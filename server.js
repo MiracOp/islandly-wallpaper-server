@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import { randomUUID } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { extname, join, normalize } from "node:path";
@@ -6,9 +7,19 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const PORT = Number(process.env.PORT || 3000);
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "change-me";
 const DATA_FILE = process.env.DATA_FILE || join(__dirname, "data", "wallpapers.json");
 const PUBLIC_DIR = join(__dirname, "public");
+const sessions = new Map();
+const adminUsers = [
+  {
+    username: "Nisa",
+    password: "Nisa123",
+    displayName: "Nisa",
+    title: "Kurucu",
+    role: "Founder",
+    permissions: ["*"]
+  }
+];
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -26,13 +37,17 @@ async function writeWallpapers(items) {
   await writeFile(DATA_FILE, `${JSON.stringify(items, null, 2)}\n`, "utf8");
 }
 
+function sortWallpapers(items) {
+  return [...items].sort((a, b) => Number(a.order || 999) - Number(b.order || 999));
+}
+
 function send(res, status, body, headers = {}) {
   const payload = typeof body === "string" ? body : JSON.stringify(body);
   res.writeHead(status, {
     "content-type": typeof body === "string" ? "text/plain; charset=utf-8" : "application/json; charset=utf-8",
     "access-control-allow-origin": "*",
     "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
-    "access-control-allow-headers": "content-type,x-admin-token",
+    "access-control-allow-headers": "content-type,x-admin-session",
     ...headers
   });
   res.end(payload);
@@ -46,9 +61,15 @@ async function parseBody(req) {
 }
 
 function requireAdmin(req, res) {
-  if (req.headers["x-admin-token"] === ADMIN_TOKEN) return true;
+  const sessionToken = req.headers["x-admin-session"];
+  if (sessionToken && sessions.has(sessionToken)) return true;
   send(res, 401, { error: "Unauthorized" });
   return false;
+}
+
+function sessionUser(req) {
+  const sessionToken = req.headers["x-admin-session"];
+  return sessionToken ? sessions.get(sessionToken) : null;
 }
 
 function normalizeWallpaper(input, existing = {}) {
@@ -70,6 +91,8 @@ function normalizeWallpaper(input, existing = {}) {
     accentGreen: Number(input.accentGreen ?? existing.accentGreen ?? 0.65),
     accentBlue: Number(input.accentBlue ?? existing.accentBlue ?? 1),
     isPremium: Boolean(input.isPremium ?? existing.isPremium ?? false),
+    isFeatured: Boolean(input.isFeatured ?? existing.isFeatured ?? false),
+    isActive: input.isActive ?? existing.isActive ?? true,
     order: Number(input.order ?? existing.order ?? 999)
   };
 }
@@ -105,9 +128,50 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    if (req.method === "POST" && url.pathname === "/api/login") {
+      const body = await parseBody(req);
+      const user = adminUsers.find((item) =>
+        item.username === body.username && item.password === body.password
+      );
+
+      if (!user) {
+        send(res, 401, { error: "Invalid username or password" });
+        return;
+      }
+
+      const token = randomUUID();
+      const profile = {
+        username: user.username,
+        displayName: user.displayName,
+        title: user.title,
+        role: user.role,
+        permissions: user.permissions
+      };
+      sessions.set(token, profile);
+      send(res, 200, { token, user: profile });
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/me") {
+      const user = sessionUser(req);
+      if (!user) {
+        send(res, 401, { error: "Unauthorized" });
+        return;
+      }
+      send(res, 200, { user });
+      return;
+    }
+
     if (req.method === "GET" && url.pathname === "/api/wallpapers") {
       const items = await readWallpapers();
-      send(res, 200, items.sort((a, b) => Number(a.order || 999) - Number(b.order || 999)));
+      send(res, 200, sortWallpapers(items.filter((item) => item.isActive !== false)));
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/admin/wallpapers") {
+      if (!requireAdmin(req, res)) return;
+      const items = await readWallpapers();
+      send(res, 200, sortWallpapers(items));
       return;
     }
 
