@@ -3,7 +3,7 @@
   "snow": {
     "enabled": true,
     "intensity": 115,
-    "speed": 0.7,
+    "speed": 3,
     "size": 0.5
   }
 }
