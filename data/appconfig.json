@@ -1,0 +1,9 @@
+{
+  "theme": "default",
+  "snow": {
+    "enabled": true,
+    "intensity": 10,
+    "speed": 0.7,
+    "size": 0.5
+  }
+}
