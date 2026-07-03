@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import { randomUUID } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { extname, join, normalize } from "node:path";
@@ -17,6 +18,22 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
 const GITHUB_REPO = process.env.GITHUB_REPO || "MiracOp/islandly-wallpaper-server";
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH || "main";
 const GITHUB_DATA_PATH = "data/wallpapers.json";
+
+// ── Kullanıcı girişi ─────────────────────────────────────────
+// Kullanıcılar Railway'de ADMIN_USERS env değişkeninde JSON olarak tutulur
+// (şifreler koda yazılmaz — repo herkese açık!). Örnek:
+// [{"username":"Nisa","password":"Nisa123","displayName":"Nisa","title":"Kurucu"}]
+function loadAdminUsers() {
+  try {
+    const parsed = JSON.parse(process.env.ADMIN_USERS || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    console.warn("ADMIN_USERS geçerli JSON değil — kullanıcı girişi devre dışı");
+    return [];
+  }
+}
+const adminUsers = loadAdminUsers();
+const sessions = new Map(); // sessionToken → kullanıcı profili
 
 async function githubRequest(path, options = {}) {
   return fetch(`https://api.github.com${path}`, {
@@ -96,7 +113,7 @@ function send(res, status, body, headers = {}) {
     "content-type": typeof body === "string" ? "text/plain; charset=utf-8" : "application/json; charset=utf-8",
     "access-control-allow-origin": "*",
     "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
-    "access-control-allow-headers": "content-type,x-admin-token",
+    "access-control-allow-headers": "content-type,x-admin-token,x-admin-session",
     ...headers
   });
   res.end(payload);
@@ -110,6 +127,9 @@ async function parseBody(req) {
 }
 
 function requireAdmin(req, res) {
+  // 1) Kullanıcı oturumu (Nisa vb.) 2) Eski usül admin token — ikisi de geçerli
+  const session = req.headers["x-admin-session"];
+  if (session && sessions.has(session)) return true;
   if (req.headers["x-admin-token"] === ADMIN_TOKEN) return true;
   send(res, 401, { error: "Unauthorized" });
   return false;
@@ -173,6 +193,39 @@ const server = createServer(async (req, res) => {
     if (req.method === "GET" && url.pathname === "/api/verify") {
       if (!requireAdmin(req, res)) return;
       send(res, 200, { ok: true, githubSync: Boolean(GITHUB_TOKEN) });
+      return;
+    }
+
+    // Kullanıcı adı + şifre ile giriş → oturum token'ı döner
+    if (req.method === "POST" && url.pathname === "/api/login") {
+      const body = await parseBody(req);
+      const user = adminUsers.find(
+        (u) => u.username === body.username && u.password === body.password
+      );
+      if (!user) {
+        send(res, 401, { error: "Kullanıcı adı veya şifre yanlış" });
+        return;
+      }
+      const token = randomUUID();
+      const profile = {
+        username: user.username,
+        displayName: user.displayName || user.username,
+        title: user.title || "Admin"
+      };
+      sessions.set(token, profile);
+      send(res, 200, { token, user: profile });
+      return;
+    }
+
+    // Mevcut oturumun kim olduğunu döner (sayfa yenilenince otomatik giriş)
+    if (req.method === "GET" && url.pathname === "/api/me") {
+      const session = req.headers["x-admin-session"];
+      const user = session ? sessions.get(session) : null;
+      if (!user) {
+        send(res, 401, { error: "Unauthorized" });
+        return;
+      }
+      send(res, 200, { user });
       return;
     }
 
