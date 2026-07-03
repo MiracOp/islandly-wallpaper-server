@@ -327,6 +327,35 @@
     75% { transform: translateX(-5px); }
   }
 
+  /* ── User badge (topbar) ────────────────────────── */
+  .user-badge {
+    display: flex; align-items: center; gap: 10px;
+    padding: 5px 14px 5px 6px; border-radius: 999px;
+    background: var(--card); border: 1px solid var(--stroke-soft);
+  }
+  .user-badge .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; color: #fff;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+  }
+  .user-badge .u-name { font-size: 12.5px; font-weight: 700; line-height: 1.15; }
+  .user-badge .u-title {
+    font-size: 9.5px; font-weight: 800; letter-spacing: 0.8px;
+    text-transform: uppercase; margin-top: 1px;
+    color: var(--text-mid);
+  }
+  .user-badge.founder .avatar {
+    background: linear-gradient(135deg, #ffd76a, #ff9d3f);
+    color: #3a2500;
+    box-shadow: 0 0 14px rgba(255,190,80,0.45);
+  }
+  .user-badge.founder .u-title {
+    background: linear-gradient(90deg, #ffd76a, #ff9d3f);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .user-badge.founder { border-color: rgba(255,190,80,0.35); }
+
   /* ── Toast ──────────────────────────────────────── */
   .toast-zone {
     position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%);
@@ -358,6 +387,13 @@
     <span class="stat-chip"><b id="statPremium">0</b> premium</span>
   </div>
   <div class="top-right">
+    <div class="user-badge" id="userBadge" style="display:none">
+      <div class="avatar" id="userAvatar">?</div>
+      <div>
+        <div class="u-name" id="userName"></div>
+        <div class="u-title" id="userTitle"></div>
+      </div>
+    </div>
     <button class="btn" id="refreshBtn">↻ Yenile</button>
     <button class="btn btn-ghost" id="logoutBtn">Çıkış yap</button>
   </div>
@@ -368,8 +404,9 @@
   <div class="login-card" id="loginCard">
     <div class="logo-pill big"></div>
     <h2>Islandly <span>Studio</span></h2>
-    <p>Wallpaper yönetim paneline devam etmek için<br>admin token'ını gir</p>
-    <input type="password" id="loginToken" placeholder="••••••••••••" autocomplete="off">
+    <p>Wallpaper yönetim paneline devam etmek için<br>giriş yap</p>
+    <input type="text" id="loginUsername" placeholder="Kullanıcı adı" autocomplete="off">
+    <input type="password" id="loginPassword" placeholder="Şifre" autocomplete="off">
     <button class="btn btn-primary" id="loginBtn">Giriş yap</button>
     <div class="login-err" id="loginErr"></div>
   </div>
@@ -487,49 +524,79 @@ let activeCat = "all";
 
 const $ = (id) => document.getElementById(id);
 
-/* ── Auth ── */
-let TOKEN = localStorage.getItem("islandly.token") || "";
+/* ── Auth (kullanıcı adı + şifre) ── */
+let SESSION = localStorage.getItem("islandly.session") || "";
 
-async function verifyToken(t) {
-  try {
-    const res = await fetch("/api/verify", { headers: { "x-admin-token": t } });
-    return res.ok;
-  } catch { return false; }
+function shakeCard(msg) {
+  $("loginErr").textContent = msg;
+  const card = $("loginCard");
+  card.classList.remove("shake"); void card.offsetWidth;
+  card.classList.add("shake");
 }
 
-function showApp() { $("loginOverlay").classList.add("hidden"); }
+function showApp(user) {
+  $("loginOverlay").classList.add("hidden");
+  const badge = $("userBadge");
+  badge.style.display = "flex";
+  $("userAvatar").textContent = (user.displayName || "?").charAt(0).toUpperCase();
+  $("userName").textContent = user.displayName;
+  $("userTitle").textContent = user.title || "Admin";
+  badge.classList.toggle("founder",
+    (user.title || "").toLowerCase() === "kurucu" || (user.title || "").toLowerCase() === "founder");
+}
+
+async function fetchMe(session) {
+  try {
+    const res = await fetch("/api/me", { headers: { "x-admin-session": session } });
+    if (!res.ok) return null;
+    return (await res.json()).user;
+  } catch { return null; }
+}
 
 async function initAuth() {
-  if (TOKEN && await verifyToken(TOKEN)) { showApp(); return; }
-  TOKEN = "";
-  localStorage.removeItem("islandly.token");
+  if (SESSION) {
+    const user = await fetchMe(SESSION);
+    if (user) { showApp(user); return; }
+  }
+  SESSION = "";
+  localStorage.removeItem("islandly.session");
 }
 
 $("loginBtn").onclick = async () => {
-  const t = $("loginToken").value.trim();
-  if (!t) return;
+  const username = $("loginUsername").value.trim();
+  const password = $("loginPassword").value;
+  if (!username || !password) return shakeCard("Kullanıcı adı ve şifre gerekli");
+
   const btn = $("loginBtn");
   btn.disabled = true; btn.textContent = "Kontrol ediliyor…";
-  const ok = await verifyToken(t);
-  btn.disabled = false; btn.textContent = "Giriş yap";
-  if (!ok) {
-    $("loginErr").textContent = "Token yanlış — tekrar dene";
-    const card = $("loginCard");
-    card.classList.remove("shake"); void card.offsetWidth;
-    card.classList.add("shake");
-    return;
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+    if (!res.ok) {
+      shakeCard("Kullanıcı adı veya şifre yanlış");
+      return;
+    }
+    const data = await res.json();
+    SESSION = data.token;
+    localStorage.setItem("islandly.session", SESSION);
+    $("loginErr").textContent = "";
+    $("loginPassword").value = "";
+    showApp(data.user);
+    load();
+  } catch {
+    shakeCard("Bağlantı hatası — sunucu ayakta mı?");
+  } finally {
+    btn.disabled = false; btn.textContent = "Giriş yap";
   }
-  TOKEN = t;
-  localStorage.setItem("islandly.token", t);
-  $("loginErr").textContent = "";
-  $("loginToken").value = "";
-  showApp();
-  load();
 };
-$("loginToken").addEventListener("keydown", (e) => { if (e.key === "Enter") $("loginBtn").click(); });
+["loginUsername", "loginPassword"].forEach(id =>
+  $(id).addEventListener("keydown", (e) => { if (e.key === "Enter") $("loginBtn").click(); }));
 
 $("logoutBtn").onclick = () => {
-  localStorage.removeItem("islandly.token");
+  localStorage.removeItem("islandly.session");
   location.reload();
 };
 
@@ -694,7 +761,7 @@ window.startEdit = (id) => {
 
 /* ── API calls ── */
 function headers() {
-  return { "content-type": "application/json", "x-admin-token": TOKEN };
+  return { "content-type": "application/json", "x-admin-session": SESSION };
 }
 
 $("saveBtn").onclick = async () => {
@@ -702,7 +769,7 @@ $("saveBtn").onclick = async () => {
   if (!body.id || !body.title || !body.imageURL) {
     return toast("ID, başlık ve görsel URL zorunlu", "err");
   }
-  if (!TOKEN) return toast("Önce giriş yap 🔑", "err");
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
 
   const btn = $("saveBtn");
   btn.disabled = true; btn.textContent = "Kaydediliyor…";
@@ -724,7 +791,7 @@ $("saveBtn").onclick = async () => {
 };
 
 window.removeItem = async (id) => {
-  if (!TOKEN) return toast("Önce giriş yap 🔑", "err");
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
   if (!confirm(`"${id}" silinsin mi? Bu işlem geri alınamaz.`)) return;
   try {
     const res = await fetch(`${API}/${encodeURIComponent(id)}`, { method: "DELETE", headers: headers() });
