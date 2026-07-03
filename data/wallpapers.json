@@ -1,0 +1,14 @@
+[
+  {
+    "id": "remote-sample-aurora",
+    "title": "Aurora Sample",
+    "subtitle": "Remote wallpaper example",
+    "imageURL": "https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=1290&q=90",
+    "category": "Nature",
+    "accentRed": 0.35,
+    "accentGreen": 0.88,
+    "accentBlue": 0.75,
+    "isPremium": false,
+    "order": 1
+  }
+]

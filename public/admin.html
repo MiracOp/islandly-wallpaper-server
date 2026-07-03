@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Islandly Admin</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0a0c10;
+      color: #f4f7fb;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #0a0c10; }
+    header {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(14,17,23,.96); position: sticky; top: 0; z-index: 3;
+    }
+    h1 { margin: 0; font-size: 20px; letter-spacing: 0; }
+    main { display: grid; grid-template-columns: 380px 1fr; gap: 24px; padding: 24px; }
+    section {
+      border: 1px solid rgba(255,255,255,.09); background: #11151d;
+      border-radius: 8px; padding: 18px;
+    }
+    label { display: grid; gap: 6px; margin-bottom: 12px; color: rgba(244,247,251,.72); font-size: 12px; font-weight: 700; }
+    input, select {
+      width: 100%; border: 1px solid rgba(255,255,255,.12); border-radius: 7px;
+      padding: 11px 12px; background: #080a0e; color: #fff; outline: none;
+    }
+    input[type="checkbox"] { width: auto; }
+    .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .check { display: flex; align-items: center; gap: 8px; margin: 4px 0 16px; }
+    button {
+      border: 0; border-radius: 7px; padding: 11px 14px; background: #2f7df6;
+      color: #fff; font-weight: 800; cursor: pointer;
+    }
+    button.secondary { background: rgba(255,255,255,.09); }
+    button.danger { background: #d63f4c; }
+    .toolbar { display: flex; gap: 10px; align-items: center; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+    .card { overflow: hidden; border-radius: 8px; background: #0b0e14; border: 1px solid rgba(255,255,255,.08); }
+    .card img { width: 100%; aspect-ratio: 9 / 16; object-fit: cover; display: block; background: #05070a; }
+    .card-body { padding: 12px; display: grid; gap: 8px; }
+    .meta { display: flex; justify-content: space-between; gap: 8px; color: rgba(244,247,251,.58); font-size: 12px; }
+    .actions { display: flex; gap: 8px; }
+    .actions button { flex: 1; padding: 9px 10px; }
+    .status { min-height: 20px; color: rgba(244,247,251,.62); font-size: 13px; }
+    @media (max-width: 900px) { main { grid-template-columns: 1fr; } header { align-items: flex-start; flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Islandly Wallpaper Admin</h1>
+    <div class="toolbar">
+      <input id="token" type="password" placeholder="Admin token">
+      <button class="secondary" onclick="loadWallpapers()">Refresh</button>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2 id="formTitle">New wallpaper</h2>
+      <form id="form">
+        <label>ID<input id="id" required placeholder="space-aurora-001"></label>
+        <label>Title<input id="title" required placeholder="Aurora Lake"></label>
+        <label>Subtitle<input id="subtitle" placeholder="Northern lights for Dynamic Island"></label>
+        <label>Image URL<input id="imageURL" required placeholder="https://.../image.jpg"></label>
+        <label>Category
+          <select id="category">
+            <option>Space</option>
+            <option>Nature</option>
+            <option>City</option>
+            <option>Seasonal</option>
+            <option>Sports</option>
+          </select>
+        </label>
+        <div class="row">
+          <label>Red<input id="accentRed" type="number" min="0" max="1" step="0.01" value="0.45"></label>
+          <label>Green<input id="accentGreen" type="number" min="0" max="1" step="0.01" value="0.65"></label>
+          <label>Blue<input id="accentBlue" type="number" min="0" max="1" step="0.01" value="1"></label>
+        </div>
+        <label>Order<input id="order" type="number" value="100"></label>
+        <label class="check"><input id="isPremium" type="checkbox"> Premium</label>
+        <div class="toolbar">
+          <button type="submit">Save</button>
+          <button type="button" class="secondary" onclick="resetForm()">Clear</button>
+        </div>
+      </form>
+      <p class="status" id="status"></p>
+    </section>
+
+    <section>
+      <div class="grid" id="list"></div>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let editingId = null;
+
+    function status(text) {
+      $("status").textContent = text;
+    }
+
+    function token() {
+      return $("token").value;
+    }
+
+    function formValue() {
+      return {
+        id: $("id").value.trim(),
+        title: $("title").value.trim(),
+        subtitle: $("subtitle").value.trim(),
+        imageURL: $("imageURL").value.trim(),
+        category: $("category").value,
+        accentRed: Number($("accentRed").value),
+        accentGreen: Number($("accentGreen").value),
+        accentBlue: Number($("accentBlue").value),
+        order: Number($("order").value),
+        isPremium: $("isPremium").checked
+      };
+    }
+
+    function fillForm(item) {
+      editingId = item.id;
+      $("formTitle").textContent = `Edit ${item.id}`;
+      for (const key of ["id", "title", "subtitle", "imageURL", "category", "accentRed", "accentGreen", "accentBlue", "order"]) {
+        $(key).value = item[key] ?? "";
+      }
+      $("isPremium").checked = Boolean(item.isPremium);
+      $("id").disabled = true;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function resetForm() {
+      editingId = null;
+      $("form").reset();
+      $("formTitle").textContent = "New wallpaper";
+      $("id").disabled = false;
+      $("accentRed").value = 0.45;
+      $("accentGreen").value = 0.65;
+      $("accentBlue").value = 1;
+      $("order").value = 100;
+    }
+
+    async function request(path, options = {}) {
+      const res = await fetch(path, {
+        ...options,
+        headers: {
+          "content-type": "application/json",
+          "x-admin-token": token(),
+          ...(options.headers || {})
+        }
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `HTTP ${res.status}`);
+      }
+      return res.json();
+    }
+
+    async function loadWallpapers() {
+      const items = await request("/api/wallpapers", { headers: { "x-admin-token": "" } });
+      $("list").innerHTML = items.map((item) => `
+        <article class="card">
+          <img src="${item.imageURL}" alt="">
+          <div class="card-body">
+            <strong>${item.title}</strong>
+            <div class="meta"><span>${item.category}</span><span>${item.isPremium ? "Premium" : "Free"}</span></div>
+            <div class="actions">
+              <button class="secondary" onclick='fillForm(${JSON.stringify(item)})'>Edit</button>
+              <button class="danger" onclick='deleteWallpaper("${item.id}")'>Delete</button>
+            </div>
+          </div>
+        </article>
+      `).join("");
+      status(`${items.length} wallpapers loaded`);
+    }
+
+    async function deleteWallpaper(id) {
+      if (!confirm(`Delete ${id}?`)) return;
+      await request(`/api/wallpapers/${encodeURIComponent(id)}`, { method: "DELETE" });
+      await loadWallpapers();
+      status("Deleted");
+    }
+
+    $("form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const item = formValue();
+      const path = editingId ? `/api/wallpapers/${encodeURIComponent(editingId)}` : "/api/wallpapers";
+      const method = editingId ? "PUT" : "POST";
+      await request(path, { method, body: JSON.stringify(item) });
+      resetForm();
+      await loadWallpapers();
+      status("Saved");
+    });
+
+    loadWallpapers().catch((error) => status(error.message));
+  </script>
+</body>
+</html>
