@@ -18,6 +18,14 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
 const GITHUB_REPO = process.env.GITHUB_REPO || "MiracOp/islandly-wallpaper-server";
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH || "main";
 const GITHUB_DATA_PATH = "data/wallpapers.json";
+const CONFIG_FILE = process.env.CONFIG_FILE || join(__dirname, "data", "appconfig.json");
+const GITHUB_CONFIG_PATH = "data/appconfig.json";
+
+// Uygulama görünüm ayarları (kar modu vb.) — panelden yönetilir
+const DEFAULT_CONFIG = {
+  theme: "default",
+  snow: { enabled: false, intensity: 60, speed: 1, size: 1 }
+};
 
 // ── Kullanıcı girişi ─────────────────────────────────────────
 // Kullanıcılar Railway'de ADMIN_USERS env değişkeninde JSON olarak tutulur
@@ -47,43 +55,38 @@ async function githubRequest(path, options = {}) {
   });
 }
 
-/** Açılışta GitHub'daki güncel wallpaper listesini lokale indirir. */
-async function pullDataFromGitHub() {
+/** Açılışta GitHub'daki güncel dosyayı lokale indirir. */
+async function pullFileFromGitHub(repoPath, localFile) {
   if (!GITHUB_TOKEN) return;
   try {
     const res = await githubRequest(
-      `/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_PATH}?ref=${GITHUB_BRANCH}`
+      `/repos/${GITHUB_REPO}/contents/${repoPath}?ref=${GITHUB_BRANCH}`
     );
     if (!res.ok) return;
     const json = await res.json();
     const content = Buffer.from(json.content, "base64").toString("utf8");
     JSON.parse(content); // geçerli JSON değilse dokunma
-    await writeFile(DATA_FILE, content, "utf8");
-    console.log("✓ Wallpaper data pulled from GitHub");
+    await writeFile(localFile, content, "utf8");
+    console.log(`✓ ${repoPath} pulled from GitHub`);
   } catch (error) {
     console.warn("GitHub pull failed:", error.message);
   }
 }
 
-/** Her değişiklikte listeyi GitHub'a commit'ler ([skip railway] → redeploy tetiklemez). */
-async function pushDataToGitHub(items) {
+/** Her değişiklikte dosyayı GitHub'a commit'ler ([skip railway] → redeploy tetiklemez). */
+async function pushFileToGitHub(repoPath, data, message) {
   if (!GITHUB_TOKEN) return;
   try {
     const get = await githubRequest(
-      `/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_PATH}?ref=${GITHUB_BRANCH}`
+      `/repos/${GITHUB_REPO}/contents/${repoPath}?ref=${GITHUB_BRANCH}`
     );
     const sha = get.ok ? (await get.json()).sha : undefined;
-    const content = Buffer.from(`${JSON.stringify(items, null, 2)}\n`).toString("base64");
-    const res = await githubRequest(`/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_PATH}`, {
+    const content = Buffer.from(`${JSON.stringify(data, null, 2)}\n`).toString("base64");
+    const res = await githubRequest(`/repos/${GITHUB_REPO}/contents/${repoPath}`, {
       method: "PUT",
-      body: JSON.stringify({
-        message: "chore: update wallpapers via admin panel [skip railway]",
-        content,
-        sha,
-        branch: GITHUB_BRANCH
-      })
+      body: JSON.stringify({ message, content, sha, branch: GITHUB_BRANCH })
     });
-    if (res.ok) console.log("✓ Wallpaper data pushed to GitHub");
+    if (res.ok) console.log(`✓ ${repoPath} pushed to GitHub`);
     else console.warn("GitHub push failed:", res.status, await res.text());
   } catch (error) {
     console.warn("GitHub push failed:", error.message);
@@ -104,7 +107,23 @@ async function readWallpapers() {
 
 async function writeWallpapers(items) {
   await writeFile(DATA_FILE, `${JSON.stringify(items, null, 2)}\n`, "utf8");
-  pushDataToGitHub(items); // arka planda — yanıtı bekletmez
+  pushFileToGitHub(GITHUB_DATA_PATH, items,
+    "chore: update wallpapers via admin panel [skip railway]"); // arka planda
+}
+
+async function readConfig() {
+  try {
+    const raw = JSON.parse(await readFile(CONFIG_FILE, "utf8"));
+    return { ...DEFAULT_CONFIG, ...raw, snow: { ...DEFAULT_CONFIG.snow, ...(raw.snow || {}) } };
+  } catch {
+    return DEFAULT_CONFIG;
+  }
+}
+
+async function writeConfig(config) {
+  await writeFile(CONFIG_FILE, `${JSON.stringify(config, null, 2)}\n`, "utf8");
+  pushFileToGitHub(GITHUB_CONFIG_PATH, config,
+    "chore: update app config via admin panel [skip railway]"); // arka planda
 }
 
 function send(res, status, body, headers = {}) {
@@ -229,6 +248,26 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    // Uygulama görünüm ayarları — iOS app okur (public), panel yazar (admin)
+    if (req.method === "GET" && url.pathname === "/api/config") {
+      send(res, 200, await readConfig());
+      return;
+    }
+
+    if (req.method === "PUT" && url.pathname === "/api/config") {
+      if (!requireAdmin(req, res)) return;
+      const body = await parseBody(req);
+      const current = await readConfig();
+      const next = {
+        ...current,
+        ...body,
+        snow: { ...current.snow, ...(body.snow || {}) }
+      };
+      await writeConfig(next);
+      send(res, 200, next);
+      return;
+    }
+
     if (req.method === "GET" && url.pathname === "/api/wallpapers") {
       const items = await readWallpapers();
       send(res, 200, items.sort((a, b) => Number(a.order || 999) - Number(b.order || 999)));
@@ -281,7 +320,8 @@ const server = createServer(async (req, res) => {
   }
 });
 
-await pullDataFromGitHub();
+await pullFileFromGitHub(GITHUB_DATA_PATH, DATA_FILE);
+await pullFileFromGitHub(GITHUB_CONFIG_PATH, CONFIG_FILE);
 
 server.listen(PORT, () => {
   console.log(`Wallpaper server listening on http://localhost:${PORT}`);
