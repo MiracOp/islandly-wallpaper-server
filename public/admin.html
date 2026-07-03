@@ -1,203 +1,654 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Islandly Admin</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0a0c10;
-      color: #f4f7fb;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; background: #0a0c10; }
-    header {
-      display: flex; align-items: center; justify-content: space-between; gap: 16px;
-      padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,.08);
-      background: rgba(14,17,23,.96); position: sticky; top: 0; z-index: 3;
-    }
-    h1 { margin: 0; font-size: 20px; letter-spacing: 0; }
-    main { display: grid; grid-template-columns: 380px 1fr; gap: 24px; padding: 24px; }
-    section {
-      border: 1px solid rgba(255,255,255,.09); background: #11151d;
-      border-radius: 8px; padding: 18px;
-    }
-    label { display: grid; gap: 6px; margin-bottom: 12px; color: rgba(244,247,251,.72); font-size: 12px; font-weight: 700; }
-    input, select {
-      width: 100%; border: 1px solid rgba(255,255,255,.12); border-radius: 7px;
-      padding: 11px 12px; background: #080a0e; color: #fff; outline: none;
-    }
-    input[type="checkbox"] { width: auto; }
-    .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .check { display: flex; align-items: center; gap: 8px; margin: 4px 0 16px; }
-    button {
-      border: 0; border-radius: 7px; padding: 11px 14px; background: #2f7df6;
-      color: #fff; font-weight: 800; cursor: pointer;
-    }
-    button.secondary { background: rgba(255,255,255,.09); }
-    button.danger { background: #d63f4c; }
-    .toolbar { display: flex; gap: 10px; align-items: center; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
-    .card { overflow: hidden; border-radius: 8px; background: #0b0e14; border: 1px solid rgba(255,255,255,.08); }
-    .card img { width: 100%; aspect-ratio: 9 / 16; object-fit: cover; display: block; background: #05070a; }
-    .card-body { padding: 12px; display: grid; gap: 8px; }
-    .meta { display: flex; justify-content: space-between; gap: 8px; color: rgba(244,247,251,.58); font-size: 12px; }
-    .actions { display: flex; gap: 8px; }
-    .actions button { flex: 1; padding: 9px 10px; }
-    .status { min-height: 20px; color: rgba(244,247,251,.62); font-size: 13px; }
-    @media (max-width: 900px) { main { grid-template-columns: 1fr; } header { align-items: flex-start; flex-direction: column; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Islandly · Wallpaper Studio</title>
+<style>
+  :root {
+    --bg: #07070f;
+    --bg2: #0c0c18;
+    --card: rgba(255,255,255,0.045);
+    --card-hover: rgba(255,255,255,0.075);
+    --stroke: rgba(255,255,255,0.09);
+    --stroke-soft: rgba(255,255,255,0.06);
+    --text: #f2f3fa;
+    --text-mid: #9a9db4;
+    --text-dim: #5c5f75;
+    --accent: #7c5cff;
+    --accent2: #4dd6ff;
+    --danger: #ff5c7a;
+    --ok: #4ade80;
+    --radius: 20px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(124,92,255,0.16), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(77,214,255,0.10), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Topbar ─────────────────────────────────────── */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 28px;
+    background: rgba(7,7,15,0.72);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--stroke-soft);
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-pill {
+    width: 38px; height: 16px; border-radius: 999px;
+    background: #000; border: 1px solid var(--stroke);
+    position: relative; overflow: hidden;
+  }
+  .logo-pill::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0.85; filter: blur(6px); transform: translateY(70%);
+  }
+  .logo h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.2px; }
+  .logo h1 span { color: var(--text-dim); font-weight: 500; }
+  .top-stats { display: flex; gap: 8px; margin-left: 8px; }
+  .stat-chip {
+    font-size: 12px; font-weight: 600; color: var(--text-mid);
+    padding: 5px 12px; border-radius: 999px;
+    background: var(--card); border: 1px solid var(--stroke-soft);
+  }
+  .stat-chip b { color: var(--text); }
+  .top-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+  .token-wrap { position: relative; }
+  .token-wrap input {
+    width: 210px; padding: 9px 36px 9px 14px;
+    background: var(--card); border: 1px solid var(--stroke);
+    border-radius: 12px; color: var(--text); font-size: 13px;
+    outline: none; transition: border-color .2s;
+  }
+  .token-wrap input:focus { border-color: var(--accent); }
+  .token-eye {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--text-dim);
+    cursor: pointer; font-size: 14px; padding: 2px;
+  }
+
+  button { font-family: inherit; }
+  .btn {
+    padding: 9px 18px; border-radius: 12px; border: 1px solid var(--stroke);
+    background: var(--card); color: var(--text);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: all .18s ease;
+  }
+  .btn:hover { background: var(--card-hover); transform: translateY(-1px); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #5e3fe0);
+    border-color: transparent;
+    box-shadow: 0 4px 20px rgba(124,92,255,0.35);
+  }
+  .btn-primary:hover { box-shadow: 0 6px 26px rgba(124,92,255,0.5); background: linear-gradient(135deg, #8a6dff, #6a4cf0); }
+  .btn-danger { color: var(--danger); border-color: rgba(255,92,122,0.25); }
+  .btn-danger:hover { background: rgba(255,92,122,0.12); }
+  .btn-ghost { background: transparent; border-color: transparent; color: var(--text-mid); }
+  .btn-ghost:hover { color: var(--text); background: var(--card); }
+
+  /* ── Layout ─────────────────────────────────────── */
+  .layout {
+    display: grid; grid-template-columns: 400px 1fr;
+    gap: 26px; padding: 26px 28px; max-width: 1560px; margin: 0 auto;
+  }
+  @media (max-width: 1080px) { .layout { grid-template-columns: 1fr; } }
+
+  /* ── Form panel ─────────────────────────────────── */
+  .panel {
+    background: var(--card); border: 1px solid var(--stroke-soft);
+    border-radius: var(--radius); padding: 24px;
+    align-self: start; position: sticky; top: 86px;
+  }
+  @media (max-width: 1080px) { .panel { position: static; } }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .panel-head h2 { font-size: 16px; font-weight: 700; letter-spacing: -0.2px; }
+  .mode-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: rgba(124,92,255,0.15); color: #b5a3ff;
+    display: none;
+  }
+  .mode-badge.show { display: inline-block; }
+
+  /* live preview */
+  .preview-zone { display: flex; justify-content: center; margin-bottom: 20px; }
+  .phone {
+    width: 168px; height: 340px; border-radius: 30px;
+    border: 2.5px solid rgba(255,255,255,0.14);
+    background: #0a0a12 center/cover no-repeat;
+    position: relative; overflow: hidden;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.55);
+    transition: box-shadow .3s;
+  }
+  .phone .island {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    width: 56px; height: 17px; border-radius: 999px; background: #000;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 0 18px 2px var(--glow, rgba(124,92,255,0.55));
+  }
+  .phone .accent-wash {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, var(--wash, rgba(124,92,255,0.22)), transparent 45%);
+    pointer-events: none;
+  }
+  .phone .ph-title {
+    position: absolute; bottom: 34px; left: 12px; right: 12px;
+    font-size: 12px; font-weight: 700; text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+  }
+  .phone .ph-sub {
+    position: absolute; bottom: 18px; left: 12px; right: 12px;
+    font-size: 9.5px; color: rgba(255,255,255,0.75); text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .phone .ph-premium {
+    position: absolute; top: 36px; right: 10px;
+    font-size: 8.5px; font-weight: 800; letter-spacing: 0.8px;
+    padding: 3px 8px; border-radius: 999px;
+    background: linear-gradient(135deg, #ffd76a, #ff9d3f); color: #3a2500;
+    display: none;
+  }
+  .phone .ph-premium.show { display: block; }
+  .phone .ph-empty {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); font-size: 11px; text-align: center; padding: 0 16px;
+  }
+
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block; font-size: 11.5px; font-weight: 600;
+    color: var(--text-mid); margin-bottom: 6px; letter-spacing: 0.3px;
+  }
+  .field input[type="text"], .field input[type="url"], .field input[type="number"], .field select {
+    width: 100%; padding: 10px 13px;
+    background: rgba(0,0,0,0.3); border: 1px solid var(--stroke);
+    border-radius: 12px; color: var(--text); font-size: 13.5px;
+    outline: none; transition: border-color .2s; appearance: none;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239a9db4' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row3 { display: grid; grid-template-columns: auto 1fr 1fr; gap: 12px; align-items: end; }
+
+  .color-well {
+    width: 46px; height: 40px; border-radius: 12px;
+    border: 1px solid var(--stroke); background: none; cursor: pointer; padding: 3px;
+  }
+  .color-well::-webkit-color-swatch-wrapper { padding: 0; }
+  .color-well::-webkit-color-swatch { border: none; border-radius: 9px; }
+
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; border-radius: 12px;
+    background: rgba(0,0,0,0.25); border: 1px solid var(--stroke-soft);
+    margin-bottom: 18px;
+  }
+  .toggle-row .t-label { font-size: 13px; font-weight: 600; }
+  .toggle-row .t-hint { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .switch { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .track {
+    position: absolute; inset: 0; border-radius: 999px;
+    background: rgba(255,255,255,0.12); transition: .25s; cursor: pointer;
+  }
+  .switch .track::before {
+    content: ""; position: absolute; width: 20px; height: 20px;
+    left: 3px; top: 3px; border-radius: 50%; background: #fff; transition: .25s;
+  }
+  .switch input:checked + .track { background: linear-gradient(135deg, #ffd76a, #ff9d3f); }
+  .switch input:checked + .track::before { transform: translateX(18px); }
+
+  .form-actions { display: flex; gap: 10px; }
+  .form-actions .btn { flex: 1; padding: 12px; font-size: 14px; }
+
+  /* ── Gallery ────────────────────────────────────── */
+  .gallery-head {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 340px; }
+  .search-wrap input {
+    width: 100%; padding: 10px 14px 10px 38px;
+    background: var(--card); border: 1px solid var(--stroke);
+    border-radius: 12px; color: var(--text); font-size: 13.5px; outline: none;
+    transition: border-color .2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); opacity: 0.4; }
+  .chips { display: flex; gap: 7px; flex-wrap: wrap; }
+  .chip {
+    padding: 7px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
+    background: var(--card); border: 1px solid var(--stroke-soft);
+    color: var(--text-mid); cursor: pointer; transition: all .18s;
+  }
+  .chip:hover { color: var(--text); }
+  .chip.active {
+    background: rgba(124,92,255,0.16); border-color: rgba(124,92,255,0.45);
+    color: #c4b5ff;
+  }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    border-radius: var(--radius); overflow: hidden;
+    background: var(--card); border: 1px solid var(--stroke-soft);
+    transition: transform .22s ease, box-shadow .22s ease, border-color .22s;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: var(--stroke);
+    box-shadow: 0 16px 44px rgba(0,0,0,0.45);
+  }
+  .card .thumb {
+    aspect-ratio: 9/16; background: #11111c center/cover no-repeat; position: relative;
+  }
+  .card .thumb .mini-island {
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    width: 44px; height: 13px; border-radius: 999px; background: #000;
+    box-shadow: 0 0 12px 1px var(--glow, rgba(124,92,255,0.5));
+  }
+  .card .badges { position: absolute; bottom: 8px; left: 8px; display: flex; gap: 5px; }
+  .badge {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.4px;
+    padding: 3px 9px; border-radius: 999px;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+    color: rgba(255,255,255,0.9);
+  }
+  .badge.premium { background: linear-gradient(135deg, #ffd76a, #ff9d3f); color: #3a2500; }
+  .card .order-tag {
+    position: absolute; top: 8px; right: 8px;
+    font-size: 9.5px; font-weight: 700; color: rgba(255,255,255,0.85);
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+    padding: 3px 8px; border-radius: 999px;
+  }
+  .card .meta { padding: 13px 14px 14px; }
+  .card .meta h3 { font-size: 14px; font-weight: 700; letter-spacing: -0.1px; }
+  .card .meta p {
+    font-size: 11.5px; color: var(--text-dim); margin-top: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .card .actions { display: flex; gap: 8px; margin-top: 12px; }
+  .card .actions .btn { flex: 1; padding: 7px; font-size: 12px; border-radius: 10px; }
+
+  .empty-state {
+    grid-column: 1/-1; text-align: center; padding: 70px 20px;
+    color: var(--text-dim); font-size: 14px;
+  }
+  .empty-state .big { font-size: 40px; margin-bottom: 12px; }
+
+  /* ── Toast ──────────────────────────────────────── */
+  .toast-zone {
+    position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; gap: 8px; z-index: 100;
+  }
+  .toast {
+    padding: 12px 22px; border-radius: 14px; font-size: 13.5px; font-weight: 600;
+    background: rgba(18,18,30,0.92); border: 1px solid var(--stroke);
+    backdrop-filter: blur(16px); box-shadow: 0 10px 34px rgba(0,0,0,0.5);
+    animation: toast-in .3s ease;
+  }
+  .toast.ok { border-color: rgba(74,222,128,0.35); }
+  .toast.err { border-color: rgba(255,92,122,0.4); }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; } }
+
+  .skeleton { animation: pulse 1.4s ease-in-out infinite; background: var(--card); border-radius: var(--radius); aspect-ratio: 9/13; }
+  @keyframes pulse { 0%,100% { opacity: .5; } 50% { opacity: 1; } }
+</style>
 </head>
 <body>
-  <header>
-    <h1>Islandly Wallpaper Admin</h1>
-    <div class="toolbar">
-      <input id="token" type="password" placeholder="Admin token">
-      <button class="secondary" onclick="loadWallpapers()">Refresh</button>
+
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-pill"></div>
+    <h1>Islandly <span>· Wallpaper Studio</span></h1>
+  </div>
+  <div class="top-stats">
+    <span class="stat-chip"><b id="statTotal">0</b> wallpaper</span>
+    <span class="stat-chip"><b id="statPremium">0</b> premium</span>
+  </div>
+  <div class="top-right">
+    <div class="token-wrap">
+      <input type="password" id="token" placeholder="Admin token" autocomplete="off">
+      <button class="token-eye" id="toggleToken" title="Göster/gizle">👁</button>
     </div>
-  </header>
+    <button class="btn" id="refreshBtn">↻ Yenile</button>
+  </div>
+</header>
 
-  <main>
-    <section>
-      <h2 id="formTitle">New wallpaper</h2>
-      <form id="form">
-        <label>ID<input id="id" required placeholder="space-aurora-001"></label>
-        <label>Title<input id="title" required placeholder="Aurora Lake"></label>
-        <label>Subtitle<input id="subtitle" placeholder="Northern lights for Dynamic Island"></label>
-        <label>Image URL<input id="imageURL" required placeholder="https://.../image.jpg"></label>
-        <label>Category
-          <select id="category">
-            <option>Space</option>
-            <option>Nature</option>
-            <option>City</option>
-            <option>Seasonal</option>
-            <option>Sports</option>
-          </select>
-        </label>
-        <div class="row">
-          <label>Red<input id="accentRed" type="number" min="0" max="1" step="0.01" value="0.45"></label>
-          <label>Green<input id="accentGreen" type="number" min="0" max="1" step="0.01" value="0.65"></label>
-          <label>Blue<input id="accentBlue" type="number" min="0" max="1" step="0.01" value="1"></label>
+<main class="layout">
+
+  <!-- ── Form ── -->
+  <section class="panel">
+    <div class="panel-head">
+      <h2 id="formTitle">Yeni Wallpaper</h2>
+      <span class="mode-badge" id="editBadge">DÜZENLEME</span>
+    </div>
+
+    <div class="preview-zone">
+      <div class="phone" id="phone">
+        <div class="accent-wash"></div>
+        <div class="island"></div>
+        <span class="ph-premium" id="phPremium">PREMIUM</span>
+        <div class="ph-title" id="phTitle"></div>
+        <div class="ph-sub" id="phSub"></div>
+        <div class="ph-empty" id="phEmpty">Görsel URL'i girince<br>canlı önizleme burada</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>ID <span style="color:var(--text-dim);font-weight:400">— benzersiz, örn. space-aurora-001</span></label>
+      <input type="text" id="fId" placeholder="space-aurora-001">
+    </div>
+    <div class="field">
+      <label>Başlık</label>
+      <input type="text" id="fTitle" placeholder="Aurora Lake">
+    </div>
+    <div class="field">
+      <label>Alt başlık</label>
+      <input type="text" id="fSubtitle" placeholder="Northern lights for Dynamic Island">
+    </div>
+    <div class="field">
+      <label>Görsel URL</label>
+      <input type="url" id="fImage" placeholder="https://…/image.jpg">
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Kategori</label>
+        <select id="fCategory">
+          <option>Space</option><option>Nature</option><option>City</option>
+          <option>Seasonal</option><option>Sports</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Sıra</label>
+        <input type="number" id="fOrder" value="100">
+      </div>
+    </div>
+    <div class="field">
+      <label>Vurgu rengi <span style="color:var(--text-dim);font-weight:400">— Island parlaması</span></label>
+      <div class="row3">
+        <input type="color" class="color-well" id="fColor" value="#7c5cff">
+        <div>
+          <label style="margin-bottom:4px">Hex</label>
+          <input type="text" id="fHex" value="#7c5cff">
         </div>
-        <label>Order<input id="order" type="number" value="100"></label>
-        <label class="check"><input id="isPremium" type="checkbox"> Premium</label>
-        <div class="toolbar">
-          <button type="submit">Save</button>
-          <button type="button" class="secondary" onclick="resetForm()">Clear</button>
+        <div>
+          <label style="margin-bottom:4px">RGB (0-1)</label>
+          <input type="text" id="fRgb" value="0.49, 0.36, 1.00" readonly style="color:var(--text-dim)">
         </div>
-      </form>
-      <p class="status" id="status"></p>
-    </section>
+      </div>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <div class="t-label">Premium içerik</div>
+        <div class="t-hint">Sadece abonelere görünür</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="fPremium">
+        <span class="track"></span>
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" id="clearBtn">Temizle</button>
+      <button class="btn btn-primary" id="saveBtn">Kaydet</button>
+    </div>
+  </section>
 
-    <section>
-      <div class="grid" id="list"></div>
-    </section>
-  </main>
+  <!-- ── Gallery ── -->
+  <section>
+    <div class="gallery-head">
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input type="text" id="search" placeholder="Başlık veya ID ara…">
+      </div>
+      <div class="chips" id="chips">
+        <button class="chip active" data-cat="all">Tümü</button>
+        <button class="chip" data-cat="Space">Space</button>
+        <button class="chip" data-cat="Nature">Nature</button>
+        <button class="chip" data-cat="City">City</button>
+        <button class="chip" data-cat="Seasonal">Seasonal</button>
+        <button class="chip" data-cat="Sports">Sports</button>
+        <button class="chip" data-cat="premium">⭐ Premium</button>
+      </div>
+    </div>
+    <div class="grid" id="grid">
+      <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+    </div>
+  </section>
+</main>
 
-  <script>
-    const $ = (id) => document.getElementById(id);
-    let editingId = null;
+<div class="toast-zone" id="toasts"></div>
 
-    function status(text) {
-      $("status").textContent = text;
-    }
+<script>
+const API = "/api/wallpapers";
+let items = [];
+let editingId = null;
+let activeCat = "all";
 
-    function token() {
-      return $("token").value;
-    }
+const $ = (id) => document.getElementById(id);
+const tokenInput = $("token");
+tokenInput.value = localStorage.getItem("islandly.token") || "";
+tokenInput.addEventListener("input", () => localStorage.setItem("islandly.token", tokenInput.value));
+$("toggleToken").onclick = () => {
+  tokenInput.type = tokenInput.type === "password" ? "text" : "password";
+};
 
-    function formValue() {
-      return {
-        id: $("id").value.trim(),
-        title: $("title").value.trim(),
-        subtitle: $("subtitle").value.trim(),
-        imageURL: $("imageURL").value.trim(),
-        category: $("category").value,
-        accentRed: Number($("accentRed").value),
-        accentGreen: Number($("accentGreen").value),
-        accentBlue: Number($("accentBlue").value),
-        order: Number($("order").value),
-        isPremium: $("isPremium").checked
-      };
-    }
+/* ── Toast ── */
+function toast(msg, kind = "ok") {
+  const el = document.createElement("div");
+  el.className = `toast ${kind}`;
+  el.textContent = msg;
+  $("toasts").appendChild(el);
+  setTimeout(() => { el.style.opacity = "0"; el.style.transition = "opacity .4s"; }, 2400);
+  setTimeout(() => el.remove(), 2900);
+}
 
-    function fillForm(item) {
-      editingId = item.id;
-      $("formTitle").textContent = `Edit ${item.id}`;
-      for (const key of ["id", "title", "subtitle", "imageURL", "category", "accentRed", "accentGreen", "accentBlue", "order"]) {
-        $(key).value = item[key] ?? "";
-      }
-      $("isPremium").checked = Boolean(item.isPremium);
-      $("id").disabled = true;
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+/* ── Color sync ── */
+function hexToRgb01(hex) {
+  const m = hex.replace("#", "");
+  return [0, 2, 4].map(i => +(parseInt(m.slice(i, i + 2), 16) / 255).toFixed(2));
+}
+function rgb01ToHex(r, g, b) {
+  const h = (v) => Math.round(Math.min(1, Math.max(0, v)) * 255).toString(16).padStart(2, "0");
+  return `#${h(r)}${h(g)}${h(b)}`;
+}
+function syncColor(hex) {
+  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+  $("fColor").value = hex.toLowerCase();
+  $("fHex").value = hex.toLowerCase();
+  const [r, g, b] = hexToRgb01(hex);
+  $("fRgb").value = `${r.toFixed(2)}, ${g.toFixed(2)}, ${b.toFixed(2)}`;
+  updatePreview();
+}
+$("fColor").addEventListener("input", (e) => syncColor(e.target.value));
+$("fHex").addEventListener("change", (e) => syncColor(e.target.value.trim()));
 
-    function resetForm() {
-      editingId = null;
-      $("form").reset();
-      $("formTitle").textContent = "New wallpaper";
-      $("id").disabled = false;
-      $("accentRed").value = 0.45;
-      $("accentGreen").value = 0.65;
-      $("accentBlue").value = 1;
-      $("order").value = 100;
-    }
+/* ── Live preview ── */
+function updatePreview() {
+  const img = $("fImage").value.trim();
+  const phone = $("phone");
+  const hex = $("fColor").value;
+  phone.style.setProperty("--glow", hex + "99");
+  phone.style.setProperty("--wash", hex + "38");
+  phone.style.backgroundImage = img ? `url("${img}")` : "none";
+  $("phEmpty").style.display = img ? "none" : "flex";
+  $("phTitle").textContent = $("fTitle").value;
+  $("phSub").textContent = $("fSubtitle").value;
+  $("phPremium").classList.toggle("show", $("fPremium").checked);
+}
+["fImage", "fTitle", "fSubtitle"].forEach(id => $(id).addEventListener("input", updatePreview));
+$("fPremium").addEventListener("change", updatePreview);
 
-    async function request(path, options = {}) {
-      const res = await fetch(path, {
-        ...options,
-        headers: {
-          "content-type": "application/json",
-          "x-admin-token": token(),
-          ...(options.headers || {})
-        }
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || `HTTP ${res.status}`);
-      }
-      return res.json();
-    }
+/* ── Load & render ── */
+async function load() {
+  try {
+    const res = await fetch(API);
+    items = await res.json();
+    render();
+  } catch {
+    toast("Liste yüklenemedi — sunucu ayakta mı?", "err");
+  }
+}
 
-    async function loadWallpapers() {
-      const items = await request("/api/wallpapers", { headers: { "x-admin-token": "" } });
-      $("list").innerHTML = items.map((item) => `
-        <article class="card">
-          <img src="${item.imageURL}" alt="">
-          <div class="card-body">
-            <strong>${item.title}</strong>
-            <div class="meta"><span>${item.category}</span><span>${item.isPremium ? "Premium" : "Free"}</span></div>
-            <div class="actions">
-              <button class="secondary" onclick='fillForm(${JSON.stringify(item)})'>Edit</button>
-              <button class="danger" onclick='deleteWallpaper("${item.id}")'>Delete</button>
-            </div>
-          </div>
-        </article>
-      `).join("");
-      status(`${items.length} wallpapers loaded`);
-    }
+function render() {
+  const q = $("search").value.trim().toLowerCase();
+  const grid = $("grid");
+  $("statTotal").textContent = items.length;
+  $("statPremium").textContent = items.filter(w => w.isPremium).length;
 
-    async function deleteWallpaper(id) {
-      if (!confirm(`Delete ${id}?`)) return;
-      await request(`/api/wallpapers/${encodeURIComponent(id)}`, { method: "DELETE" });
-      await loadWallpapers();
-      status("Deleted");
-    }
+  let list = [...items].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+  if (activeCat === "premium") list = list.filter(w => w.isPremium);
+  else if (activeCat !== "all") list = list.filter(w => w.category === activeCat);
+  if (q) list = list.filter(w =>
+    (w.title || "").toLowerCase().includes(q) || (w.id || "").toLowerCase().includes(q));
 
-    $("form").addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const item = formValue();
-      const path = editingId ? `/api/wallpapers/${encodeURIComponent(editingId)}` : "/api/wallpapers";
-      const method = editingId ? "PUT" : "POST";
-      await request(path, { method, body: JSON.stringify(item) });
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="big">🏝️</div>Burada hiç wallpaper yok.<br>Soldaki formdan ilkini ekle!</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(w => {
+    const hex = rgb01ToHex(w.accentRed ?? 0.49, w.accentGreen ?? 0.36, w.accentBlue ?? 1);
+    return `
+    <article class="card" style="--glow:${hex}99">
+      <div class="thumb" style="background-image:url('${(w.imageURL || "").replace(/'/g, "%27")}')">
+        <div class="mini-island"></div>
+        <span class="order-tag">#${w.order ?? "–"}</span>
+        <div class="badges">
+          <span class="badge">${w.category || "–"}</span>
+          ${w.isPremium ? '<span class="badge premium">PREMIUM</span>' : '<span class="badge">FREE</span>'}
+        </div>
+      </div>
+      <div class="meta">
+        <h3>${esc(w.title)}</h3>
+        <p>${esc(w.subtitle || w.id)}</p>
+        <div class="actions">
+          <button class="btn" onclick="startEdit('${esc(w.id)}')">Düzenle</button>
+          <button class="btn btn-danger" onclick="removeItem('${esc(w.id)}')">Sil</button>
+        </div>
+      </div>
+    </article>`;
+  }).join("");
+}
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+/* ── Filters ── */
+$("search").addEventListener("input", render);
+$("chips").addEventListener("click", (e) => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+  chip.classList.add("active");
+  activeCat = chip.dataset.cat;
+  render();
+});
+
+/* ── Form ── */
+function collect() {
+  const [r, g, b] = hexToRgb01($("fColor").value);
+  return {
+    id: $("fId").value.trim(),
+    title: $("fTitle").value.trim(),
+    subtitle: $("fSubtitle").value.trim(),
+    imageURL: $("fImage").value.trim(),
+    category: $("fCategory").value,
+    accentRed: r, accentGreen: g, accentBlue: b,
+    isPremium: $("fPremium").checked,
+    order: Number($("fOrder").value || 999)
+  };
+}
+
+function resetForm() {
+  editingId = null;
+  ["fId", "fTitle", "fSubtitle", "fImage"].forEach(id => $(id).value = "");
+  $("fCategory").value = "Space";
+  $("fOrder").value = 100;
+  $("fPremium").checked = false;
+  $("fId").disabled = false;
+  syncColor("#7c5cff");
+  $("formTitle").textContent = "Yeni Wallpaper";
+  $("editBadge").classList.remove("show");
+  updatePreview();
+}
+$("clearBtn").onclick = resetForm;
+
+window.startEdit = (id) => {
+  const w = items.find(x => x.id === id);
+  if (!w) return;
+  editingId = id;
+  $("fId").value = w.id; $("fId").disabled = true;
+  $("fTitle").value = w.title || "";
+  $("fSubtitle").value = w.subtitle || "";
+  $("fImage").value = w.imageURL || "";
+  $("fCategory").value = w.category || "Space";
+  $("fOrder").value = w.order ?? 100;
+  $("fPremium").checked = !!w.isPremium;
+  syncColor(rgb01ToHex(w.accentRed ?? 0.49, w.accentGreen ?? 0.36, w.accentBlue ?? 1));
+  $("formTitle").textContent = w.title || w.id;
+  $("editBadge").classList.add("show");
+  updatePreview();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+/* ── API calls ── */
+function headers() {
+  return { "content-type": "application/json", "x-admin-token": tokenInput.value };
+}
+
+$("saveBtn").onclick = async () => {
+  const body = collect();
+  if (!body.id || !body.title || !body.imageURL) {
+    return toast("ID, başlık ve görsel URL zorunlu", "err");
+  }
+  if (!tokenInput.value) return toast("Admin token gir kanka 🔑", "err");
+
+  const btn = $("saveBtn");
+  btn.disabled = true; btn.textContent = "Kaydediliyor…";
+  try {
+    const res = editingId
+      ? await fetch(`${API}/${encodeURIComponent(editingId)}`, { method: "PUT", headers: headers(), body: JSON.stringify(body) })
+      : await fetch(API, { method: "POST", headers: headers(), body: JSON.stringify(body) });
+
+    if (res.status === 401) toast("Token yanlış — yetki reddedildi", "err");
+    else if (res.status === 409) toast("Bu ID zaten var, farklı bir ID dene", "err");
+    else if (!res.ok) toast((await res.json()).error || "Kaydedilemedi", "err");
+    else {
+      toast(editingId ? "Güncellendi ✓" : "Eklendi ✓");
       resetForm();
-      await loadWallpapers();
-      status("Saved");
-    });
+      await load();
+    }
+  } catch { toast("Bağlantı hatası", "err"); }
+  btn.disabled = false; btn.textContent = "Kaydet";
+};
 
-    loadWallpapers().catch((error) => status(error.message));
-  </script>
+window.removeItem = async (id) => {
+  if (!tokenInput.value) return toast("Admin token gir kanka 🔑", "err");
+  if (!confirm(`"${id}" silinsin mi? Bu işlem geri alınamaz.`)) return;
+  try {
+    const res = await fetch(`${API}/${encodeURIComponent(id)}`, { method: "DELETE", headers: headers() });
+    if (res.status === 401) return toast("Token yanlış — yetki reddedildi", "err");
+    if (!res.ok) return toast("Silinemedi", "err");
+    toast("Silindi ✓");
+    if (editingId === id) resetForm();
+    await load();
+  } catch { toast("Bağlantı hatası", "err"); }
+};
+
+$("refreshBtn").onclick = load;
+
+/* init */
+syncColor("#7c5cff");
+updatePreview();
+load();
+</script>
 </body>
 </html>
