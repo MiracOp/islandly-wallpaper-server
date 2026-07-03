@@ -960,6 +960,8 @@ document.querySelectorAll(".page-tab").forEach(tab => {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     tab.classList.add("active");
     document.getElementById("page-" + tab.dataset.page).classList.add("active");
+    // Kar önizleme canvas'ı sekme gizliyken 0x0 kalır — sekme açılınca doğru boyutla yeniden kur.
+    if (tab.dataset.page === "appearance") snowEngine.configure(readSnowUI());
   };
 });
 
@@ -1036,6 +1038,9 @@ const snowEngine = (() => {
   let flakes = [], settings = { enabled: false, intensity: 60, speed: 1, size: 1 }, raf = null;
 
   function resize() {
+    // Sekme gizliyken (display:none) offsetWidth/Height 0 döner — ölçmeyi atla,
+    // yoksa canvas 0x0'a kilitlenir ve kar hiç görünmez.
+    if (!canvas.offsetWidth || !canvas.offsetHeight) return;
     canvas.width = canvas.offsetWidth * devicePixelRatio;
     canvas.height = canvas.offsetHeight * devicePixelRatio;
   }
@@ -1073,9 +1078,10 @@ const snowEngine = (() => {
   }
 
   return {
+    resize,
     configure(s) {
       settings = s;
-      if (canvas.width === 0) resize();
+      resize();
       const target = s.enabled ? s.intensity : 0;
       while (flakes.length < target) flakes.push(makeFlake());
       flakes.length = Math.min(flakes.length, target);
