@@ -453,7 +453,10 @@
   @keyframes pulse { 0%,100% { opacity: .5; } 50% { opacity: 1; } }
 
   /* ── Hediyeler ──────────────────────────────────── */
-  .gifts-layout { display: grid; grid-template-columns: 380px 1fr; gap: 22px; align-items: start; }
+  .gifts-layout {
+    display: grid; grid-template-columns: 380px 1fr; gap: 22px; align-items: start;
+    padding: 26px 28px; max-width: 1560px; margin: 0 auto;
+  }
   @media (max-width: 900px) { .gifts-layout { grid-template-columns: 1fr; } }
   .gift-row {
     display: flex; align-items: center; gap: 14px;
@@ -477,6 +480,60 @@
   }
   .gift-del:hover { color: var(--danger); background: rgba(255,92,122,0.1); }
   .gift-empty { text-align: center; color: var(--text-dim); font-size: 13px; padding: 40px 0; }
+
+  /* ── Mobil uyum ─────────────────────────────────── */
+  @media (max-width: 640px) {
+    /* Topbar: tek satıra sığmayanlar alta insin */
+    .topbar { padding: 10px 14px; gap: 8px; flex-wrap: wrap; }
+    .logo h1 { font-size: 15px; }
+    .logo h1 span { display: none; }
+    .top-stats { order: 3; width: 100%; margin-left: 0; }
+    .top-right { gap: 6px; }
+    .top-right .btn { padding: 8px 12px; font-size: 12px; }
+    .user-badge { padding: 4px 10px 4px 5px; }
+    .user-badge .u-title { display: none; }
+
+    /* Sekmeler: yatay kaydırılabilir */
+    .page-tabs {
+      padding: 12px 14px 0; gap: 6px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .page-tabs::-webkit-scrollbar { display: none; }
+    .page-tab { white-space: nowrap; padding: 9px 14px; font-size: 12.5px; flex-shrink: 0; }
+
+    /* Sayfa yerleşimleri: tek kolon + dar padding */
+    .layout, .appearance-layout, .gifts-layout { padding: 14px; gap: 14px; }
+    .panel { padding: 18px 16px; border-radius: 16px; }
+
+    /* iOS Safari focus zoom'unu önle: input font >= 16px */
+    .field input, .field select, .login-card input,
+    .search-wrap input { font-size: 16px; }
+
+    /* Galeri: küçük kartlar */
+    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .gallery-head { gap: 8px; }
+    .search-wrap { max-width: 100%; min-width: 150px; }
+    .form-actions { flex-wrap: wrap; }
+
+    /* Kar önizleme telefonu: küçült */
+    .snow-preview-zone { padding: 8px 0 20px; }
+    .snow-phone { width: 200px; height: 410px; border-radius: 36px; }
+    .snow-phone .clock { font-size: 42px; top: 66px; }
+    .snow-phone .island { width: 66px; height: 20px; top: 11px; }
+
+    /* Login kartı ekrana sığsın */
+    .login-card { width: min(340px, calc(100vw - 32px)); padding: 30px 22px; }
+
+    /* Toast tam genişlik */
+    .toast-zone { left: 14px; right: 14px; transform: none; }
+    .toast { text-align: center; }
+
+    /* Hediye satırları */
+    .gift-row { padding: 11px 12px; gap: 10px; flex-wrap: wrap; }
+    .gift-icon { width: 28px; font-size: 20px; }
+    .gift-info { min-width: 55%; }
+  }
 </style>
 </head>
 <body>
