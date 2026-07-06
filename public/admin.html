@@ -741,6 +741,10 @@
       <label>Görsel URL</label>
       <input type="url" id="fImage" placeholder="https://…/image.jpg">
     </div>
+    <div class="field">
+      <label>Video URL <span style="color:var(--text-dim);font-weight:400">— opsiyonel, canlı duvar kağıdı (.mp4)</span></label>
+      <input type="url" id="fVideo" placeholder="https://…/video.mp4">
+    </div>
     <div class="row">
       <div class="field">
         <label>Kategori</label>
@@ -979,6 +983,7 @@ function render() {
         <div class="badges">
           <span class="badge">${w.category || "–"}</span>
           ${w.isPremium ? '<span class="badge premium">PREMIUM</span>' : '<span class="badge">FREE</span>'}
+          ${w.videoURL ? '<span class="badge" style="background:rgba(77,214,255,0.35)">▶ CANLI</span>' : ''}
         </div>
       </div>
       <div class="meta">
@@ -1013,6 +1018,7 @@ function collect() {
     title: $("fTitle").value.trim(),
     subtitle: $("fSubtitle").value.trim(),
     imageURL: $("fImage").value.trim(),
+    videoURL: $("fVideo").value.trim(),
     category: $("fCategory").value,
     accentRed: r, accentGreen: g, accentBlue: b,
     isPremium: $("fPremium").checked,
@@ -1022,7 +1028,7 @@ function collect() {
 
 function resetForm() {
   editingId = null;
-  ["fId", "fTitle", "fSubtitle", "fImage"].forEach(id => $(id).value = "");
+  ["fId", "fTitle", "fSubtitle", "fImage", "fVideo"].forEach(id => $(id).value = "");
   $("fCategory").value = "Space";
   $("fOrder").value = 100;
   $("fPremium").checked = false;
@@ -1042,6 +1048,7 @@ window.startEdit = (id) => {
   $("fTitle").value = w.title || "";
   $("fSubtitle").value = w.subtitle || "";
   $("fImage").value = w.imageURL || "";
+  $("fVideo").value = w.videoURL || "";
   $("fCategory").value = w.category || "Space";
   $("fOrder").value = w.order ?? 100;
   $("fPremium").checked = !!w.isPremium;
@@ -1154,11 +1161,6 @@ async function loadGifts() {
   } catch {
     $("giftList").innerHTML = `<div class="gift-empty">Bağlantı hatası</div>`;
   }
-}
-
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
 function renderGifts(gifts) {
