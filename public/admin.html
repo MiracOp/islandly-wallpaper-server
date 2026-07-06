@@ -803,6 +803,7 @@
         <button class="chip" data-cat="Seasonal">Seasonal</button>
         <button class="chip" data-cat="Sports">Sports</button>
         <button class="chip" data-cat="premium">⭐ Premium</button>
+        <button class="chip" data-cat="live">▶ Canlı</button>
       </div>
     </div>
     <div class="grid" id="grid">
@@ -964,6 +965,7 @@ function render() {
 
   let list = [...items].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
   if (activeCat === "premium") list = list.filter(w => w.isPremium);
+  else if (activeCat === "live") list = list.filter(w => w.videoURL);
   else if (activeCat !== "all") list = list.filter(w => w.category === activeCat);
   if (q) list = list.filter(w =>
     (w.title || "").toLowerCase().includes(q) || (w.id || "").toLowerCase().includes(q));
