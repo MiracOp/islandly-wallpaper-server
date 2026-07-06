@@ -8,5 +8,15 @@
     "claimed": false,
     "claimedAt": null,
     "premiumDays": 30
+  },
+  {
+    "id": "22e3bf53-b462-4e86-8e28-40337cc53b5f",
+    "userID": "102115279006602628564",
+    "kind": "coins",
+    "note": "",
+    "createdAt": "2026-07-06T15:37:50.117Z",
+    "claimed": false,
+    "claimedAt": null,
+    "coins": 300
   }
 ]
