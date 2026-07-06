@@ -20,6 +20,8 @@ const GITHUB_BRANCH = process.env.GITHUB_BRANCH || "main";
 const GITHUB_DATA_PATH = "data/wallpapers.json";
 const CONFIG_FILE = process.env.CONFIG_FILE || join(__dirname, "data", "appconfig.json");
 const GITHUB_CONFIG_PATH = "data/appconfig.json";
+const GIFTS_FILE = process.env.GIFTS_FILE || join(__dirname, "data", "gifts.json");
+const GITHUB_GIFTS_PATH = "data/gifts.json";
 
 // Uygulama görünüm ayarları (kar modu vb.) — panelden yönetilir
 const DEFAULT_CONFIG = {
@@ -124,6 +126,64 @@ async function writeConfig(config) {
   await writeFile(CONFIG_FILE, `${JSON.stringify(config, null, 2)}\n`, "utf8");
   pushFileToGitHub(GITHUB_CONFIG_PATH, config,
     "chore: update app config via admin panel [skip railway]"); // arka planda
+}
+
+// ── Hediyeler (kullanıcı ID'sine premium / coin / pet gönderme) ──
+// Panel hediye oluşturur → iOS app açılışta kendi ID'siyle bekleyenleri
+// çeker, uygular ve claim eder.
+async function readGifts() {
+  try {
+    return JSON.parse(await readFile(GIFTS_FILE, "utf8"));
+  } catch {
+    return [];
+  }
+}
+
+async function writeGifts(items) {
+  await writeFile(GIFTS_FILE, `${JSON.stringify(items, null, 2)}\n`, "utf8");
+  pushFileToGitHub(GITHUB_GIFTS_PATH, items,
+    "chore: update gifts via admin panel [skip railway]"); // arka planda
+}
+
+const GIFT_KINDS = new Set(["premium", "coins", "pet"]);
+
+/** Panelden gelen hediye girdisini doğrular ve normalize eder. */
+function normalizeGift(input) {
+  const userID = String(input.userID || "").trim();
+  const kind = String(input.kind || "").trim();
+
+  if (!userID) throw new Error("userID is required");
+  if (!GIFT_KINDS.has(kind)) throw new Error("kind must be premium, coins or pet");
+
+  const gift = {
+    id: randomUUID(),
+    userID,
+    kind,
+    note: String(input.note || "").slice(0, 200),
+    createdAt: new Date().toISOString(),
+    claimed: false,
+    claimedAt: null
+  };
+
+  if (kind === "premium") {
+    const days = Number(input.premiumDays);
+    if (!Number.isFinite(days) || days < 1 || days > 3650) {
+      throw new Error("premiumDays must be between 1 and 3650");
+    }
+    gift.premiumDays = Math.floor(days);
+  } else if (kind === "coins") {
+    const amount = Number(input.coins);
+    if (!Number.isFinite(amount) || amount < 1 || amount > 1_000_000) {
+      throw new Error("coins must be between 1 and 1000000");
+    }
+    gift.coins = Math.floor(amount);
+  } else if (kind === "pet") {
+    const petType = String(input.petType || "").trim();
+    if (!petType) throw new Error("petType is required");
+    gift.petType = petType;
+  }
+
+  return gift;
 }
 
 function send(res, status, body, headers = {}) {
@@ -268,6 +328,71 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    // ── Hediye API ──────────────────────────────────────────
+    // Admin: tüm hediyeleri listele
+    if (req.method === "GET" && url.pathname === "/api/gifts") {
+      if (!requireAdmin(req, res)) return;
+      const gifts = await readGifts();
+      send(res, 200, gifts.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")));
+      return;
+    }
+
+    // Admin: yeni hediye oluştur
+    if (req.method === "POST" && url.pathname === "/api/gifts") {
+      if (!requireAdmin(req, res)) return;
+      const gift = normalizeGift(await parseBody(req));
+      const gifts = await readGifts();
+      gifts.push(gift);
+      await writeGifts(gifts);
+      send(res, 201, gift);
+      return;
+    }
+
+    // Admin: hediye sil (henüz alınmamışsa geri çekme)
+    const giftMatch = url.pathname.match(/^\/api\/gifts\/([^/]+)$/);
+    if (giftMatch && req.method === "DELETE") {
+      if (!requireAdmin(req, res)) return;
+      const id = decodeURIComponent(giftMatch[1]);
+      const gifts = await readGifts();
+      const next = gifts.filter((g) => g.id !== id);
+      await writeGifts(next);
+      send(res, 200, { deleted: gifts.length - next.length });
+      return;
+    }
+
+    // Public: kullanıcının bekleyen hediyeleri (iOS app açılışta çağırır)
+    const pendingMatch = url.pathname.match(/^\/api\/gifts\/pending\/([^/]+)$/);
+    if (pendingMatch && req.method === "GET") {
+      const userID = decodeURIComponent(pendingMatch[1]);
+      const gifts = await readGifts();
+      send(res, 200, gifts.filter((g) => g.userID === userID && !g.claimed));
+      return;
+    }
+
+    // Public: hediyeleri alındı olarak işaretle
+    if (req.method === "POST" && url.pathname === "/api/gifts/claim") {
+      const body = await parseBody(req);
+      const userID = String(body.userID || "").trim();
+      const ids = Array.isArray(body.ids) ? body.ids.map(String) : [];
+      if (!userID || ids.length === 0) {
+        send(res, 400, { error: "userID and ids are required" });
+        return;
+      }
+      const gifts = await readGifts();
+      let updated = 0;
+      for (const gift of gifts) {
+        // Sadece kendi userID'sine ait hediyeler claim edilebilir
+        if (ids.includes(gift.id) && gift.userID === userID && !gift.claimed) {
+          gift.claimed = true;
+          gift.claimedAt = new Date().toISOString();
+          updated += 1;
+        }
+      }
+      if (updated > 0) await writeGifts(gifts);
+      send(res, 200, { claimed: updated });
+      return;
+    }
+
     if (req.method === "GET" && url.pathname === "/api/wallpapers") {
       const items = await readWallpapers();
       send(res, 200, items.sort((a, b) => Number(a.order || 999) - Number(b.order || 999)));
@@ -322,6 +447,7 @@ const server = createServer(async (req, res) => {
 
 await pullFileFromGitHub(GITHUB_DATA_PATH, DATA_FILE);
 await pullFileFromGitHub(GITHUB_CONFIG_PATH, CONFIG_FILE);
+await pullFileFromGitHub(GITHUB_GIFTS_PATH, GIFTS_FILE);
 
 server.listen(PORT, () => {
   console.log(`Wallpaper server listening on http://localhost:${PORT}`);

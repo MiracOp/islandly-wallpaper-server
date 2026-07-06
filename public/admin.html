@@ -451,6 +451,32 @@
 
   .skeleton { animation: pulse 1.4s ease-in-out infinite; background: var(--card); border-radius: var(--radius); aspect-ratio: 9/13; }
   @keyframes pulse { 0%,100% { opacity: .5; } 50% { opacity: 1; } }
+
+  /* ── Hediyeler ──────────────────────────────────── */
+  .gifts-layout { display: grid; grid-template-columns: 380px 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 900px) { .gifts-layout { grid-template-columns: 1fr; } }
+  .gift-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 16px; border-radius: 14px;
+    background: var(--card); border: 1px solid var(--stroke);
+  }
+  .gift-row + .gift-row { margin-top: 10px; }
+  .gift-icon { font-size: 24px; width: 34px; text-align: center; }
+  .gift-info { flex: 1; min-width: 0; }
+  .gift-title { font-size: 13.5px; font-weight: 700; }
+  .gift-sub { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; word-break: break-all; }
+  .gift-status {
+    font-size: 10.5px; font-weight: 800; letter-spacing: .4px;
+    padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+  }
+  .gift-status.waiting { background: rgba(255,196,74,0.14); color: #ffc44a; }
+  .gift-status.claimed { background: rgba(74,222,128,0.14); color: #4ade80; }
+  .gift-del {
+    background: none; border: none; color: var(--text-dim); cursor: pointer;
+    font-size: 15px; padding: 6px; border-radius: 8px;
+  }
+  .gift-del:hover { color: var(--danger); background: rgba(255,92,122,0.1); }
+  .gift-empty { text-align: center; color: var(--text-dim); font-size: 13px; padding: 40px 0; }
 </style>
 </head>
 <body>
@@ -493,7 +519,69 @@
 <nav class="page-tabs">
   <button class="page-tab active" data-page="wallpapers">🖼 Wallpaperlar</button>
   <button class="page-tab" data-page="appearance">❄️ Görünüm & Efektler</button>
+  <button class="page-tab" data-page="gifts">🎁 Hediyeler</button>
 </nav>
+
+<!-- ═══ Hediyeler ═══ -->
+<div class="page" id="page-gifts">
+  <div class="gifts-layout">
+    <section class="panel" style="position:static">
+      <div class="panel-head">
+        <h2>Hediye Gönder</h2>
+      </div>
+
+      <div class="field">
+        <label for="giftUserID">Kullanıcı ID</label>
+        <input type="text" id="giftUserID" placeholder="Firebase kullanıcı ID'si (users koleksiyonundaki belge adı)" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="giftKind">Hediye türü</label>
+        <select id="giftKind">
+          <option value="premium">⭐ Premium üyelik</option>
+          <option value="coins">🪙 Coin (puan)</option>
+          <option value="pet">🐾 Pet</option>
+        </select>
+      </div>
+
+      <div class="field" id="giftFieldPremium">
+        <label for="giftDays">Süre (gün)</label>
+        <input type="number" id="giftDays" min="1" max="3650" value="30">
+      </div>
+
+      <div class="field" id="giftFieldCoins" style="display:none">
+        <label for="giftCoins">Coin miktarı</label>
+        <input type="number" id="giftCoins" min="1" max="1000000" value="500">
+      </div>
+
+      <div class="field" id="giftFieldPet" style="display:none">
+        <label for="giftPet">Pet seç</label>
+        <select id="giftPet"></select>
+      </div>
+
+      <div class="field">
+        <label for="giftNote">Not (opsiyonel)</label>
+        <input type="text" id="giftNote" placeholder="örn. Çekiliş ödülü" maxlength="200" autocomplete="off">
+      </div>
+
+      <div class="form-actions" style="margin-top:24px">
+        <button class="btn btn-primary" id="sendGiftBtn">🎁 Hediyeyi Gönder</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-dim);margin-top:12px;line-height:1.5">
+        Hediye, kullanıcı uygulamayı bir sonraki açışında otomatik uygulanır.
+        Kullanıcı ID'lerini Firebase Console → Firestore → users koleksiyonunda bulabilirsin.
+      </p>
+    </section>
+
+    <section class="panel" style="position:static">
+      <div class="panel-head">
+        <h2>Gönderilen Hediyeler</h2>
+        <button class="btn" id="refreshGiftsBtn">↻</button>
+      </div>
+      <div id="giftList"><div class="gift-empty">Yükleniyor…</div></div>
+    </section>
+  </div>
+</div>
 
 <!-- ═══ Görünüm & Efektler ═══ -->
 <div class="page" id="page-appearance">
@@ -962,8 +1050,122 @@ document.querySelectorAll(".page-tab").forEach(tab => {
     document.getElementById("page-" + tab.dataset.page).classList.add("active");
     // Kar önizleme canvas'ı sekme gizliyken 0x0 kalır — sekme açılınca doğru boyutla yeniden kur.
     if (tab.dataset.page === "appearance") snowEngine.configure(readSnowUI());
+    if (tab.dataset.page === "gifts") loadGifts();
   };
 });
+
+/* ── Hediyeler ── */
+// iOS PetType enum'undaki rawValue'larla birebir aynı olmalı
+const PET_TYPES = [
+  ["fox", "🦊 Blaze (Tilki)"],        ["cat", "🐱 Ponyo (Kedi)"],
+  ["dog", "🐶 Ein (Köpek)"],          ["penguin", "🐧 Chill (Penguen)"],
+  ["owl", "🦉 Hedwig (Baykuş)"],      ["bunny", "🐰 Miffy (Tavşan)"],
+  ["lion", "🦁 Majesty (Aslan)"],     ["hedgehog", "🦔 Quill (Kirpi)"],
+  ["unicorn", "🦄 Unicorn"],          ["raccoon", "🦝 Bandit (Rakun)"],
+  ["panda", "🐼 Bamboo (Panda)"],     ["bear", "🐻 Honey (Ayı)"],
+  ["capybara", "🦫 Capy (Kapibara)"], ["axolotl", "🦎 Axo (Aksolotl)"],
+  ["redPanda", "🐾 Rusty (Kızıl Panda)"], ["frog", "🐸 Hopper (Kurbağa)"],
+  ["duck", "🦆 Quackers (Ördek)"],    ["hamster", "🐹 Peanut (Hamster)"],
+  ["otter", "🦦 Splash (Su Samuru)"], ["koala", "🐨 Koko (Koala)"],
+  ["dragon", "🐉 Ember (Ejderha)"],   ["phoenix", "🐦‍🔥 Ignis (Anka)"]
+];
+$("giftPet").innerHTML = PET_TYPES
+  .map(([v, label]) => `<option value="${v}">${label}</option>`).join("");
+
+const GIFT_ICONS = { premium: "⭐", coins: "🪙", pet: "🐾" };
+
+function giftSummary(g) {
+  if (g.kind === "premium") return `${g.premiumDays} gün Premium`;
+  if (g.kind === "coins") return `${g.coins} coin`;
+  const pet = PET_TYPES.find(([v]) => v === g.petType);
+  return pet ? pet[1] : g.petType;
+}
+
+$("giftKind").addEventListener("change", () => {
+  const kind = $("giftKind").value;
+  $("giftFieldPremium").style.display = kind === "premium" ? "" : "none";
+  $("giftFieldCoins").style.display   = kind === "coins"   ? "" : "none";
+  $("giftFieldPet").style.display     = kind === "pet"     ? "" : "none";
+});
+
+async function loadGifts() {
+  if (!SESSION) return;
+  try {
+    const res = await fetch("/api/gifts", { headers: headers() });
+    if (!res.ok) { $("giftList").innerHTML = `<div class="gift-empty">Liste yüklenemedi</div>`; return; }
+    renderGifts(await res.json());
+  } catch {
+    $("giftList").innerHTML = `<div class="gift-empty">Bağlantı hatası</div>`;
+  }
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function renderGifts(gifts) {
+  if (!gifts.length) {
+    $("giftList").innerHTML = `<div class="gift-empty">Henüz hediye gönderilmedi 🎁</div>`;
+    return;
+  }
+  $("giftList").innerHTML = gifts.map((g) => `
+    <div class="gift-row">
+      <div class="gift-icon">${GIFT_ICONS[g.kind] || "🎁"}</div>
+      <div class="gift-info">
+        <div class="gift-title">${esc(giftSummary(g))}</div>
+        <div class="gift-sub">${esc(g.userID)}${g.note ? " · " + esc(g.note) : ""}
+          · ${new Date(g.createdAt).toLocaleString("tr-TR")}</div>
+      </div>
+      <span class="gift-status ${g.claimed ? "claimed" : "waiting"}">
+        ${g.claimed ? "ALINDI ✓" : "BEKLİYOR"}</span>
+      ${g.claimed ? "" : `<button class="gift-del" onclick="removeGift('${g.id}')" title="Geri çek">✕</button>`}
+    </div>`).join("");
+}
+
+$("sendGiftBtn").onclick = async () => {
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
+  const kind = $("giftKind").value;
+  const body = {
+    userID: $("giftUserID").value.trim(),
+    kind,
+    note: $("giftNote").value.trim(),
+    premiumDays: Number($("giftDays").value),
+    coins: Number($("giftCoins").value),
+    petType: $("giftPet").value
+  };
+  if (!body.userID) return toast("Kullanıcı ID gerekli", "err");
+
+  const btn = $("sendGiftBtn");
+  btn.disabled = true; btn.textContent = "Gönderiliyor…";
+  try {
+    const res = await fetch("/api/gifts", {
+      method: "POST", headers: headers(), body: JSON.stringify(body)
+    });
+    if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
+    else if (!res.ok) toast((await res.json()).error || "Gönderilemedi", "err");
+    else {
+      toast("🎁 Hediye gönderildi — kullanıcı uygulamayı açınca alacak");
+      $("giftUserID").value = ""; $("giftNote").value = "";
+      await loadGifts();
+    }
+  } catch { toast("Bağlantı hatası", "err"); }
+  btn.disabled = false; btn.textContent = "🎁 Hediyeyi Gönder";
+};
+
+window.removeGift = async (id) => {
+  if (!confirm("Bu hediye geri çekilsin mi?")) return;
+  try {
+    const res = await fetch(`/api/gifts/${encodeURIComponent(id)}`, {
+      method: "DELETE", headers: headers()
+    });
+    if (!res.ok) return toast("Silinemedi", "err");
+    toast("Hediye geri çekildi ✓");
+    await loadGifts();
+  } catch { toast("Bağlantı hatası", "err"); }
+};
+
+$("refreshGiftsBtn").onclick = loadGifts;
 
 /* ── Görünüm & Efektler (kar modu) ── */
 let cfg = { theme: "default", snow: { enabled: false, intensity: 60, speed: 1, size: 1 } };
