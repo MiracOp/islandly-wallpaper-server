@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "564a1355-c2df-4798-ab27-6eac9a4e0c7e",
+    "userID": "102115279006602628564",
+    "kind": "premium",
+    "note": "",
+    "createdAt": "2026-07-06T14:28:10.386Z",
+    "claimed": false,
+    "claimedAt": null,
+    "premiumDays": 30
+  }
+]
