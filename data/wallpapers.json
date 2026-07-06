@@ -10,17 +10,5 @@
     "accentBlue": 0.75,
     "isPremium": false,
     "order": 1
-  },
-  {
-    "id": "denem13",
-    "title": "deneme",
-    "subtitle": "deneme131",
-    "imageURL": "https://res.cloudinary.com/dsgxvgubz/video/upload/v1783348625/kling_20260616_作品_kanka_sana_5008_0_u5ggzc.mp4",
-    "category": "Nature",
-    "accentRed": 0.49,
-    "accentGreen": 0.36,
-    "accentBlue": 1,
-    "isPremium": false,
-    "order": 100
   }
 ]
