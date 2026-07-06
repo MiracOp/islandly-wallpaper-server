@@ -1,7 +1,7 @@
 {
   "theme": "default",
   "snow": {
-    "enabled": true,
+    "enabled": false,
     "intensity": 65,
     "speed": 2.1,
     "size": 0.7
