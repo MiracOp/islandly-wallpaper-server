@@ -6,7 +6,7 @@ Small Railway-ready API and admin panel for managing remote wallpapers.
 
 ```bash
 cd railway-wallpaper-server
-ADMIN_TOKEN=dev-token npm start
+npm start
 ```
 
 Open:
@@ -22,19 +22,22 @@ GET /api/wallpapers
 ```
 
 Admin API requires `x-admin-token`.
+Admin panel login:
+
+```text
+Username: Nisa
+Password: Nisa123
+Title: Kurucu
+```
+
+Admin API requires the login session header returned from `POST /api/login`.
 
 ## Deploy to Railway
 
 1. Create a new Railway project from this folder.
 2. Set the start command to `npm start` if Railway does not detect it.
-3. Add an environment variable:
-
-```text
-ADMIN_TOKEN=choose-a-long-random-token
-```
-
-4. After deploy, copy the Railway domain.
-5. In the iOS app, update `baseURLString` in:
+3. After deploy, copy the Railway domain.
+4. In the iOS app, update `baseURLString` in:
 
 ```text
 DynamicIslandWallpapers/DynamicIslandWallpapers/Wallpapers/RemoteRealWallpaperService.swift
