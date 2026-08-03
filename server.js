@@ -243,7 +243,9 @@ async function fetchFirebaseUsers() {
 /** Login kaydını Firestore'a yazar (merge) — iOS app her girişte çağırır. */
 async function trackFirebaseUser(input) {
   const id = String(input.id || "").trim();
-  if (!id || id.length > 200) throw new Error("id is required");
+  // Sadece gerçek Apple/Google kimlik formatları — HTML/script enjeksiyonunu
+  // ve çöp kayıtları en baştan engelle
+  if (!/^[A-Za-z0-9._:@-]{4,160}$/.test(id)) throw new Error("invalid id");
   const sa = firebaseServiceAccount();
   const token = await firebaseAccessToken();
   const base = `https://firestore.googleapis.com/v1/projects/${sa.project_id}/databases/(default)/documents`;
@@ -254,11 +256,17 @@ async function trackFirebaseUser(input) {
   const existing = await fetch(docPath, { headers: { authorization: `Bearer ${token}` } });
   const isNew = existing.status === 404;
 
+  // < > ve kontrol karakterleri temizlenir — panelde XSS'e karşı 2. savunma hattı
+  const clean = (value, max) => String(value || "")
+    .replace(/[<>]/g, "")
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .slice(0, max);
+
   const fields = {
     id: { stringValue: id },
-    displayName: { stringValue: String(input.displayName || "").slice(0, 120) },
-    email: { stringValue: String(input.email || "").slice(0, 200) },
-    provider: { stringValue: String(input.provider || "").slice(0, 30) },
+    displayName: { stringValue: clean(input.displayName, 120) },
+    email: { stringValue: clean(input.email, 200) },
+    provider: { stringValue: clean(input.provider, 30) },
     lastLoginAt: { timestampValue: nowISO }
   };
   if (isNew) fields.createdAt = { timestampValue: nowISO };
@@ -369,7 +377,9 @@ async function recordEvent(input) {
   if (type === "paywall_shown") {
     bucket.paywallShown += 1;
   } else {
-    const pid = String(input.productID || "unknown").slice(0, 120);
+    // Ürün ID'si panelde gösterilir — sadece güvenli karakterler
+    const pid = String(input.productID || "unknown")
+      .replace(/[^A-Za-z0-9._-]/g, "").slice(0, 120) || "unknown";
     bucket.purchases[pid] = (bucket.purchases[pid] || 0) + 1;
   }
 
@@ -430,6 +440,9 @@ function send(res, status, body, headers = {}) {
     "access-control-allow-origin": "*",
     "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
     "access-control-allow-headers": "content-type,x-admin-token,x-admin-session",
+    "x-content-type-options": "nosniff",
+    "referrer-policy": "no-referrer",
+    "strict-transport-security": "max-age=31536000",
     ...headers
   });
   res.end(payload);
@@ -437,16 +450,62 @@ function send(res, status, body, headers = {}) {
 
 async function parseBody(req) {
   const chunks = [];
-  for await (const chunk of req) chunks.push(chunk);
+  let total = 0;
+  for await (const chunk of req) {
+    total += chunk.length;
+    if (total > 1_000_000) throw new Error("Body too large"); // 1MB sınır — DoS koruması
+    chunks.push(chunk);
+  }
   if (chunks.length === 0) return {};
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
+
+// ── Hız sınırı (IP başına) ───────────────────────────────────
+// Public uçlara spam / brute-force koruması. Bellek içi — Railway tek instance.
+const rateBuckets = new Map();
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, bucket] of rateBuckets) {
+    if (now > bucket.resetAt) rateBuckets.delete(key);
+  }
+}, 60_000).unref();
+
+function clientIP(req) {
+  const fwd = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+  return fwd || req.socket.remoteAddress || "?";
+}
+
+function rateLimit(req, res, name, max, windowMs) {
+  const key = `${name}:${clientIP(req)}`;
+  const now = Date.now();
+  let bucket = rateBuckets.get(key);
+  if (!bucket || now > bucket.resetAt) {
+    bucket = { count: 0, resetAt: now + windowMs };
+    rateBuckets.set(key, bucket);
+  }
+  bucket.count += 1;
+  if (bucket.count > max) {
+    send(res, 429, { error: "Çok fazla istek — biraz bekle" },
+      { "retry-after": String(Math.ceil((bucket.resetAt - now) / 1000)) });
+    return false;
+  }
+  return true;
+}
+
+/** Zamanlama saldırısına dayanıklı karşılaştırma. */
+function safeEqual(a, b) {
+  const bufA = Buffer.from(String(a ?? ""));
+  const bufB = Buffer.from(String(b ?? ""));
+  return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function requireAdmin(req, res) {
   // 1) Kullanıcı oturumu (imzalı token) 2) Eski usül admin token — ikisi de geçerli
   const session = req.headers["x-admin-session"];
   if (session && verifySession(session)) return true;
-  if (req.headers["x-admin-token"] === ADMIN_TOKEN) return true;
+  if (req.headers["x-admin-token"] && safeEqual(req.headers["x-admin-token"], ADMIN_TOKEN)) return true;
   send(res, 401, { error: "Unauthorized" });
   return false;
 }
@@ -487,9 +546,31 @@ async function serveStatic(pathname, res) {
   }
 
   const body = await readFile(filePath);
-  res.writeHead(200, {
-    "content-type": mimeTypes[extname(filePath)] || "application/octet-stream"
-  });
+  const ext = extname(filePath);
+  const headers = {
+    "content-type": mimeTypes[ext] || "application/octet-stream",
+    "x-content-type-options": "nosniff",
+    "referrer-policy": "no-referrer",
+    "strict-transport-security": "max-age=31536000"
+  };
+  if (ext === ".html") {
+    // Panel dışarıdan hiçbir script/bağlantı yüklemez — CSP bunu zorunlu kılar:
+    // XSS olsa bile çalınan veri dış sunuculara fetch ile GÖNDERİLEMEZ,
+    // panel iframe içine alınıp clickjacking yapılamaz.
+    headers["content-security-policy"] = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src * data: blob:",
+      "media-src *",
+      "connect-src 'self'",
+      "frame-ancestors 'none'",
+      "base-uri 'none'",
+      "form-action 'self'"
+    ].join("; ");
+    headers["x-frame-options"] = "DENY";
+  }
+  res.writeHead(200, headers);
   res.end(body);
 }
 
@@ -516,11 +597,14 @@ const server = createServer(async (req, res) => {
 
     // Kullanıcı adı + şifre ile giriş → oturum token'ı döner
     if (req.method === "POST" && url.pathname === "/api/login") {
+      // Brute-force koruması: IP başına 10 dakikada en fazla 5 deneme
+      if (!rateLimit(req, res, "login", 5, 10 * 60_000)) return;
       const body = await parseBody(req);
       const user = adminUsers.find(
-        (u) => u.username === body.username && u.password === body.password
+        (u) => safeEqual(u.username, body.username) && safeEqual(u.password, body.password)
       );
       if (!user) {
+        await sleep(400); // başarısız denemeyi yavaşlat
         send(res, 401, { error: "Kullanıcı adı veya şifre yanlış" });
         return;
       }
@@ -565,6 +649,7 @@ const server = createServer(async (req, res) => {
     // Public: iOS app her girişte kullanıcıyı buraya bildirir → sunucu
     // service account ile Firestore'a yazar (güvenlik kuralları kilitli kalır)
     if (req.method === "POST" && url.pathname === "/api/users/track") {
+      if (!rateLimit(req, res, "track", 30, 60 * 60_000)) return;
       if (!firebaseServiceAccount()) {
         send(res, 501, { error: "FIREBASE_SERVICE_ACCOUNT tanımlı değil" });
         return;
@@ -604,6 +689,7 @@ const server = createServer(async (req, res) => {
     // ── Dönüşüm olayları ────────────────────────────────────
     // Public: iOS app paywall gösterimi / satın alma bildirir
     if (req.method === "POST" && url.pathname === "/api/events") {
+      if (!rateLimit(req, res, "events", 120, 60 * 60_000)) return;
       try {
         await recordEvent(await parseBody(req));
         send(res, 200, { ok: true });
@@ -712,6 +798,7 @@ const server = createServer(async (req, res) => {
     // Public: kullanıcının bekleyen hediyeleri (iOS app açılışta çağırır)
     const pendingMatch = url.pathname.match(/^\/api\/gifts\/pending\/([^/]+)$/);
     if (pendingMatch && req.method === "GET") {
+      if (!rateLimit(req, res, "gifts", 120, 60 * 60_000)) return;
       const userID = decodeURIComponent(pendingMatch[1]);
       const gifts = await readGifts();
       send(res, 200, gifts.filter((g) => g.userID === userID && !g.claimed));
@@ -720,6 +807,7 @@ const server = createServer(async (req, res) => {
 
     // Public: hediyeleri alındı olarak işaretle
     if (req.method === "POST" && url.pathname === "/api/gifts/claim") {
+      if (!rateLimit(req, res, "gifts", 120, 60 * 60_000)) return;
       const body = await parseBody(req);
       const userID = String(body.userID || "").trim();
       const ids = Array.isArray(body.ids) ? body.ids.map(String) : [];
@@ -798,6 +886,13 @@ await pullFileFromGitHub(GITHUB_DATA_PATH, DATA_FILE);
 await pullFileFromGitHub(GITHUB_CONFIG_PATH, CONFIG_FILE);
 await pullFileFromGitHub(GITHUB_GIFTS_PATH, GIFTS_FILE);
 await pullFileFromGitHub(GITHUB_EVENTS_PATH, EVENTS_FILE);
+
+if (ADMIN_TOKEN === "change-me") {
+  console.warn("⚠️  ADMIN_TOKEN varsayılan değerde! Railway'de güçlü bir ADMIN_TOKEN ayarla.");
+}
+if (!process.env.SESSION_SECRET) {
+  console.warn("ℹ️  SESSION_SECRET tanımlı değil — oturum imzası ADMIN_TOKEN ile atılıyor (çalışır ama ayrı bir değer daha güvenli).");
+}
 
 server.listen(PORT, () => {
   console.log(`Wallpaper server listening on http://localhost:${PORT}`);

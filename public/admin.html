@@ -1554,8 +1554,8 @@ async function loadConversions() {
     const productRows = Object.entries(byProduct)
       .sort((a, b) => b[1] - a[1])
       .map(([pid, n]) => `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 10px">
-        <span style="color:var(--text-dim);overflow:hidden;text-overflow:ellipsis">${pid}</span>
-        <b>${n}</b>
+        <span style="color:var(--text-dim);overflow:hidden;text-overflow:ellipsis">${esc(pid)}</span>
+        <b>${Number(n) || 0}</b>
       </div>`).join("");
 
     $("convTable").innerHTML = `
@@ -1649,30 +1649,35 @@ function renderUserList() {
     const name = u.displayName || "(isimsiz)";
     const login = timeAgo(fsDate(u.lastLoginAt));
     const created = fsDate(u.createdAt);
+    // esc() ŞART: isim/e-posta/ID kullanıcıdan gelir — kaçış yapılmazsa
+    // kötü niyetli bir kullanıcı adı panelde script çalıştırabilir (XSS)
     return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;background:var(--card)">
-      <div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;background:${premium ? "linear-gradient(135deg,#f5c542,#e08a00)" : "var(--border)"};color:${premium ? "#000" : "var(--text)"}">${(name[0] || "?").toUpperCase()}</div>
+      <div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;background:${premium ? "linear-gradient(135deg,#f5c542,#e08a00)" : "var(--border)"};color:${premium ? "#000" : "var(--text)"}">${esc((name[0] || "?").toUpperCase())}</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:6px">
-          ${name}
+          ${esc(name)}
           ${premium ? '<span style="font-size:9px;font-weight:900;background:#f5c542;color:#000;border-radius:6px;padding:2px 6px">PREMIUM</span>' : ""}
-          <span style="font-size:10px;color:var(--text-dim);border:1px solid var(--border);border-radius:6px;padding:1px 5px">${provider}</span>
+          <span style="font-size:10px;color:var(--text-dim);border:1px solid var(--border);border-radius:6px;padding:1px 5px">${esc(provider)}</span>
         </div>
-        <div style="font-size:11.5px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.email || u.docID}</div>
+        <div style="font-size:11.5px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(u.email || u.docID)}</div>
       </div>
       <div style="text-align:right;font-size:11px;color:var(--text-dim);flex-shrink:0">
-        <div>Son giriş: <b style="color:var(--text)">${login}</b></div>
+        <div>Son giriş: <b style="color:var(--text)">${esc(login)}</b></div>
         <div>Kayıt: ${created ? created.toLocaleDateString("tr-TR") : "—"}</div>
       </div>
-      <button class="btn" title="Hediye gönder" onclick="giftToUser('${u.docID.replace(/'/g, "")}')">🎁</button>
+      <button class="btn gift-user-btn" title="Hediye gönder" data-uid="${esc(u.docID)}">🎁</button>
     </div>`;
   }).join("");
 }
 
-function giftToUser(id) {
-  $("giftUserID").value = id;
+// Event delegation — ID'yi HTML'e gömülü onclick yerine data attribute'tan oku
+$("userList").addEventListener("click", (e) => {
+  const btn = e.target.closest(".gift-user-btn");
+  if (!btn) return;
+  $("giftUserID").value = btn.dataset.uid || "";
   document.querySelector('.page-tab[data-page="gifts"]').click();
   toast("Kullanıcı ID hediye formuna kopyalandı 🎁");
-}
+});
 
 async function loadUsers() {
   if (!SESSION) { $("userList").innerHTML = '<div class="gift-empty">Önce giriş yap 🔑</div>'; return; }
@@ -1681,7 +1686,7 @@ async function loadUsers() {
     const res = await fetch("/api/users", { headers: headers() });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      $("userList").innerHTML = `<div class="gift-empty" style="line-height:1.6">${err.error || "Kullanıcılar alınamadı"}</div>`;
+      $("userList").innerHTML = `<div class="gift-empty" style="line-height:1.6">${esc(err.error || "Kullanıcılar alınamadı")}</div>`;
       $("userStats").innerHTML = "";
       return;
     }
