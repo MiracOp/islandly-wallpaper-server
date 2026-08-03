@@ -28,5 +28,15 @@
     "claimed": true,
     "claimedAt": "2026-07-10T13:56:57.110Z",
     "coins": 5000
+  },
+  {
+    "id": "fddc76e7-6cc3-4a16-9831-5f21d9cb3ced",
+    "userID": "google:102115279006602628564",
+    "kind": "coins",
+    "note": "",
+    "createdAt": "2026-08-03T16:01:29.426Z",
+    "claimed": false,
+    "claimedAt": null,
+    "coins": 500
   }
 ]
