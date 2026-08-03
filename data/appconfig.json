@@ -6,6 +6,15 @@
     "speed": 2.1,
     "size": 0.7
   },
+  "announcement": {
+    "enabled": false,
+    "id": "",
+    "emoji": "📣",
+    "title": "",
+    "message": "",
+    "ctaText": "",
+    "ctaAction": "none"
+  },
   "themes": {
     "freeThemeNames": [],
     "featuredThemeName": "",
@@ -15,5 +24,11 @@
     "trialEnabled": true,
     "monthlyProductID": "",
     "yearlyProductID": ""
+  },
+  "effect": {
+    "type": "none",
+    "intensity": 60,
+    "speed": 1,
+    "size": 1
   }
 }
