@@ -48,5 +48,15 @@
     "claimed": true,
     "claimedAt": "2026-08-03T16:07:22.950Z",
     "premiumDays": 30
+  },
+  {
+    "id": "161a401a-9fc3-412c-9044-c3ee67da4c3e",
+    "userID": "google:115650609780485752005",
+    "kind": "premium",
+    "note": "premium ödülün!",
+    "createdAt": "2026-08-03T16:08:27.031Z",
+    "claimed": false,
+    "claimedAt": null,
+    "premiumDays": 120
   }
 ]
