@@ -577,6 +577,10 @@
   <button class="page-tab active" data-page="wallpapers">🖼 Wallpaperlar</button>
   <button class="page-tab" data-page="appearance">❄️ Görünüm & Efektler</button>
   <button class="page-tab" data-page="gifts">🎁 Hediyeler</button>
+  <button class="page-tab" data-page="users">👤 Kullanıcılar</button>
+  <button class="page-tab" data-page="announcement">📣 Duyuru</button>
+  <button class="page-tab" data-page="themes">🎨 Temalar</button>
+  <button class="page-tab" data-page="paywall">💰 Paywall</button>
 </nav>
 
 <!-- ═══ Hediyeler ═══ -->
@@ -700,6 +704,170 @@
         <div class="ground"></div>
         <div class="status-off" id="snowOff">Kar modu kapalı<br>Açınca önizleme burada başlar</div>
       </div>
+    </section>
+  </div>
+</div>
+
+<!-- ═══ Kullanıcılar ═══ -->
+<div class="page" id="page-users">
+  <section class="panel" style="position:static;max-width:1100px">
+    <div class="panel-head">
+      <h2>Kullanıcılar</h2>
+      <button class="btn" id="refreshUsersBtn">↻ Yenile</button>
+    </div>
+
+    <div id="userStats" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px"></div>
+
+    <div class="field">
+      <input type="text" id="userSearch" placeholder="İsim, e-posta veya ID ara…" autocomplete="off">
+    </div>
+
+    <div id="userList" style="margin-top:14px">
+      <div class="gift-empty">Yükleniyor…</div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ Duyuru ═══ -->
+<div class="page" id="page-announcement">
+  <div class="gifts-layout">
+    <section class="panel" style="position:static">
+      <div class="panel-head">
+        <h2>Uygulama İçi Duyuru <span class="live-chip off" id="annChip"><span class="dot"></span><span id="annChipText">KAPALI</span></span></h2>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="t-label">📣 Duyuru banner'ı</div>
+          <div class="t-hint">Açınca uygulamadaki herkese üstte banner gösterilir</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="annEnabled">
+          <span class="track"></span>
+        </label>
+      </div>
+
+      <div class="field">
+        <label for="annEmoji">Emoji</label>
+        <input type="text" id="annEmoji" placeholder="📣" maxlength="4" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="annTitle">Başlık</label>
+        <input type="text" id="annTitle" placeholder="örn. Yeni Pixel Temalar! 👾" maxlength="60" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="annMessage">Mesaj</label>
+        <input type="text" id="annMessage" placeholder="örn. 6 yeni 8-bit tema seni bekliyor" maxlength="120" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="annCtaText">Buton yazısı (boş = buton yok)</label>
+        <input type="text" id="annCtaText" placeholder="örn. Göz at" maxlength="20" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="annCtaAction">Butona basınca</label>
+        <select id="annCtaAction">
+          <option value="none">Hiçbir şey — sadece kapansın</option>
+          <option value="themes">Temalar sekmesine git</option>
+          <option value="pets">Pet sekmesine git</option>
+          <option value="paywall">Paywall'u aç</option>
+        </select>
+      </div>
+
+      <div class="form-actions" style="margin-top:24px">
+        <button class="btn btn-primary" id="saveAnnBtn">📣 Duyuruyu Yayınla</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-dim);margin-top:12px;line-height:1.5">
+        Her yayınlamada duyuru yeni bir kimlik alır — banner'ı daha önce kapatan
+        kullanıcılar da yeni duyuruyu tekrar görür.
+      </p>
+    </section>
+
+    <section class="panel" style="position:static">
+      <div class="panel-head"><h2>Önizleme</h2></div>
+      <div id="annPreview" style="border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(124,92,255,.25),rgba(124,92,255,.08))">
+        <span id="annPvEmoji" style="font-size:24px">📣</span>
+        <div style="flex:1;min-width:0">
+          <div id="annPvTitle" style="font-weight:700;font-size:14px">Başlık buraya</div>
+          <div id="annPvMessage" style="font-size:12px;color:var(--text-dim)">Mesaj buraya</div>
+        </div>
+        <button class="btn" id="annPvCta" style="display:none;pointer-events:none">Göz at</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ═══ Temalar ═══ -->
+<div class="page" id="page-themes">
+  <div class="gifts-layout">
+    <section class="panel" style="position:static">
+      <div class="panel-head"><h2>Tema Yönetimi</h2></div>
+
+      <div class="field">
+        <label for="thFeatured">⭐ Haftanın teması (tema adı)</label>
+        <input type="text" id="thFeatured" placeholder="örn. Pixel Invader" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="thFree">🆓 Ücretsiz temalar (virgülle ayır)</label>
+        <input type="text" id="thFree" placeholder="örn. Pixel Invader, Kalp, Neon Pulse" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>🚫 Gizlenen kategoriler</label>
+        <div id="thCategories" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:6px"></div>
+      </div>
+
+      <div class="form-actions" style="margin-top:24px">
+        <button class="btn btn-primary" id="saveThemesBtn">🎨 Tema Ayarlarını Yayınla</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-dim);margin-top:12px;line-height:1.5">
+        Tema adları uygulamadaki isimle birebir aynı olmalı (örn. "Pixel Invader").
+        Ücretsiz listesi uygulamadaki mevcut ücretsiz temalara ek olarak çalışır —
+        premium'u kaldırmaz, sadece seçilenleri herkese açar.
+      </p>
+    </section>
+  </div>
+</div>
+
+<!-- ═══ Paywall ═══ -->
+<div class="page" id="page-paywall">
+  <div class="gifts-layout">
+    <section class="panel" style="position:static">
+      <div class="panel-head"><h2>Paywall Kontrolü</h2></div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="t-label">🎁 3 gün ücretsiz deneme</div>
+          <div class="t-hint">Kapatınca paywall'da trial rozeti ve metni gizlenir</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="pwTrial">
+          <span class="track"></span>
+        </label>
+      </div>
+
+      <div class="field">
+        <label for="pwMonthly">Aylık ürün ID (boş = uygulamadaki varsayılan)</label>
+        <input type="text" id="pwMonthly" placeholder="com.dynamicisland.premium.monthly" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="pwYearly">Yıllık ürün ID (boş = uygulamadaki varsayılan)</label>
+        <input type="text" id="pwYearly" placeholder="com.dynamicisland.premium.yearly" autocomplete="off">
+      </div>
+
+      <div class="form-actions" style="margin-top:24px">
+        <button class="btn btn-primary" id="savePaywallBtn">💰 Paywall Ayarlarını Yayınla</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-dim);margin-top:12px;line-height:1.5">
+        Fiyat testi için: App Store Connect'te yeni fiyatlı ürünler oluştur
+        (örn. …premium.monthly2 · $4.99), ID'leri buraya yaz ve yayınla.
+        Uygulama bir sonraki açılışta yeni ürünleri gösterir. Mevcut abonelere dokunulmaz.
+      </p>
     </section>
   </div>
 </div>
@@ -1117,6 +1285,7 @@ document.querySelectorAll(".page-tab").forEach(tab => {
     // Kar önizleme canvas'ı sekme gizliyken 0x0 kalır — sekme açılınca doğru boyutla yeniden kur.
     if (tab.dataset.page === "appearance") snowEngine.configure(readSnowUI());
     if (tab.dataset.page === "gifts") loadGifts();
+    if (tab.dataset.page === "users") loadUsers();
   };
 });
 
@@ -1228,6 +1397,125 @@ window.removeGift = async (id) => {
 
 $("refreshGiftsBtn").onclick = loadGifts;
 
+/* ── Kullanıcılar ── */
+let allUsers = [];
+
+function fsDate(v) {
+  // Firestore timestamp string veya {_seconds} objesi gelebilir
+  if (!v) return null;
+  if (typeof v === "string") return new Date(v);
+  if (typeof v === "object" && v.seconds) return new Date(v.seconds * 1000);
+  return null;
+}
+
+function timeAgo(d) {
+  if (!d || isNaN(d)) return "—";
+  const s = (Date.now() - d.getTime()) / 1000;
+  if (s < 60) return "az önce";
+  if (s < 3600) return Math.floor(s / 60) + " dk önce";
+  if (s < 86400) return Math.floor(s / 3600) + " saat önce";
+  if (s < 86400 * 30) return Math.floor(s / 86400) + " gün önce";
+  return d.toLocaleDateString("tr-TR");
+}
+
+function isPremiumUser(u) {
+  const sub = u.subscription;
+  if (!sub || sub.isActive === false) return false;
+  const exp = fsDate(sub.expiresAt);
+  return sub.isActive === true && (!exp || exp > new Date());
+}
+
+function renderUserStats() {
+  const now = Date.now();
+  const total = allUsers.length;
+  const premium = allUsers.filter(isPremiumUser).length;
+  const today = allUsers.filter(u => {
+    const d = fsDate(u.lastLoginAt);
+    return d && now - d.getTime() < 86400e3;
+  }).length;
+  const week = allUsers.filter(u => {
+    const d = fsDate(u.lastLoginAt);
+    return d && now - d.getTime() < 7 * 86400e3;
+  }).length;
+  const chip = (label, value, hue) =>
+    `<div style="border:1px solid var(--border);border-radius:12px;padding:10px 16px;background:var(--card)">
+       <div style="font-size:20px;font-weight:800;color:hsl(${hue} 80% 70%)">${value}</div>
+       <div style="font-size:11px;color:var(--text-dim)">${label}</div>
+     </div>`;
+  $("userStats").innerHTML =
+    chip("Toplam kullanıcı", total, 250) +
+    chip("Aktif premium", premium, 45) +
+    chip("Bugün giren", today, 140) +
+    chip("Son 7 gün", week, 190);
+}
+
+function renderUserList() {
+  const q = $("userSearch").value.trim().toLowerCase();
+  let list = [...allUsers].sort((a, b) =>
+    (fsDate(b.lastLoginAt)?.getTime() || 0) - (fsDate(a.lastLoginAt)?.getTime() || 0));
+  if (q) {
+    list = list.filter(u =>
+      (u.displayName || "").toLowerCase().includes(q) ||
+      (u.email || "").toLowerCase().includes(q) ||
+      (u.docID || "").toLowerCase().includes(q));
+  }
+  if (!list.length) {
+    $("userList").innerHTML = `<div class="gift-empty">${q ? "Eşleşen kullanıcı yok" : "Henüz kullanıcı yok"}</div>`;
+    return;
+  }
+  $("userList").innerHTML = list.slice(0, 300).map(u => {
+    const premium = isPremiumUser(u);
+    const provider = u.provider === "apple" ? "" : u.provider === "google" ? "G" : "?";
+    const name = u.displayName || "(isimsiz)";
+    const login = timeAgo(fsDate(u.lastLoginAt));
+    const created = fsDate(u.createdAt);
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;background:var(--card)">
+      <div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;background:${premium ? "linear-gradient(135deg,#f5c542,#e08a00)" : "var(--border)"};color:${premium ? "#000" : "var(--text)"}">${(name[0] || "?").toUpperCase()}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:6px">
+          ${name}
+          ${premium ? '<span style="font-size:9px;font-weight:900;background:#f5c542;color:#000;border-radius:6px;padding:2px 6px">PREMIUM</span>' : ""}
+          <span style="font-size:10px;color:var(--text-dim);border:1px solid var(--border);border-radius:6px;padding:1px 5px">${provider}</span>
+        </div>
+        <div style="font-size:11.5px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.email || u.docID}</div>
+      </div>
+      <div style="text-align:right;font-size:11px;color:var(--text-dim);flex-shrink:0">
+        <div>Son giriş: <b style="color:var(--text)">${login}</b></div>
+        <div>Kayıt: ${created ? created.toLocaleDateString("tr-TR") : "—"}</div>
+      </div>
+      <button class="btn" title="Hediye gönder" onclick="giftToUser('${u.docID.replace(/'/g, "")}')">🎁</button>
+    </div>`;
+  }).join("");
+}
+
+function giftToUser(id) {
+  $("giftUserID").value = id;
+  document.querySelector('.page-tab[data-page="gifts"]').click();
+  toast("Kullanıcı ID hediye formuna kopyalandı 🎁");
+}
+
+async function loadUsers() {
+  if (!SESSION) { $("userList").innerHTML = '<div class="gift-empty">Önce giriş yap 🔑</div>'; return; }
+  $("userList").innerHTML = '<div class="gift-empty">Yükleniyor…</div>';
+  try {
+    const res = await fetch("/api/users", { headers: headers() });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      $("userList").innerHTML = `<div class="gift-empty" style="line-height:1.6">${err.error || "Kullanıcılar alınamadı"}</div>`;
+      $("userStats").innerHTML = "";
+      return;
+    }
+    allUsers = await res.json();
+    renderUserStats();
+    renderUserList();
+  } catch {
+    $("userList").innerHTML = '<div class="gift-empty">Bağlantı hatası</div>';
+  }
+}
+
+$("refreshUsersBtn").onclick = loadUsers;
+$("userSearch").addEventListener("input", renderUserList);
+
 /* ── Görünüm & Efektler (kar modu) ── */
 let cfg = { theme: "default", snow: { enabled: false, intensity: 60, speed: 1, size: 1 } };
 
@@ -1271,7 +1559,133 @@ async function loadConfig() {
     if (res.ok) cfg = await res.json();
   } catch {}
   applySnowUI();
+  applyAnnUI();
+  applyThemesUI();
+  applyPaywallUI();
 }
+
+/* ── Duyuru ── */
+function applyAnnUI() {
+  const a = cfg.announcement || {};
+  $("annEnabled").checked = Boolean(a.enabled);
+  $("annEmoji").value = a.emoji || "📣";
+  $("annTitle").value = a.title || "";
+  $("annMessage").value = a.message || "";
+  $("annCtaText").value = a.ctaText || "";
+  $("annCtaAction").value = a.ctaAction || "none";
+  updateAnnPreview();
+}
+
+function updateAnnPreview() {
+  $("annPvEmoji").textContent = $("annEmoji").value || "📣";
+  $("annPvTitle").textContent = $("annTitle").value || "Başlık buraya";
+  $("annPvMessage").textContent = $("annMessage").value || "Mesaj buraya";
+  const cta = $("annCtaText").value.trim();
+  $("annPvCta").style.display = cta ? "" : "none";
+  $("annPvCta").textContent = cta || "";
+  const on = $("annEnabled").checked;
+  $("annChip").className = "live-chip " + (on ? "on" : "off");
+  $("annChipText").textContent = on ? "UYGULAMADA AKTİF" : "KAPALI";
+}
+
+["annEmoji", "annTitle", "annMessage", "annCtaText"].forEach(id =>
+  $(id).addEventListener("input", updateAnnPreview));
+$("annEnabled").addEventListener("change", updateAnnPreview);
+
+$("saveAnnBtn").onclick = async () => {
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
+  const btn = $("saveAnnBtn");
+  btn.disabled = true; btn.textContent = "Yayınlanıyor…";
+  try {
+    const announcement = {
+      enabled: $("annEnabled").checked,
+      id: "ann-" + Date.now(),   // her yayında yeni id → kapatanlar da tekrar görür
+      emoji: $("annEmoji").value || "📣",
+      title: $("annTitle").value.trim(),
+      message: $("annMessage").value.trim(),
+      ctaText: $("annCtaText").value.trim(),
+      ctaAction: $("annCtaAction").value
+    };
+    const res = await fetch("/api/config", {
+      method: "PUT", headers: headers(),
+      body: JSON.stringify({ announcement })
+    });
+    if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
+    else if (!res.ok) toast("Kaydedilemedi", "err");
+    else {
+      cfg = await res.json();
+      updateAnnPreview();
+      toast(announcement.enabled ? "📣 Duyuru yayında!" : "Duyuru kapatıldı ✓");
+    }
+  } catch { toast("Bağlantı hatası", "err"); }
+  btn.disabled = false; btn.textContent = "📣 Duyuruyu Yayınla";
+};
+
+/* ── Temalar ── */
+const APP_CATEGORIES = ["Premium","Pixel","Marvel","Pets","Pastel","Classic","Animated",
+  "Aurora","Chrome","Galaxy","Holographic","Glass","Sunset","Crystal","Shapes","Characters"];
+
+function applyThemesUI() {
+  const t = cfg.themes || {};
+  $("thFeatured").value = t.featuredThemeName || "";
+  $("thFree").value = (t.freeThemeNames || []).join(", ");
+  const disabled = new Set(t.disabledCategories || []);
+  $("thCategories").innerHTML = APP_CATEGORIES.map(c =>
+    `<label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer">
+       <input type="checkbox" data-cat="${c}" ${disabled.has(c) ? "checked" : ""}> ${c}
+     </label>`).join("");
+}
+
+$("saveThemesBtn").onclick = async () => {
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
+  const btn = $("saveThemesBtn");
+  btn.disabled = true; btn.textContent = "Yayınlanıyor…";
+  try {
+    const themes = {
+      featuredThemeName: $("thFeatured").value.trim(),
+      freeThemeNames: $("thFree").value.split(",").map(s => s.trim()).filter(Boolean),
+      disabledCategories: [...document.querySelectorAll("#thCategories input:checked")]
+        .map(el => el.dataset.cat)
+    };
+    const res = await fetch("/api/config", {
+      method: "PUT", headers: headers(),
+      body: JSON.stringify({ themes })
+    });
+    if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
+    else if (!res.ok) toast("Kaydedilemedi", "err");
+    else { cfg = await res.json(); toast("🎨 Tema ayarları yayında!"); }
+  } catch { toast("Bağlantı hatası", "err"); }
+  btn.disabled = false; btn.textContent = "🎨 Tema Ayarlarını Yayınla";
+};
+
+/* ── Paywall ── */
+function applyPaywallUI() {
+  const p = cfg.paywall || {};
+  $("pwTrial").checked = p.trialEnabled !== false;
+  $("pwMonthly").value = p.monthlyProductID || "";
+  $("pwYearly").value = p.yearlyProductID || "";
+}
+
+$("savePaywallBtn").onclick = async () => {
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
+  const btn = $("savePaywallBtn");
+  btn.disabled = true; btn.textContent = "Yayınlanıyor…";
+  try {
+    const paywall = {
+      trialEnabled: $("pwTrial").checked,
+      monthlyProductID: $("pwMonthly").value.trim(),
+      yearlyProductID: $("pwYearly").value.trim()
+    };
+    const res = await fetch("/api/config", {
+      method: "PUT", headers: headers(),
+      body: JSON.stringify({ paywall })
+    });
+    if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
+    else if (!res.ok) toast("Kaydedilemedi", "err");
+    else { cfg = await res.json(); toast("💰 Paywall ayarları yayında!"); }
+  } catch { toast("Bağlantı hatası", "err"); }
+  btn.disabled = false; btn.textContent = "💰 Paywall Ayarlarını Yayınla";
+};
 
 $("saveConfigBtn").onclick = async () => {
   if (!SESSION) return toast("Önce giriş yap 🔑", "err");

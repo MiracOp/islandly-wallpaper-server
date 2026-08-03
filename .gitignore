@@ -1,0 +1,8 @@
+# Service account anahtarları — ASLA commit'lenmez
+*adminsdk*.json
+*service-account*.json
+*serviceAccount*.json
+islandly-7fd09-*.json
+
+node_modules/
+.DS_Store

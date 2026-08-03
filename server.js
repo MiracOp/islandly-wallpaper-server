@@ -26,7 +26,29 @@ const GITHUB_GIFTS_PATH = "data/gifts.json";
 // Uygulama görünüm ayarları (kar modu vb.) — panelden yönetilir
 const DEFAULT_CONFIG = {
   theme: "default",
-  snow: { enabled: false, intensity: 60, speed: 1, size: 1 }
+  snow: { enabled: false, intensity: 60, speed: 1, size: 1 },
+  // Uygulama içi duyuru banner'ı — id değişince daha önce kapatan kullanıcıya tekrar gösterilir
+  announcement: {
+    enabled: false,
+    id: "",
+    emoji: "📣",
+    title: "",
+    message: "",
+    ctaText: "",
+    ctaAction: "none" // none | paywall | themes | pets
+  },
+  // Tema yönetimi — uygulama güncellemesi olmadan panelden kontrol
+  themes: {
+    freeThemeNames: [],      // bu isimli temalar premium'suz kullanılabilir (app'teki isFree'ye ek)
+    featuredThemeName: "",   // haftanın teması — listede öne çıkarılır
+    disabledCategories: []   // bu kategoriler app'te gizlenir
+  },
+  // Paywall kontrolü — trial ve fiyat seti (A/B testi için product ID override)
+  paywall: {
+    trialEnabled: true,
+    monthlyProductID: "",    // boş = app'teki varsayılan ID
+    yearlyProductID: ""      // boş = app'teki varsayılan ID
+  }
 };
 
 // ── Kullanıcı girişi ─────────────────────────────────────────
@@ -95,6 +117,124 @@ async function pushFileToGitHub(repoPath, data, message) {
   }
 }
 
+// ── Firebase (kullanıcı listesi + login takibi) ──────────────
+// Railway'de FIREBASE_SERVICE_ACCOUNT env değişkenine Firebase Console →
+// Project settings → Service accounts → "Generate new private key" ile inen
+// JSON'un TAMAMI yapıştırılır. Service account Firestore kurallarını bypass
+// eder — kurallar kilitli kalabilir (güvenli), yazma sunucudan yapılır.
+const FIREBASE_SERVICE_ACCOUNT = process.env.FIREBASE_SERVICE_ACCOUNT || "";
+let fbTokenCache = { token: "", exp: 0 };
+
+function firebaseServiceAccount() {
+  if (!FIREBASE_SERVICE_ACCOUNT) return null;
+  try { return JSON.parse(FIREBASE_SERVICE_ACCOUNT); } catch { return null; }
+}
+
+async function firebaseAccessToken() {
+  const sa = firebaseServiceAccount();
+  if (!sa) throw new Error("FIREBASE_SERVICE_ACCOUNT tanımlı değil veya geçersiz JSON");
+  if (fbTokenCache.token && Date.now() < fbTokenCache.exp - 60_000) return fbTokenCache.token;
+
+  const { createSign } = await import("node:crypto");
+  const now = Math.floor(Date.now() / 1000);
+  const b64 = (obj) => Buffer.from(JSON.stringify(obj)).toString("base64url");
+  const unsigned = `${b64({ alg: "RS256", typ: "JWT" })}.${b64({
+    iss: sa.client_email,
+    scope: "https://www.googleapis.com/auth/datastore",
+    aud: "https://oauth2.googleapis.com/token",
+    iat: now,
+    exp: now + 3600
+  })}`;
+  const signer = createSign("RSA-SHA256");
+  signer.update(unsigned);
+  const jwt = `${unsigned}.${signer.sign(sa.private_key, "base64url")}`;
+
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: `grant_type=${encodeURIComponent("urn:ietf:params:oauth:grant-type:jwt-bearer")}&assertion=${jwt}`
+  });
+  if (!res.ok) throw new Error(`Google token alınamadı: ${await res.text()}`);
+  const json = await res.json();
+  fbTokenCache = { token: json.access_token, exp: Date.now() + json.expires_in * 1000 };
+  return fbTokenCache.token;
+}
+
+/** Firestore'un tipli değerlerini sade JS değerine çevirir. */
+function parseFsValue(v) {
+  if (v == null || typeof v !== "object") return null;
+  if ("stringValue" in v) return v.stringValue;
+  if ("integerValue" in v) return Number(v.integerValue);
+  if ("doubleValue" in v) return v.doubleValue;
+  if ("booleanValue" in v) return v.booleanValue;
+  if ("timestampValue" in v) return v.timestampValue;
+  if ("nullValue" in v) return null;
+  if ("mapValue" in v) {
+    const out = {};
+    for (const [k, val] of Object.entries(v.mapValue.fields || {})) out[k] = parseFsValue(val);
+    return out;
+  }
+  if ("arrayValue" in v) return (v.arrayValue.values || []).map(parseFsValue);
+  return null;
+}
+
+/** users koleksiyonunun tamamını çeker (sayfalı). */
+async function fetchFirebaseUsers() {
+  const sa = firebaseServiceAccount();
+  const token = await firebaseAccessToken();
+  const base = `https://firestore.googleapis.com/v1/projects/${sa.project_id}/databases/(default)/documents`;
+  const users = [];
+  let pageToken = "";
+  do {
+    const u = new URL(`${base}/users`);
+    u.searchParams.set("pageSize", "300");
+    if (pageToken) u.searchParams.set("pageToken", pageToken);
+    const res = await fetch(u, { headers: { authorization: `Bearer ${token}` } });
+    if (!res.ok) throw new Error(`Firestore okunamadı: ${await res.text()}`);
+    const json = await res.json();
+    for (const doc of json.documents || []) {
+      const fields = {};
+      for (const [k, v] of Object.entries(doc.fields || {})) fields[k] = parseFsValue(v);
+      users.push({ docID: doc.name.split("/").pop(), ...fields });
+    }
+    pageToken = json.nextPageToken || "";
+  } while (pageToken && users.length < 5000);
+  return users;
+}
+
+/** Login kaydını Firestore'a yazar (merge) — iOS app her girişte çağırır. */
+async function trackFirebaseUser(input) {
+  const id = String(input.id || "").trim();
+  if (!id || id.length > 200) throw new Error("id is required");
+  const sa = firebaseServiceAccount();
+  const token = await firebaseAccessToken();
+  const base = `https://firestore.googleapis.com/v1/projects/${sa.project_id}/databases/(default)/documents`;
+  const docPath = `${base}/users/${encodeURIComponent(id)}`;
+  const nowISO = new Date().toISOString();
+
+  // createdAt sadece ilk kayıtta yazılır
+  const existing = await fetch(docPath, { headers: { authorization: `Bearer ${token}` } });
+  const isNew = existing.status === 404;
+
+  const fields = {
+    id: { stringValue: id },
+    displayName: { stringValue: String(input.displayName || "").slice(0, 120) },
+    email: { stringValue: String(input.email || "").slice(0, 200) },
+    provider: { stringValue: String(input.provider || "").slice(0, 30) },
+    lastLoginAt: { timestampValue: nowISO }
+  };
+  if (isNew) fields.createdAt = { timestampValue: nowISO };
+
+  const mask = Object.keys(fields).map((f) => `updateMask.fieldPaths=${f}`).join("&");
+  const res = await fetch(`${docPath}?${mask}`, {
+    method: "PATCH",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+    body: JSON.stringify({ fields })
+  });
+  if (!res.ok) throw new Error(`Firestore yazılamadı: ${await res.text()}`);
+  return { isNew };
+}
+
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -116,7 +256,14 @@ async function writeWallpapers(items) {
 async function readConfig() {
   try {
     const raw = JSON.parse(await readFile(CONFIG_FILE, "utf8"));
-    return { ...DEFAULT_CONFIG, ...raw, snow: { ...DEFAULT_CONFIG.snow, ...(raw.snow || {}) } };
+    return {
+      ...DEFAULT_CONFIG,
+      ...raw,
+      snow: { ...DEFAULT_CONFIG.snow, ...(raw.snow || {}) },
+      announcement: { ...DEFAULT_CONFIG.announcement, ...(raw.announcement || {}) },
+      themes: { ...DEFAULT_CONFIG.themes, ...(raw.themes || {}) },
+      paywall: { ...DEFAULT_CONFIG.paywall, ...(raw.paywall || {}) }
+    };
   } catch {
     return DEFAULT_CONFIG;
   }
@@ -310,6 +457,37 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    // ── Kullanıcılar ────────────────────────────────────────
+    // Admin: Firestore'daki tüm kullanıcıları listele (panel Kullanıcılar sekmesi)
+    if (req.method === "GET" && url.pathname === "/api/users") {
+      if (!requireAdmin(req, res)) return;
+      if (!firebaseServiceAccount()) {
+        send(res, 501, { error: "FIREBASE_SERVICE_ACCOUNT env değişkeni tanımlı değil. Firebase Console → Project settings → Service accounts → Generate new private key → JSON'u Railway'e ekle." });
+        return;
+      }
+      try {
+        send(res, 200, await fetchFirebaseUsers());
+      } catch (error) {
+        send(res, 502, { error: error.message });
+      }
+      return;
+    }
+
+    // Public: iOS app her girişte kullanıcıyı buraya bildirir → sunucu
+    // service account ile Firestore'a yazar (güvenlik kuralları kilitli kalır)
+    if (req.method === "POST" && url.pathname === "/api/users/track") {
+      if (!firebaseServiceAccount()) {
+        send(res, 501, { error: "FIREBASE_SERVICE_ACCOUNT tanımlı değil" });
+        return;
+      }
+      try {
+        send(res, 200, await trackFirebaseUser(await parseBody(req)));
+      } catch (error) {
+        send(res, 400, { error: error.message });
+      }
+      return;
+    }
+
     // Uygulama görünüm ayarları — iOS app okur (public), panel yazar (admin)
     if (req.method === "GET" && url.pathname === "/api/config") {
       send(res, 200, await readConfig());
@@ -323,7 +501,10 @@ const server = createServer(async (req, res) => {
       const next = {
         ...current,
         ...body,
-        snow: { ...current.snow, ...(body.snow || {}) }
+        snow: { ...current.snow, ...(body.snow || {}) },
+        announcement: { ...current.announcement, ...(body.announcement || {}) },
+        themes: { ...current.themes, ...(body.themes || {}) },
+        paywall: { ...current.paywall, ...(body.paywall || {}) }
       };
       await writeConfig(next);
       send(res, 200, next);
