@@ -35,8 +35,8 @@
     "kind": "coins",
     "note": "",
     "createdAt": "2026-08-03T16:01:29.426Z",
-    "claimed": false,
-    "claimedAt": null,
+    "claimed": true,
+    "claimedAt": "2026-08-03T16:01:58.714Z",
     "coins": 500
   }
 ]
