@@ -1734,7 +1734,10 @@ function updateSnowLabels() {
   chip.className = "live-chip " + (savedType !== "none" ? "on" : "off");
   $("snowChipText").textContent = savedType !== "none"
     ? (EFFECT_LABELS[savedType] || "AKTİF") + " YAYINDA" : "KAPALI";
-  snowEngine.configure(s);
+  // Kaydırıcı sürüklenirken motoru her piksel değişiminde değil,
+  // hareket durunca yapılandır — GPU'yu yormaz, çökmeyi önler
+  clearTimeout(updateSnowLabels._t);
+  updateSnowLabels._t = setTimeout(() => snowEngine.configure(readSnowUI()), 90);
 }
 
 ["cfgIntensity", "cfgSpeed", "cfgSize"].forEach(id =>
