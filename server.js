@@ -22,6 +22,8 @@ const CONFIG_FILE = process.env.CONFIG_FILE || join(__dirname, "data", "appconfi
 const GITHUB_CONFIG_PATH = "data/appconfig.json";
 const GIFTS_FILE = process.env.GIFTS_FILE || join(__dirname, "data", "gifts.json");
 const GITHUB_GIFTS_PATH = "data/gifts.json";
+const EVENTS_FILE = process.env.EVENTS_FILE || join(__dirname, "data", "events.json");
+const GITHUB_EVENTS_PATH = "data/events.json";
 
 // Uygulama görünüm ayarları (kar modu vb.) — panelden yönetilir
 const DEFAULT_CONFIG = {
@@ -48,7 +50,9 @@ const DEFAULT_CONFIG = {
     trialEnabled: true,
     monthlyProductID: "",    // boş = app'teki varsayılan ID
     yearlyProductID: ""      // boş = app'teki varsayılan ID
-  }
+  },
+  // Ekran efekti — kar modunun genellenmişi (none | snow | confetti | hearts | leaves)
+  effect: { type: "none", intensity: 60, speed: 1, size: 1 }
 };
 
 // ── Kullanıcı girişi ─────────────────────────────────────────
@@ -262,7 +266,8 @@ async function readConfig() {
       snow: { ...DEFAULT_CONFIG.snow, ...(raw.snow || {}) },
       announcement: { ...DEFAULT_CONFIG.announcement, ...(raw.announcement || {}) },
       themes: { ...DEFAULT_CONFIG.themes, ...(raw.themes || {}) },
-      paywall: { ...DEFAULT_CONFIG.paywall, ...(raw.paywall || {}) }
+      paywall: { ...DEFAULT_CONFIG.paywall, ...(raw.paywall || {}) },
+      effect: { ...DEFAULT_CONFIG.effect, ...(raw.effect || {}) }
     };
   } catch {
     return DEFAULT_CONFIG;
@@ -290,6 +295,57 @@ async function writeGifts(items) {
   await writeFile(GIFTS_FILE, `${JSON.stringify(items, null, 2)}\n`, "utf8");
   pushFileToGitHub(GITHUB_GIFTS_PATH, items,
     "chore: update gifts via admin panel [skip railway]"); // arka planda
+}
+
+// ── Dönüşüm olayları (paywall istatistikleri) ────────────────
+// Ham olay değil GÜNLÜK SAYAÇ tutulur — dosya küçük kalır:
+// { "2026-08-03": { "paywallShown": 12, "purchases": { "com...monthly": 2 } } }
+const EVENT_TYPES = new Set(["paywall_shown", "purchase"]);
+
+async function readEvents() {
+  try {
+    return JSON.parse(await readFile(EVENTS_FILE, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+let eventsWriteTimer = null;
+async function writeEvents(events) {
+  await writeFile(EVENTS_FILE, `${JSON.stringify(events, null, 2)}\n`, "utf8");
+  // GitHub push'u 60 sn'de bire sınırla — her olayda commit atılmasın
+  if (!eventsWriteTimer) {
+    eventsWriteTimer = setTimeout(() => {
+      eventsWriteTimer = null;
+      readEvents().then((latest) =>
+        pushFileToGitHub(GITHUB_EVENTS_PATH, latest,
+          "chore: update events via app [skip railway]"));
+    }, 60_000);
+  }
+}
+
+async function recordEvent(input) {
+  const type = String(input.type || "").trim();
+  if (!EVENT_TYPES.has(type)) throw new Error("type must be paywall_shown or purchase");
+
+  const events = await readEvents();
+  const day = new Date().toISOString().slice(0, 10);
+  const bucket = events[day] || (events[day] = { paywallShown: 0, purchases: {} });
+
+  if (type === "paywall_shown") {
+    bucket.paywallShown += 1;
+  } else {
+    const pid = String(input.productID || "unknown").slice(0, 120);
+    bucket.purchases[pid] = (bucket.purchases[pid] || 0) + 1;
+  }
+
+  // 120 günden eski günleri temizle
+  const cutoff = new Date(Date.now() - 120 * 86400e3).toISOString().slice(0, 10);
+  for (const key of Object.keys(events)) {
+    if (key < cutoff) delete events[key];
+  }
+
+  await writeEvents(events);
 }
 
 const GIFT_KINDS = new Set(["premium", "coins", "pet"]);
@@ -504,10 +560,87 @@ const server = createServer(async (req, res) => {
         snow: { ...current.snow, ...(body.snow || {}) },
         announcement: { ...current.announcement, ...(body.announcement || {}) },
         themes: { ...current.themes, ...(body.themes || {}) },
-        paywall: { ...current.paywall, ...(body.paywall || {}) }
+        paywall: { ...current.paywall, ...(body.paywall || {}) },
+        effect: { ...current.effect, ...(body.effect || {}) }
       };
       await writeConfig(next);
       send(res, 200, next);
+      return;
+    }
+
+    // ── Dönüşüm olayları ────────────────────────────────────
+    // Public: iOS app paywall gösterimi / satın alma bildirir
+    if (req.method === "POST" && url.pathname === "/api/events") {
+      try {
+        await recordEvent(await parseBody(req));
+        send(res, 200, { ok: true });
+      } catch (error) {
+        send(res, 400, { error: error.message });
+      }
+      return;
+    }
+
+    // Admin: günlük sayaçları döner (panel Paywall sekmesi)
+    if (req.method === "GET" && url.pathname === "/api/events") {
+      if (!requireAdmin(req, res)) return;
+      send(res, 200, await readEvents());
+      return;
+    }
+
+    // ── Toplu hediye kampanyası ─────────────────────────────
+    // Admin: bir segmentteki TÜM kullanıcılara hediye oluşturur
+    if (req.method === "POST" && url.pathname === "/api/gifts/bulk") {
+      if (!requireAdmin(req, res)) return;
+      if (!firebaseServiceAccount()) {
+        send(res, 501, { error: "Toplu kampanya için FIREBASE_SERVICE_ACCOUNT gerekli (kullanıcı listesi oradan geliyor)" });
+        return;
+      }
+      try {
+        const body = await parseBody(req);
+        const target = String(body.target || "all"); // all | premium | nonpremium
+        const users = await fetchFirebaseUsers();
+        const now = new Date();
+
+        const isPremium = (u) => {
+          const sub = u.subscription;
+          if (!sub || sub.isActive !== true) return false;
+          const exp = sub.expiresAt ? new Date(sub.expiresAt) : null;
+          return !exp || exp > now;
+        };
+
+        const selected = users.filter((u) => {
+          if (!u.docID) return false;
+          if (target === "premium") return isPremium(u);
+          if (target === "nonpremium") return !isPremium(u);
+          return true;
+        });
+
+        if (selected.length === 0) {
+          send(res, 400, { error: "Bu segmentte kullanıcı yok" });
+          return;
+        }
+
+        const gifts = await readGifts();
+        const campaignNote = String(body.note || "").slice(0, 200);
+        let created = 0;
+        for (const user of selected) {
+          try {
+            gifts.push(normalizeGift({
+              userID: user.docID,
+              kind: body.kind,
+              premiumDays: body.premiumDays,
+              coins: body.coins,
+              petType: body.petType,
+              note: campaignNote
+            }));
+            created += 1;
+          } catch { /* geçersiz tek kullanıcı kampanyayı durdurmasın */ }
+        }
+        await writeGifts(gifts);
+        send(res, 201, { created, target });
+      } catch (error) {
+        send(res, 400, { error: error.message });
+      }
       return;
     }
 
@@ -631,6 +764,7 @@ const server = createServer(async (req, res) => {
 await pullFileFromGitHub(GITHUB_DATA_PATH, DATA_FILE);
 await pullFileFromGitHub(GITHUB_CONFIG_PATH, CONFIG_FILE);
 await pullFileFromGitHub(GITHUB_GIFTS_PATH, GIFTS_FILE);
+await pullFileFromGitHub(GITHUB_EVENTS_PATH, EVENTS_FILE);
 
 server.listen(PORT, () => {
   console.log(`Wallpaper server listening on http://localhost:${PORT}`);

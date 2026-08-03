@@ -641,6 +641,56 @@
       </div>
       <div id="giftList"><div class="gift-empty">Yükleniyor…</div></div>
     </section>
+
+    <section class="panel" style="position:static">
+      <div class="panel-head"><h2>📢 Toplu Kampanya</h2></div>
+
+      <div class="field">
+        <label for="bulkTarget">Kimlere gönderilsin?</label>
+        <select id="bulkTarget">
+          <option value="all">👥 Tüm kullanıcılar</option>
+          <option value="nonpremium">🆓 Premium olmayanlar</option>
+          <option value="premium">⭐ Premium olanlar</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="bulkKind">Hediye türü</label>
+        <select id="bulkKind">
+          <option value="coins">🪙 Coin (puan)</option>
+          <option value="premium">⭐ Premium üyelik</option>
+          <option value="pet">🐾 Pet</option>
+        </select>
+      </div>
+
+      <div class="field" id="bulkFieldCoins">
+        <label for="bulkCoins">Coin miktarı</label>
+        <input type="number" id="bulkCoins" min="1" max="1000000" value="200">
+      </div>
+
+      <div class="field" id="bulkFieldPremium" style="display:none">
+        <label for="bulkDays">Süre (gün)</label>
+        <input type="number" id="bulkDays" min="1" max="3650" value="3">
+      </div>
+
+      <div class="field" id="bulkFieldPet" style="display:none">
+        <label for="bulkPet">Pet seç</label>
+        <select id="bulkPet"></select>
+      </div>
+
+      <div class="field">
+        <label for="bulkNote">Not (opsiyonel)</label>
+        <input type="text" id="bulkNote" placeholder="örn. Yaz kampanyası 🎉" maxlength="200" autocomplete="off">
+      </div>
+
+      <div class="form-actions" style="margin-top:24px">
+        <button class="btn btn-primary" id="sendBulkBtn">📢 Kampanyayı Başlat</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-dim);margin-top:12px;line-height:1.5">
+        Seçilen segmentteki HERKESE tek tek hediye oluşturur — göndermeden önce
+        kaç kişiye gideceği sorulur. Kullanıcılar uygulamayı açınca otomatik alır.
+      </p>
+    </section>
   </div>
 </div>
 
@@ -649,18 +699,22 @@
   <div class="appearance-layout">
     <section class="panel" style="position:static">
       <div class="panel-head">
-        <h2>Kar Modu <span class="live-chip off" id="snowChip"><span class="dot"></span><span id="snowChipText">KAPALI</span></span></h2>
+        <h2>Ekran Efekti <span class="live-chip off" id="snowChip"><span class="dot"></span><span id="snowChipText">KAPALI</span></span></h2>
       </div>
 
-      <div class="toggle-row">
-        <div>
-          <div class="t-label">❄️ Kar yağışı</div>
-          <div class="t-hint">Açınca uygulamadaki herkesin ekranında kar yağar</div>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="cfgSnowEnabled">
-          <span class="track"></span>
-        </label>
+      <div class="field">
+        <label for="cfgEffectType">Efekt türü</label>
+        <select id="cfgEffectType">
+          <option value="none">Kapalı</option>
+          <option value="snow">❄️ Kar yağışı</option>
+          <option value="confetti">🎉 Konfeti</option>
+          <option value="hearts">💗 Kalp yağmuru</option>
+          <option value="leaves">🍂 Yaprak dökümü</option>
+        </select>
+        <p style="font-size:11px;color:var(--text-dim);margin-top:6px">
+          Seçilen efekt uygulamadaki herkesin ekranında görünür.
+          Konfeti/kalp/yaprak yeni uygulama sürümü gerektirir; eski sürümler sadece karı gösterir.
+        </p>
       </div>
 
       <div class="slider-row">
@@ -702,7 +756,7 @@
         <div class="clock">21:30</div>
         <canvas id="snowCanvas"></canvas>
         <div class="ground"></div>
-        <div class="status-off" id="snowOff">Kar modu kapalı<br>Açınca önizleme burada başlar</div>
+        <div class="status-off" id="snowOff">Efekt kapalı<br>Seçince önizleme burada başlar</div>
       </div>
     </section>
   </div>
@@ -867,6 +921,20 @@
         Fiyat testi için: App Store Connect'te yeni fiyatlı ürünler oluştur
         (örn. …premium.monthly2 · $4.99), ID'leri buraya yaz ve yayınla.
         Uygulama bir sonraki açılışta yeni ürünleri gösterir. Mevcut abonelere dokunulmaz.
+      </p>
+    </section>
+
+    <section class="panel" style="position:static">
+      <div class="panel-head">
+        <h2>📊 Dönüşüm</h2>
+        <button class="btn" id="refreshConvBtn">↻</button>
+      </div>
+      <div id="convTotals" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
+      <div id="convTable"><div class="gift-empty">Yükleniyor…</div></div>
+      <p style="font-size:11px;color:var(--text-dim);margin-top:12px;line-height:1.5">
+        Veriler yeni uygulama sürümüyle akmaya başlar: paywall her açıldığında ve
+        her satın almada uygulama buraya bildirir. Fiyat testinde hangi ürünün
+        kazandığını bu tablodan görürsün.
       </p>
     </section>
   </div>
@@ -1286,6 +1354,7 @@ document.querySelectorAll(".page-tab").forEach(tab => {
     if (tab.dataset.page === "appearance") snowEngine.configure(readSnowUI());
     if (tab.dataset.page === "gifts") loadGifts();
     if (tab.dataset.page === "users") loadUsers();
+    if (tab.dataset.page === "paywall") loadConversions();
   };
 });
 
@@ -1396,6 +1465,117 @@ window.removeGift = async (id) => {
 };
 
 $("refreshGiftsBtn").onclick = loadGifts;
+
+/* ── Toplu Kampanya ── */
+$("bulkPet").innerHTML = PET_TYPES
+  .map(([v, label]) => `<option value="${v}">${label}</option>`).join("");
+
+$("bulkKind").addEventListener("change", () => {
+  const kind = $("bulkKind").value;
+  $("bulkFieldCoins").style.display   = kind === "coins"   ? "" : "none";
+  $("bulkFieldPremium").style.display = kind === "premium" ? "" : "none";
+  $("bulkFieldPet").style.display     = kind === "pet"     ? "" : "none";
+});
+
+$("sendBulkBtn").onclick = async () => {
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
+  const target = $("bulkTarget").value;
+  const targetLabel = { all: "TÜM kullanıcılara", nonpremium: "premium olmayan herkese", premium: "premium olan herkese" }[target];
+  if (!confirm(`Bu kampanya ${targetLabel} gönderilecek. Emin misin?`)) return;
+
+  const btn = $("sendBulkBtn");
+  btn.disabled = true; btn.textContent = "Gönderiliyor…";
+  try {
+    const res = await fetch("/api/gifts/bulk", {
+      method: "POST", headers: headers(),
+      body: JSON.stringify({
+        target,
+        kind: $("bulkKind").value,
+        coins: Number($("bulkCoins").value),
+        premiumDays: Number($("bulkDays").value),
+        petType: $("bulkPet").value,
+        note: $("bulkNote").value.trim()
+      })
+    });
+    const json = await res.json().catch(() => ({}));
+    if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
+    else if (!res.ok) toast(json.error || "Kampanya gönderilemedi", "err");
+    else { toast(`📢 Kampanya başladı — ${json.created} kullanıcıya hediye oluşturuldu!`); loadGifts(); }
+  } catch { toast("Bağlantı hatası", "err"); }
+  btn.disabled = false; btn.textContent = "📢 Kampanyayı Başlat";
+};
+
+/* ── Dönüşüm istatistikleri ── */
+async function loadConversions() {
+  if (!SESSION) { $("convTable").innerHTML = '<div class="gift-empty">Önce giriş yap 🔑</div>'; return; }
+  try {
+    const res = await fetch("/api/events", { headers: headers() });
+    if (!res.ok) { $("convTable").innerHTML = '<div class="gift-empty">Veri alınamadı</div>'; return; }
+    const events = await res.json();
+    const days = Object.keys(events).sort().reverse();
+
+    let totShown = 0, totBuy = 0;
+    const byProduct = {};
+    for (const d of days) {
+      totShown += events[d].paywallShown || 0;
+      for (const [pid, n] of Object.entries(events[d].purchases || {})) {
+        totBuy += n;
+        byProduct[pid] = (byProduct[pid] || 0) + n;
+      }
+    }
+    const rate = totShown ? ((totBuy / totShown) * 100).toFixed(1) : "0.0";
+    const chip = (label, value, hue) =>
+      `<div style="border:1px solid var(--border);border-radius:12px;padding:10px 16px;background:var(--card)">
+         <div style="font-size:20px;font-weight:800;color:hsl(${hue} 80% 70%)">${value}</div>
+         <div style="font-size:11px;color:var(--text-dim)">${label}</div>
+       </div>`;
+    $("convTotals").innerHTML =
+      chip("Paywall gösterimi", totShown, 250) +
+      chip("Satın alma", totBuy, 140) +
+      chip("Dönüşüm", "%" + rate, 45);
+
+    if (!days.length) {
+      $("convTable").innerHTML = '<div class="gift-empty">Henüz veri yok — yeni uygulama sürümüyle akmaya başlar</div>';
+      return;
+    }
+
+    const rows = days.slice(0, 14).map(d => {
+      const e = events[d];
+      const buys = Object.values(e.purchases || {}).reduce((a, b) => a + b, 0);
+      const r = e.paywallShown ? ((buys / e.paywallShown) * 100).toFixed(1) : "—";
+      return `<tr>
+        <td style="padding:6px 10px">${d}</td>
+        <td style="padding:6px 10px;text-align:right">${e.paywallShown || 0}</td>
+        <td style="padding:6px 10px;text-align:right">${buys}</td>
+        <td style="padding:6px 10px;text-align:right;font-weight:700">${r === "—" ? "—" : "%" + r}</td>
+      </tr>`;
+    }).join("");
+
+    const productRows = Object.entries(byProduct)
+      .sort((a, b) => b[1] - a[1])
+      .map(([pid, n]) => `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 10px">
+        <span style="color:var(--text-dim);overflow:hidden;text-overflow:ellipsis">${pid}</span>
+        <b>${n}</b>
+      </div>`).join("");
+
+    $("convTable").innerHTML = `
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+        <thead><tr style="color:var(--text-dim);text-align:right">
+          <th style="text-align:left;padding:6px 10px">Gün</th>
+          <th style="padding:6px 10px">Gösterim</th>
+          <th style="padding:6px 10px">Satış</th>
+          <th style="padding:6px 10px">Dönüşüm</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      ${productRows ? `<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:8px">
+        <div style="font-size:11px;color:var(--text-dim);padding:0 10px 4px">Ürün bazında satış</div>${productRows}</div>` : ""}`;
+  } catch {
+    $("convTable").innerHTML = '<div class="gift-empty">Bağlantı hatası</div>';
+  }
+}
+
+$("refreshConvBtn").onclick = loadConversions;
 
 /* ── Kullanıcılar ── */
 let allUsers = [];
@@ -1519,9 +1699,13 @@ $("userSearch").addEventListener("input", renderUserList);
 /* ── Görünüm & Efektler (kar modu) ── */
 let cfg = { theme: "default", snow: { enabled: false, intensity: 60, speed: 1, size: 1 } };
 
+const EFFECT_LABELS = { snow: "❄️ KAR", confetti: "🎉 KONFETİ", hearts: "💗 KALP", leaves: "🍂 YAPRAK" };
+
 function readSnowUI() {
+  const type = $("cfgEffectType").value;
   return {
-    enabled: $("cfgSnowEnabled").checked,
+    type,
+    enabled: type !== "none",
     intensity: Number($("cfgIntensity").value),
     speed: Number($("cfgSpeed").value),
     size: Number($("cfgSize").value)
@@ -1529,7 +1713,9 @@ function readSnowUI() {
 }
 
 function applySnowUI() {
-  $("cfgSnowEnabled").checked = cfg.snow.enabled;
+  // effect.type varsa onu kullan; yoksa eski kar ayarından türet
+  const savedType = (cfg.effect && cfg.effect.type) || (cfg.snow.enabled ? "snow" : "none");
+  $("cfgEffectType").value = savedType;
   $("cfgIntensity").value = cfg.snow.intensity;
   $("cfgSpeed").value = cfg.snow.speed;
   $("cfgSize").value = cfg.snow.size;
@@ -1543,15 +1729,17 @@ function updateSnowLabels() {
   $("valSize").textContent = s.size.toFixed(1) + "×";
   ["cfgIntensity", "cfgSpeed", "cfgSize"].forEach(id => $(id).disabled = !s.enabled);
   $("snowOff").style.display = s.enabled ? "none" : "flex";
+  const savedType = (cfg.effect && cfg.effect.type) || (cfg.snow.enabled ? "snow" : "none");
   const chip = $("snowChip");
-  chip.className = "live-chip " + (cfg.snow.enabled ? "on" : "off");
-  $("snowChipText").textContent = cfg.snow.enabled ? "UYGULAMADA AKTİF" : "KAPALI";
+  chip.className = "live-chip " + (savedType !== "none" ? "on" : "off");
+  $("snowChipText").textContent = savedType !== "none"
+    ? (EFFECT_LABELS[savedType] || "AKTİF") + " YAYINDA" : "KAPALI";
   snowEngine.configure(s);
 }
 
 ["cfgIntensity", "cfgSpeed", "cfgSize"].forEach(id =>
   $(id).addEventListener("input", updateSnowLabels));
-$("cfgSnowEnabled").addEventListener("change", updateSnowLabels);
+$("cfgEffectType").addEventListener("change", updateSnowLabels);
 
 async function loadConfig() {
   try {
@@ -1692,17 +1880,22 @@ $("saveConfigBtn").onclick = async () => {
   const btn = $("saveConfigBtn");
   btn.disabled = true; btn.textContent = "Yayınlanıyor…";
   try {
+    const s = readSnowUI();
     const res = await fetch("/api/config", {
       method: "PUT",
       headers: headers(),
-      body: JSON.stringify({ snow: readSnowUI() })
+      body: JSON.stringify({
+        // Eski uygulama sürümleri sadece kar bilir — snow.enabled yalnızca kar seçiliyken açılır
+        snow: { enabled: s.type === "snow", intensity: s.intensity, speed: s.speed, size: s.size },
+        effect: { type: s.type, intensity: s.intensity, speed: s.speed, size: s.size }
+      })
     });
     if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
     else if (!res.ok) toast("Kaydedilemedi", "err");
     else {
       cfg = await res.json();
       updateSnowLabels();
-      toast(cfg.snow.enabled ? "❄️ Kar modu yayında!" : "Kar modu kapatıldı ✓");
+      toast(s.type !== "none" ? (EFFECT_LABELS[s.type] || "Efekt") + " yayında!" : "Efekt kapatıldı ✓");
     }
   } catch { toast("Bağlantı hatası", "err"); }
   btn.disabled = false; btn.textContent = "Ayarları Yayınla";
@@ -1723,6 +1916,8 @@ const snowEngine = (() => {
   }
   window.addEventListener("resize", resize);
 
+  const CONFETTI_COLORS = ["#ff5c8a", "#ffd23f", "#3ec9a7", "#5c9dff", "#b45cff", "#ff8c42"];
+
   function makeFlake(top = false) {
     return {
       x: Math.random() * canvas.width,
@@ -1731,23 +1926,42 @@ const snowEngine = (() => {
       vy: (0.4 + Math.random() * 0.9) * settings.speed * devicePixelRatio,
       drift: Math.random() * Math.PI * 2,
       driftAmp: (0.15 + Math.random() * 0.4) * devicePixelRatio,
-      alpha: 0.45 + Math.random() * 0.55
+      alpha: 0.45 + Math.random() * 0.55,
+      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)]
     };
+  }
+
+  function drawFlake(f) {
+    const type = settings.type || "snow";
+    if (type === "confetti") {
+      ctx.save();
+      ctx.translate(f.x, f.y);
+      ctx.rotate(f.drift);
+      ctx.fillStyle = f.color;
+      ctx.fillRect(-f.r, -f.r * 0.6, f.r * 2, f.r * 1.2);
+      ctx.restore();
+    } else if (type === "hearts" || type === "leaves") {
+      ctx.font = `${Math.max(8, f.r * 5)}px serif`;
+      ctx.fillText(type === "hearts" ? "💗" : "🍂", f.x, f.y);
+    } else {
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fillStyle = "#fff";
+      ctx.fill();
+    }
   }
 
   function frame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (settings.enabled) {
+      const sway = settings.type === "leaves" ? 2.2 : 1;
       for (const f of flakes) {
         f.y += f.vy;
         f.drift += 0.02 * settings.speed;
-        f.x += Math.sin(f.drift) * f.driftAmp;
+        f.x += Math.sin(f.drift) * f.driftAmp * sway;
         if (f.y > canvas.height + 8) Object.assign(f, makeFlake(true));
         ctx.globalAlpha = f.alpha;
-        ctx.beginPath();
-        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-        ctx.fillStyle = "#fff";
-        ctx.fill();
+        drawFlake(f);
       }
       ctx.globalAlpha = 1;
     }
