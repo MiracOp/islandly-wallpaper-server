@@ -1911,8 +1911,14 @@ const snowEngine = (() => {
     // Sekme gizliyken (display:none) offsetWidth/Height 0 döner — ölçmeyi atla,
     // yoksa canvas 0x0'a kilitlenir ve kar hiç görünmez.
     if (!canvas.offsetWidth || !canvas.offsetHeight) return;
-    canvas.width = canvas.offsetWidth * devicePixelRatio;
-    canvas.height = canvas.offsetHeight * devicePixelRatio;
+    // dpr'yi 2 ile sınırla + boyut DEĞİŞMEDİYSE dokunma — canvas.width ataması
+    // canvas'ı sıfırlar; slider sürüklenirken saniyede onlarca kez çağrılırsa
+    // GPU tahsisi üst üste biner ve tarayıcı canvas'ı çökertir (beyaz ekran).
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    const w = Math.round(canvas.offsetWidth * dpr);
+    const h = Math.round(canvas.offsetHeight * dpr);
+    if (canvas.width !== w) canvas.width = w;
+    if (canvas.height !== h) canvas.height = h;
   }
   window.addEventListener("resize", resize);
 

@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHmac, timingSafeEqual } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { extname, join, normalize } from "node:path";
@@ -69,7 +69,41 @@ function loadAdminUsers() {
   }
 }
 const adminUsers = loadAdminUsers();
-const sessions = new Map(); // sessionToken → kullanıcı profili
+
+// ── Kalıcı oturum (HMAC imzalı token) ────────────────────────
+// Oturumlar artık bellekte değil — token'ın kendisi imzalı olduğu için
+// sunucu yeniden başlasa / redeploy olsa bile oturum 30 gün geçerli kalır.
+const SESSION_SECRET = process.env.SESSION_SECRET || ADMIN_TOKEN;
+const SESSION_TTL_MS = 30 * 86400e3;
+
+function signSession(profile) {
+  const payload = Buffer.from(JSON.stringify({
+    username: profile.username,
+    displayName: profile.displayName,
+    title: profile.title,
+    exp: Date.now() + SESSION_TTL_MS
+  })).toString("base64url");
+  const sig = createHmac("sha256", SESSION_SECRET).update(payload).digest("base64url");
+  return `${payload}.${sig}`;
+}
+
+function verifySession(token) {
+  if (typeof token !== "string" || !token.includes(".")) return null;
+  const dot = token.lastIndexOf(".");
+  const payload = token.slice(0, dot);
+  const sig = token.slice(dot + 1);
+  const expected = createHmac("sha256", SESSION_SECRET).update(payload).digest("base64url");
+  const a = Buffer.from(sig);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+  try {
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    if (!data.exp || Date.now() > data.exp) return null;
+    return { username: data.username, displayName: data.displayName, title: data.title };
+  } catch {
+    return null;
+  }
+}
 
 async function githubRequest(path, options = {}) {
   return fetch(`https://api.github.com${path}`, {
@@ -409,9 +443,9 @@ async function parseBody(req) {
 }
 
 function requireAdmin(req, res) {
-  // 1) Kullanıcı oturumu (Nisa vb.) 2) Eski usül admin token — ikisi de geçerli
+  // 1) Kullanıcı oturumu (imzalı token) 2) Eski usül admin token — ikisi de geçerli
   const session = req.headers["x-admin-session"];
-  if (session && sessions.has(session)) return true;
+  if (session && verifySession(session)) return true;
   if (req.headers["x-admin-token"] === ADMIN_TOKEN) return true;
   send(res, 401, { error: "Unauthorized" });
   return false;
@@ -490,13 +524,12 @@ const server = createServer(async (req, res) => {
         send(res, 401, { error: "Kullanıcı adı veya şifre yanlış" });
         return;
       }
-      const token = randomUUID();
       const profile = {
         username: user.username,
         displayName: user.displayName || user.username,
         title: user.title || "Admin"
       };
-      sessions.set(token, profile);
+      const token = signSession(profile);
       send(res, 200, { token, user: profile });
       return;
     }
@@ -504,7 +537,7 @@ const server = createServer(async (req, res) => {
     // Mevcut oturumun kim olduğunu döner (sayfa yenilenince otomatik giriş)
     if (req.method === "GET" && url.pathname === "/api/me") {
       const session = req.headers["x-admin-session"];
-      const user = session ? sessions.get(session) : null;
+      const user = session ? verifySession(session) : null;
       if (!user) {
         send(res, 401, { error: "Unauthorized" });
         return;
