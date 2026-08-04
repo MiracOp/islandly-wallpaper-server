@@ -281,6 +281,74 @@ async function trackFirebaseUser(input) {
   return { isNew };
 }
 
+/**
+ * Kullanıcıya premium yazar (hediye). Service account ile yazıldığı için
+ * Firestore güvenlik kuralları kilitli olsa bile ÇALIŞIR — cihazdan yazma
+ * kurallara takılıyordu, premium hediyelerin aktifleşmeme sebebi buydu.
+ * Mevcut abonelik daha ileri bir tarihteyse üzerine yazmaz, gün ekler.
+ */
+async function grantPremiumOnServer(userID, days) {
+  const sa = firebaseServiceAccount();
+  if (!sa) throw new Error("FIREBASE_SERVICE_ACCOUNT tanımlı değil");
+  const token = await firebaseAccessToken();
+  const base = `https://firestore.googleapis.com/v1/projects/${sa.project_id}/databases/(default)/documents`;
+  const docPath = `${base}/users/${encodeURIComponent(userID)}`;
+
+  // Mevcut bitiş tarihini oku — aktifse üzerine ekle
+  let start = new Date();
+  try {
+    const res = await fetch(docPath, { headers: { authorization: `Bearer ${token}` } });
+    if (res.ok) {
+      const doc = await res.json();
+      const sub = doc.fields?.subscription?.mapValue?.fields;
+      const current = sub?.expiresAt?.timestampValue;
+      if (current && new Date(current) > start) start = new Date(current);
+    }
+  } catch { /* okunamazsa şimdiden başlat */ }
+
+  const expiresAt = new Date(start.getTime() + days * 86400e3);
+  const fields = {
+    subscription: {
+      mapValue: {
+        fields: {
+          productID: { stringValue: `gift.${days}days` },
+          planType: { stringValue: "PREMİUM - HEDİYE" },
+          expiresAt: { timestampValue: expiresAt.toISOString() },
+          updatedAt: { timestampValue: new Date().toISOString() },
+          isActive: { booleanValue: true }
+        }
+      }
+    }
+  };
+
+  const res = await fetch(`${docPath}?updateMask.fieldPaths=subscription`, {
+    method: "PATCH",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+    body: JSON.stringify({ fields })
+  });
+  if (!res.ok) throw new Error(`Premium yazılamadı: ${await res.text()}`);
+  return { expiresAt: expiresAt.toISOString() };
+}
+
+/** Kullanıcının abonelik durumunu döner — iOS Firestore'u okuyamazsa buraya sorar. */
+async function readSubscriptionOnServer(userID) {
+  const sa = firebaseServiceAccount();
+  if (!sa) throw new Error("FIREBASE_SERVICE_ACCOUNT tanımlı değil");
+  const token = await firebaseAccessToken();
+  const base = `https://firestore.googleapis.com/v1/projects/${sa.project_id}/databases/(default)/documents`;
+  const res = await fetch(`${base}/users/${encodeURIComponent(userID)}`, {
+    headers: { authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) return { isActive: false, expiresAt: null };
+  const doc = await res.json();
+  const sub = doc.fields?.subscription?.mapValue?.fields;
+  if (!sub) return { isActive: false, expiresAt: null };
+  const expiresAt = sub.expiresAt?.timestampValue || null;
+  const flag = sub.isActive?.booleanValue === true;
+  const notExpired = !expiresAt || new Date(expiresAt) > new Date();
+  return { isActive: flag && notExpired, expiresAt };
+}
+
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -662,6 +730,22 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    // Public: kullanıcının abonelik durumu — iOS Firestore'u okuyamazsa buraya sorar
+    const subMatch = url.pathname.match(/^\/api\/users\/([^/]+)\/subscription$/);
+    if (subMatch && req.method === "GET") {
+      if (!rateLimit(req, res, "sub", 120, 60 * 60_000)) return;
+      if (!firebaseServiceAccount()) {
+        send(res, 501, { error: "FIREBASE_SERVICE_ACCOUNT tanımlı değil" });
+        return;
+      }
+      try {
+        send(res, 200, await readSubscriptionOnServer(decodeURIComponent(subMatch[1])));
+      } catch (error) {
+        send(res, 502, { error: error.message });
+      }
+      return;
+    }
+
     // Uygulama görünüm ayarları — iOS app okur (public), panel yazar (admin)
     if (req.method === "GET" && url.pathname === "/api/config") {
       send(res, 200, await readConfig());
@@ -779,6 +863,17 @@ const server = createServer(async (req, res) => {
       const gifts = await readGifts();
       gifts.push(gift);
       await writeGifts(gifts);
+
+      // Premium hediyesi ise Firestore'a hemen yaz (gönder + aktivasyon)
+      if (gift.kind === "premium" && gift.premiumDays > 0 && firebaseServiceAccount()) {
+        try {
+          await grantPremiumOnServer(gift.userID, gift.premiumDays);
+        } catch (error) {
+          console.warn("Premium yazılamadı:", error.message);
+          // Hediye kaydı yazıldı, Firestore yazması başarısız olsa bile devam et
+        }
+      }
+
       send(res, 201, gift);
       return;
     }
@@ -817,16 +912,28 @@ const server = createServer(async (req, res) => {
       }
       const gifts = await readGifts();
       let updated = 0;
+      let premiumDays = 0;
       for (const gift of gifts) {
         // Sadece kendi userID'sine ait hediyeler claim edilebilir
         if (ids.includes(gift.id) && gift.userID === userID && !gift.claimed) {
           gift.claimed = true;
           gift.claimedAt = new Date().toISOString();
           updated += 1;
+          if (gift.kind === "premium") premiumDays += Number(gift.premiumDays) || 0;
         }
       }
       if (updated > 0) await writeGifts(gifts);
-      send(res, 200, { claimed: updated });
+
+      // Premium hediyesini SUNUCU yazar — cihazdan yazma Firestore kurallarına takılıyordu
+      let premium = null;
+      if (premiumDays > 0 && firebaseServiceAccount()) {
+        try {
+          premium = await grantPremiumOnServer(userID, premiumDays);
+        } catch (error) {
+          console.warn("Premium hediye yazılamadı:", error.message);
+        }
+      }
+      send(res, 200, { claimed: updated, premium });
       return;
     }
 
