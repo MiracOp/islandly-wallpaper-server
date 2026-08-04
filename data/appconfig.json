@@ -2,7 +2,7 @@
   "theme": "default",
   "snow": {
     "enabled": true,
-    "intensity": 25,
+    "intensity": 105,
     "speed": 2.1,
     "size": 0.7
   },
@@ -27,7 +27,7 @@
   },
   "effect": {
     "type": "snow",
-    "intensity": 25,
+    "intensity": 105,
     "speed": 2.1,
     "size": 0.7
   },
