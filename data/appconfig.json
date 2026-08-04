@@ -2,9 +2,9 @@
   "theme": "default",
   "snow": {
     "enabled": true,
-    "intensity": 105,
-    "speed": 2.1,
-    "size": 2.3
+    "intensity": 40,
+    "speed": 0.6,
+    "size": 0.9
   },
   "announcement": {
     "enabled": false,
@@ -27,9 +27,9 @@
   },
   "effect": {
     "type": "snow",
-    "intensity": 105,
-    "speed": 2.1,
-    "size": 2.3
+    "intensity": 40,
+    "speed": 0.6,
+    "size": 0.9
   },
   "reviewPromoBanner": {
     "enabled": true,
