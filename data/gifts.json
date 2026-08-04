@@ -88,5 +88,15 @@
     "claimed": true,
     "claimedAt": "2026-08-04T16:39:21.218Z",
     "premiumDays": 30
+  },
+  {
+    "id": "ca8f78e7-7bdb-4db5-b854-f719979f615d",
+    "userID": "google:117414480036618079841",
+    "kind": "premium",
+    "note": "",
+    "createdAt": "2026-08-04T18:00:27.446Z",
+    "claimed": false,
+    "claimedAt": null,
+    "premiumDays": 30
   }
 ]
