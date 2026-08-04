@@ -841,6 +841,91 @@
     </section>
 
     <section class="panel" style="position:static">
+      <div class="panel-head">
+        <h2>⭐ Review Kampanyası <span class="live-chip off" id="reviewChip"><span class="dot"></span><span id="reviewChipText">KAPALI</span></span></h2>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="t-label">⭐ Review banner'ı</div>
+          <div class="t-hint">Premium olmayan kullanıcılara app açılışta gösterilir</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="reviewEnabled">
+          <span class="track"></span>
+        </label>
+      </div>
+
+      <div class="field">
+        <label for="reviewDays">Premium Gün Sayısı</label>
+        <input type="number" id="reviewDays" min="1" max="365" value="3" placeholder="3">
+      </div>
+
+      <div class="field" style="margin-top:20px">
+        <label style="font-weight:600">Tercümeler (Her dil için özel mesaj)</label>
+      </div>
+
+      <div class="field">
+        <label for="review_en">🇬🇧 English</label>
+        <input type="text" id="review_en" maxlength="100" placeholder="Rate us 5 stars and get 3 days free premium!" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="review_tr">🇹🇷 Türkçe</label>
+        <input type="text" id="review_tr" maxlength="100" placeholder="5 Yıldız atarsanız 3 günlük deneme alın!" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="review_de">🇩🇪 Deutsch</label>
+        <input type="text" id="review_de" maxlength="100" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="review_es">🇪🇸 Español</label>
+        <input type="text" id="review_es" maxlength="100" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="review_fr">🇫🇷 Français</label>
+        <input type="text" id="review_fr" maxlength="100" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="review_it">🇮🇹 Italiano</label>
+        <input type="text" id="review_it" maxlength="100" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="review_nl">🇳🇱 Nederlands</label>
+        <input type="text" id="review_nl" maxlength="100" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="review_ja">🇯🇵 日本語</label>
+        <input type="text" id="review_ja" maxlength="100" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="review_pt">🇧🇷 Português</label>
+        <input type="text" id="review_pt" maxlength="100" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="review_ru">🇷🇺 Русский</label>
+        <input type="text" id="review_ru" maxlength="100" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="review_hi">🇮🇳 हिन्दी</label>
+        <input type="text" id="review_hi" maxlength="100" autocomplete="off">
+      </div>
+
+      <div class="form-actions" style="margin-top:24px">
+        <button class="btn btn-primary" id="saveReviewBtn">⭐ Kampanyayı Kaydet</button>
+      </div>
+    </section>
+
+    <section class="panel" style="position:static">
       <div class="panel-head"><h2>Önizleme</h2></div>
       <div id="annPreview" style="border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(124,92,255,.25),rgba(124,92,255,.08))">
         <span id="annPvEmoji" style="font-size:24px">📣</span>
@@ -1816,6 +1901,79 @@ $("saveAnnBtn").onclick = async () => {
   } catch { toast("Bağlantı hatası", "err"); }
   btn.disabled = false; btn.textContent = "📣 Duyuruyu Yayınla";
 };
+
+// Review banner load
+async function loadReviewBanner() {
+  try {
+    const res = await fetch("/api/config", { headers: headers() });
+    if (!res.ok) return;
+    cfg = await res.json();
+    const r = cfg.reviewPromoBanner || {};
+    $("reviewEnabled").checked = r.enabled || false;
+    $("reviewDays").value = r.premiumDays || 3;
+    (r.translations || {}).en && ($("review_en").value = r.translations.en);
+    (r.translations || {}).tr && ($("review_tr").value = r.translations.tr);
+    (r.translations || {}).de && ($("review_de").value = r.translations.de);
+    (r.translations || {}).es && ($("review_es").value = r.translations.es);
+    (r.translations || {}).fr && ($("review_fr").value = r.translations.fr);
+    (r.translations || {}).it && ($("review_it").value = r.translations.it);
+    (r.translations || {}).nl && ($("review_nl").value = r.translations.nl);
+    (r.translations || {}).ja && ($("review_ja").value = r.translations.ja);
+    ($("review_pt").value = (r.translations || {})["pt-BR"] || "");
+    (r.translations || {}).ru && ($("review_ru").value = r.translations.ru);
+    (r.translations || {}).hi && ($("review_hi").value = r.translations.hi);
+    updateReviewPreview();
+  } catch { /* fail silently */ }
+}
+
+function updateReviewPreview() {
+  const on = $("reviewEnabled").checked;
+  $("reviewChip").className = "live-chip " + (on ? "on" : "off");
+  $("reviewChipText").textContent = on ? "AKTİF (" + $("reviewDays").value + " gün)" : "KAPALI";
+}
+
+$("reviewEnabled").addEventListener("change", updateReviewPreview);
+$("reviewDays").addEventListener("input", updateReviewPreview);
+
+$("saveReviewBtn").onclick = async () => {
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
+  const btn = $("saveReviewBtn");
+  btn.disabled = true; btn.textContent = "Kaydediliyor…";
+  try {
+    const reviewPromoBanner = {
+      enabled: $("reviewEnabled").checked,
+      premiumDays: Number($("reviewDays").value),
+      translations: {
+        en: $("review_en").value.trim(),
+        tr: $("review_tr").value.trim(),
+        de: $("review_de").value.trim(),
+        es: $("review_es").value.trim(),
+        fr: $("review_fr").value.trim(),
+        it: $("review_it").value.trim(),
+        nl: $("review_nl").value.trim(),
+        ja: $("review_ja").value.trim(),
+        "pt-BR": $("review_pt").value.trim(),
+        ru: $("review_ru").value.trim(),
+        hi: $("review_hi").value.trim()
+      }
+    };
+    const res = await fetch("/api/config", {
+      method: "PUT", headers: headers(),
+      body: JSON.stringify({ reviewPromoBanner })
+    });
+    if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
+    else if (!res.ok) toast("Kaydedilemedi", "err");
+    else {
+      cfg = await res.json();
+      updateReviewPreview();
+      toast(reviewPromoBanner.enabled ? "⭐ Review kampanyası aktif!" : "Kampanya kapatıldı ✓");
+    }
+  } catch { toast("Bağlantı hatası", "err"); }
+  btn.disabled = false; btn.textContent = "⭐ Kampanyayı Kaydet";
+};
+
+// Load on page load
+loadReviewBanner();
 
 /* ── Temalar ── */
 const APP_CATEGORIES = ["Premium","Pixel","Marvel","Pets","Pastel","Classic","Animated",

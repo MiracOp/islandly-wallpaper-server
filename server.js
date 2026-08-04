@@ -52,7 +52,25 @@ const DEFAULT_CONFIG = {
     yearlyProductID: ""      // boş = app'teki varsayılan ID
   },
   // Ekran efekti — kar modunun genellenmişi (none | snow | confetti | hearts | leaves)
-  effect: { type: "none", intensity: 60, speed: 1, size: 1 }
+  effect: { type: "none", intensity: 60, speed: 1, size: 1 },
+  // Premium olmayan kullanıcılara review banner kampanyası
+  reviewPromoBanner: {
+    enabled: false,
+    premiumDays: 3,
+    translations: {
+      en: "Rate us 5 stars and get 3 days free premium!",
+      tr: "5 Yıldız atarsanız 3 günlük deneme alın!",
+      de: "",
+      es: "",
+      fr: "",
+      it: "",
+      nl: "",
+      ja: "",
+      "pt-BR": "",
+      ru: "",
+      hi: ""
+    }
+  }
 };
 
 // ── Kullanıcı girişi ─────────────────────────────────────────
@@ -377,7 +395,12 @@ async function readConfig() {
       announcement: { ...DEFAULT_CONFIG.announcement, ...(raw.announcement || {}) },
       themes: { ...DEFAULT_CONFIG.themes, ...(raw.themes || {}) },
       paywall: { ...DEFAULT_CONFIG.paywall, ...(raw.paywall || {}) },
-      effect: { ...DEFAULT_CONFIG.effect, ...(raw.effect || {}) }
+      effect: { ...DEFAULT_CONFIG.effect, ...(raw.effect || {}) },
+      reviewPromoBanner: {
+        ...DEFAULT_CONFIG.reviewPromoBanner,
+        ...(raw.reviewPromoBanner || {}),
+        translations: { ...DEFAULT_CONFIG.reviewPromoBanner.translations, ...(raw.reviewPromoBanner?.translations || {}) }
+      }
     };
   } catch {
     return DEFAULT_CONFIG;
