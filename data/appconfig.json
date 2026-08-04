@@ -8,7 +8,7 @@
   },
   "announcement": {
     "enabled": false,
-    "id": "",
+    "id": "ann-1785868857537",
     "emoji": "📣",
     "title": "",
     "message": "",
@@ -30,5 +30,22 @@
     "intensity": 25,
     "speed": 2.1,
     "size": 0.7
+  },
+  "reviewPromoBanner": {
+    "enabled": false,
+    "premiumDays": 3,
+    "translations": {
+      "en": "Rate us 5 stars and get 3 days free premium!",
+      "tr": "5 Yıldız atarsanız 3 günlük deneme alın!",
+      "de": "",
+      "es": "",
+      "fr": "",
+      "it": "",
+      "nl": "",
+      "ja": "",
+      "pt-BR": "",
+      "ru": "",
+      "hi": ""
+    }
   }
 }
