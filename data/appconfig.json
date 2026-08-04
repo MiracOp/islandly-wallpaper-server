@@ -32,7 +32,7 @@
     "size": 0.7
   },
   "reviewPromoBanner": {
-    "enabled": false,
+    "enabled": true,
     "premiumDays": 3,
     "translations": {
       "en": "Rate us 5 stars and get 3 days free premium!",
