@@ -7,13 +7,13 @@
     "size": 0.7
   },
   "announcement": {
-    "enabled": false,
-    "id": "ann-1785868857537",
+    "enabled": true,
+    "id": "ann-1785868891086",
     "emoji": "📣",
-    "title": "",
-    "message": "",
-    "ctaText": "",
-    "ctaAction": "none"
+    "title": "deneme",
+    "message": "deneme",
+    "ctaText": "paywall",
+    "ctaAction": "paywall"
   },
   "themes": {
     "freeThemeNames": [],
