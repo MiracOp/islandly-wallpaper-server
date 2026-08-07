@@ -24,6 +24,8 @@ const GIFTS_FILE = process.env.GIFTS_FILE || join(__dirname, "data", "gifts.json
 const GITHUB_GIFTS_PATH = "data/gifts.json";
 const EVENTS_FILE = process.env.EVENTS_FILE || join(__dirname, "data", "events.json");
 const GITHUB_EVENTS_PATH = "data/events.json";
+const PUSH_FILE = process.env.PUSH_FILE || join(__dirname, "data", "push.json");
+const GITHUB_PUSH_PATH = "data/push.json";
 
 // Uygulama görünüm ayarları (kar modu vb.) — panelden yönetilir
 const DEFAULT_CONFIG = {
@@ -48,6 +50,9 @@ const DEFAULT_CONFIG = {
   // Paywall kontrolü — trial ve fiyat seti (A/B testi için product ID override)
   paywall: {
     trialEnabled: true,
+    // Paywall açılınca gelen "🎁 Free Trial Unlocked!" tanıtım animasyonu.
+    // trialEnabled'dan bağımsız: deneme açık kalıp animasyon kapatılabilir.
+    trialAnimationEnabled: true,
     monthlyProductID: "",    // boş = app'teki varsayılan ID
     yearlyProductID: ""      // boş = app'teki varsayılan ID
   },
@@ -247,24 +252,30 @@ async function fetchRevenueCatOverview({ force = false } = {}) {
 // JSON'un TAMAMI yapıştırılır. Service account Firestore kurallarını bypass
 // eder — kurallar kilitli kalabilir (güvenli), yazma sunucudan yapılır.
 const FIREBASE_SERVICE_ACCOUNT = process.env.FIREBASE_SERVICE_ACCOUNT || "";
-let fbTokenCache = { token: "", exp: 0 };
+
+// Firestore ve FCM farklı OAuth kapsamları ister — her kapsam için ayrı token cache
+const SCOPE_FIRESTORE = "https://www.googleapis.com/auth/datastore";
+const SCOPE_MESSAGING = "https://www.googleapis.com/auth/firebase.messaging";
+const fbTokenCaches = new Map(); // scope -> { token, exp }
 
 function firebaseServiceAccount() {
   if (!FIREBASE_SERVICE_ACCOUNT) return null;
   try { return JSON.parse(FIREBASE_SERVICE_ACCOUNT); } catch { return null; }
 }
 
-async function firebaseAccessToken() {
+async function firebaseAccessToken(scope = SCOPE_FIRESTORE) {
   const sa = firebaseServiceAccount();
   if (!sa) throw new Error("FIREBASE_SERVICE_ACCOUNT tanımlı değil veya geçersiz JSON");
-  if (fbTokenCache.token && Date.now() < fbTokenCache.exp - 60_000) return fbTokenCache.token;
+
+  const cached = fbTokenCaches.get(scope);
+  if (cached && Date.now() < cached.exp - 60_000) return cached.token;
 
   const { createSign } = await import("node:crypto");
   const now = Math.floor(Date.now() / 1000);
   const b64 = (obj) => Buffer.from(JSON.stringify(obj)).toString("base64url");
   const unsigned = `${b64({ alg: "RS256", typ: "JWT" })}.${b64({
     iss: sa.client_email,
-    scope: "https://www.googleapis.com/auth/datastore",
+    scope,
     aud: "https://oauth2.googleapis.com/token",
     iat: now,
     exp: now + 3600
@@ -280,8 +291,162 @@ async function firebaseAccessToken() {
   });
   if (!res.ok) throw new Error(`Google token alınamadı: ${await res.text()}`);
   const json = await res.json();
-  fbTokenCache = { token: json.access_token, exp: Date.now() + json.expires_in * 1000 };
-  return fbTokenCache.token;
+  fbTokenCaches.set(scope, { token: json.access_token, exp: Date.now() + json.expires_in * 1000 });
+  return json.access_token;
+}
+
+// ── Push bildirimi (FCM HTTP v1) ─────────────────────────────
+// Ek kuruluma gerek yok: mevcut FIREBASE_SERVICE_ACCOUNT kullanılır,
+// sadece OAuth kapsamı farklı (firebase.messaging).
+//
+// ⚠️ FCM v1'de çoklu gönderim (batch) uç noktası KAPATILDI (21.06.2024).
+// Her cihaza ayrı HTTP isteği gitmek zorunda — bu yüzden sınırlı
+// eşzamanlılıkla döngü kuruyoruz.
+
+const FCM_CONCURRENCY = 20;
+
+/** Tek cihaza bildirim gönderir. Dönen kod token silinmeli mi belirtir. */
+async function sendPushToToken(accessToken, projectID, token, { title, body, deepLink }) {
+  const message = {
+    token,
+    notification: { title, body },
+    apns: {
+      headers: { "apns-priority": "10", "apns-push-type": "alert" },
+      payload: {
+        // aps.alert'i açıkça yazıyoruz: apns.payload varken FCM'in generic
+        // notification alanlarını ezme ihtimali dokümanda muğlak bırakılmış.
+        aps: { alert: { title, body }, sound: "default" }
+      }
+    }
+  };
+  if (deepLink) message.data = { deepLink: String(deepLink) };
+
+  const res = await fetch(
+    `https://fcm.googleapis.com/v1/projects/${encodeURIComponent(projectID)}/messages:send`,
+    {
+      method: "POST",
+      headers: { authorization: `Bearer ${accessToken}`, "content-type": "application/json" },
+      body: JSON.stringify({ message })
+    }
+  );
+
+  if (res.ok) return { ok: true };
+
+  const json = await res.json().catch(() => ({}));
+  const err = json.error || {};
+  // FCM'e özgü hata kodu details[] içinde FcmError tipinde gelir;
+  // yoksa error.status'a düşülür (Firebase Admin SDK'nın yaptığı gibi).
+  const fcmDetail = (err.details || []).find(
+    (d) => String(d["@type"] || "").endsWith("google.firebase.fcm.v1.FcmError")
+  );
+  const code = fcmDetail?.errorCode || err.status || `HTTP_${res.status}`;
+
+  // UNREGISTERED → token kesin ölü.
+  // INVALID_ARGUMENT → SADECE FcmError tipindeyse token bozuk demektir;
+  // BadRequest tipindeyse bizim payload'ımız hatalıdır, token'a dokunma.
+  const dead =
+    code === "UNREGISTERED" ||
+    code === "UNREGISTERED_FID" ||
+    (code === "INVALID_ARGUMENT" && !!fcmDetail);
+
+  return { ok: false, code, dead, message: err.message || "" };
+}
+
+/** Kullanıcı belgesinden fcmToken alanını siler (ölü token temizliği). */
+async function deleteFcmToken(accessToken, projectID, userID) {
+  const base = `https://firestore.googleapis.com/v1/projects/${projectID}/databases/(default)/documents`;
+  await fetch(
+    `${base}/users/${encodeURIComponent(userID)}?updateMask.fieldPaths=fcmToken`,
+    {
+      method: "PATCH",
+      headers: { authorization: `Bearer ${accessToken}`, "content-type": "application/json" },
+      body: JSON.stringify({ fields: {} })
+    }
+  ).catch(() => {});
+}
+
+/**
+ * Segmentteki tüm kullanıcılara push gönderir.
+ * target: all | premium | nonpremium
+ */
+async function sendPushCampaign({ title, body, target = "all", deepLink = "" }) {
+  const sa = firebaseServiceAccount();
+  if (!sa) throw new Error("FIREBASE_SERVICE_ACCOUNT tanımlı değil");
+
+  const cleanTitle = String(title || "").trim().slice(0, 120);
+  const cleanBody = String(body || "").trim().slice(0, 400);
+  if (!cleanTitle || !cleanBody) throw new Error("Başlık ve mesaj zorunlu");
+
+  const users = await fetchFirebaseUsers();
+  const now = new Date();
+  const isPremium = (u) => {
+    const sub = u.subscription;
+    if (!sub || sub.isActive !== true) return false;
+    const pid = String(sub.productID || "");
+    if (REVOKED_PRODUCT_PREFIXES.some((p) => pid.startsWith(p))) return false;
+    const exp = sub.expiresAt ? new Date(sub.expiresAt) : null;
+    return !exp || exp > now;
+  };
+
+  const targets = users.filter((u) => {
+    if (!u.fcmToken || typeof u.fcmToken !== "string") return false;
+    if (target === "premium") return isPremium(u);
+    if (target === "nonpremium") return !isPremium(u);
+    return true;
+  });
+
+  if (!targets.length) {
+    return { sent: 0, failed: 0, removed: 0, total: 0, target, noTokens: true };
+  }
+
+  const messagingToken = await firebaseAccessToken(SCOPE_MESSAGING);
+  const firestoreToken = await firebaseAccessToken(SCOPE_FIRESTORE);
+
+  let sent = 0, failed = 0, removed = 0;
+  const errorCounts = {};
+  let cursor = 0;
+
+  async function worker() {
+    while (cursor < targets.length) {
+      const user = targets[cursor++];
+      try {
+        const r = await sendPushToToken(messagingToken, sa.project_id, user.fcmToken, {
+          title: cleanTitle, body: cleanBody, deepLink
+        });
+        if (r.ok) { sent += 1; continue; }
+        failed += 1;
+        errorCounts[r.code] = (errorCounts[r.code] || 0) + 1;
+        if (r.dead) {
+          await deleteFcmToken(firestoreToken, sa.project_id, user.docID);
+          removed += 1;
+        }
+      } catch (error) {
+        failed += 1;
+        errorCounts.NETWORK = (errorCounts.NETWORK || 0) + 1;
+      }
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(FCM_CONCURRENCY, targets.length) }, worker)
+  );
+
+  const record = {
+    id: randomUUID(),
+    title: cleanTitle,
+    body: cleanBody,
+    target,
+    deepLink,
+    total: targets.length,
+    sent, failed, removed,
+    errors: errorCounts,
+    sentAt: new Date().toISOString()
+  };
+  const history = await readPushHistory();
+  history.unshift(record);
+  await writePushHistory(history.slice(0, 100));
+
+  return record;
 }
 
 /** Firestore'un tipli değerlerini sade JS değerine çevirir. */
@@ -510,6 +675,24 @@ async function writeGifts(items) {
   await writeFile(GIFTS_FILE, `${JSON.stringify(items, null, 2)}\n`, "utf8");
   pushFileToGitHub(GITHUB_GIFTS_PATH, items,
     "chore: update gifts via admin panel [skip railway]"); // arka planda
+}
+
+// ── Push gönderim geçmişi ────────────────────────────────────
+// Son 100 kampanya tutulur — panelde "ne göndermiştim" listesi.
+
+async function readPushHistory() {
+  try {
+    const parsed = JSON.parse(await readFile(PUSH_FILE, "utf8"));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+async function writePushHistory(items) {
+  await writeFile(PUSH_FILE, `${JSON.stringify(items, null, 2)}\n`, "utf8");
+  pushFileToGitHub(GITHUB_PUSH_PATH, items,
+    "chore: update push history via admin panel [skip railway]");
 }
 
 // ── Dönüşüm olayları (paywall istatistikleri) ────────────────
@@ -895,6 +1078,60 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    // ── Push bildirimi ──────────────────────────────────────
+    // Admin: segmentteki kullanıcılara push gönder
+    if (req.method === "POST" && url.pathname === "/api/push") {
+      if (!requireAdmin(req, res)) return;
+      if (!firebaseServiceAccount()) {
+        send(res, 501, { error: "Push için FIREBASE_SERVICE_ACCOUNT gerekli" });
+        return;
+      }
+      try {
+        send(res, 200, await sendPushCampaign(await parseBody(req)));
+      } catch (error) {
+        send(res, 400, { error: error.message });
+      }
+      return;
+    }
+
+    // Admin: gönderim geçmişi
+    if (req.method === "GET" && url.pathname === "/api/push") {
+      if (!requireAdmin(req, res)) return;
+      send(res, 200, await readPushHistory());
+      return;
+    }
+
+    // Admin: kaç kullanıcıya ulaşılabilir (göndermeden önce önizleme)
+    if (req.method === "GET" && url.pathname === "/api/push/reach") {
+      if (!requireAdmin(req, res)) return;
+      if (!firebaseServiceAccount()) {
+        send(res, 501, { error: "FIREBASE_SERVICE_ACCOUNT tanımlı değil" });
+        return;
+      }
+      try {
+        const users = await fetchFirebaseUsers();
+        const now = new Date();
+        const isPremium = (u) => {
+          const sub = u.subscription;
+          if (!sub || sub.isActive !== true) return false;
+          const pid = String(sub.productID || "");
+          if (REVOKED_PRODUCT_PREFIXES.some((p) => pid.startsWith(p))) return false;
+          const exp = sub.expiresAt ? new Date(sub.expiresAt) : null;
+          return !exp || exp > now;
+        };
+        const withToken = users.filter((u) => typeof u.fcmToken === "string" && u.fcmToken);
+        send(res, 200, {
+          totalUsers: users.length,
+          all: withToken.length,
+          premium: withToken.filter(isPremium).length,
+          nonpremium: withToken.filter((u) => !isPremium(u)).length
+        });
+      } catch (error) {
+        send(res, 502, { error: error.message });
+      }
+      return;
+    }
+
     // Admin: RevenueCat gelir metrikleri (panel Gelir sekmesi)
     // ?force=1 → önbelleği atla
     if (req.method === "GET" && url.pathname === "/api/revenue") {
@@ -1114,6 +1351,7 @@ await pullFileFromGitHub(GITHUB_DATA_PATH, DATA_FILE);
 await pullFileFromGitHub(GITHUB_CONFIG_PATH, CONFIG_FILE);
 await pullFileFromGitHub(GITHUB_GIFTS_PATH, GIFTS_FILE);
 await pullFileFromGitHub(GITHUB_EVENTS_PATH, EVENTS_FILE);
+await pullFileFromGitHub(GITHUB_PUSH_PATH, PUSH_FILE);
 
 if (ADMIN_TOKEN === "change-me") {
   console.warn("⚠️  ADMIN_TOKEN varsayılan değerde! Railway'de güçlü bir ADMIN_TOKEN ayarla.");

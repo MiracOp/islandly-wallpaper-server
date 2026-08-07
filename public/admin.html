@@ -582,6 +582,7 @@
   <button class="page-tab" data-page="themes">🎨 Temalar</button>
   <button class="page-tab" data-page="paywall">💰 Paywall</button>
   <button class="page-tab" data-page="revenue">💵 Gelir</button>
+  <button class="page-tab" data-page="push">🔔 Push</button>
 </nav>
 
 <!-- ═══ Hediyeler ═══ -->
@@ -996,6 +997,17 @@
         </label>
       </div>
 
+      <div class="toggle-row">
+        <div>
+          <div class="t-label">✨ Deneme tanıtım animasyonu</div>
+          <div class="t-hint">Paywall açılınca gelen "🎁 Free Trial Unlocked!" ekranı. Kapatınca deneme devam eder, sadece animasyon gösterilmez.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="pwTrialAnim">
+          <span class="track"></span>
+        </label>
+      </div>
+
       <div class="field">
         <label for="pwMonthly">Aylık ürün ID (boş = uygulamadaki varsayılan)</label>
         <input type="text" id="pwMonthly" placeholder="com.dynamicisland.premium.monthly" autocomplete="off">
@@ -1059,6 +1071,79 @@
         ve sunucuya yazılmış abonelikler görünür. Kaldırılan hoşgeldin hediyeleri
         (<code>welcome.*</code>) sayılmaz.
       </p>
+    </section>
+
+  </div>
+</div>
+
+<!-- ═══ Push ═══ -->
+<div class="page" id="page-push">
+  <div class="gifts-layout">
+
+    <section class="panel" style="position:static">
+      <div class="panel-head">
+        <h2>🔔 Bildirim Gönder</h2>
+      </div>
+
+      <div class="field">
+        <label for="pushTitle">Başlık</label>
+        <input type="text" id="pushTitle" maxlength="120" placeholder="Yeni temalar geldi! 🎨" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="pushBody">Mesaj</label>
+        <input type="text" id="pushBody" maxlength="400" placeholder="12 yeni Dynamic Island teması seni bekliyor." autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="pushTarget">Kime gidecek</label>
+        <select id="pushTarget">
+          <option value="all">👥 Herkes</option>
+          <option value="nonpremium">🆓 Premium olmayanlar</option>
+          <option value="premium">⭐ Premium olanlar</option>
+        </select>
+        <div class="t-hint" id="pushReach" style="margin-top:8px">Ulaşılabilir cihaz sayısı hesaplanıyor…</div>
+      </div>
+
+      <div class="field">
+        <label for="pushDeepLink">Tıklayınca nereye gitsin (opsiyonel)</label>
+        <select id="pushDeepLink">
+          <option value="">Uygulamayı aç (varsayılan)</option>
+          <option value="themes">🎨 Temalar</option>
+          <option value="pets">🐾 Pet ekranı</option>
+          <option value="paywall">💰 Paywall</option>
+        </select>
+      </div>
+
+      <!-- Bildirim önizlemesi -->
+      <div style="margin-top:22px">
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px">Önizleme</div>
+        <div style="background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:16px;padding:12px 14px;display:flex;gap:11px;align-items:flex-start;backdrop-filter:blur(8px)">
+          <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#5b7cff,#8b5bff);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:17px">🏝</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12.5px;font-weight:700;color:#fff;word-break:break-word" id="pushPrevTitle">Başlık</div>
+            <div style="font-size:12.5px;color:rgba(255,255,255,0.75);word-break:break-word;margin-top:1px" id="pushPrevBody">Mesaj metni burada görünecek</div>
+          </div>
+          <div style="font-size:10.5px;color:var(--text-dim);flex-shrink:0">şimdi</div>
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-top:24px">
+        <button class="btn btn-primary" id="sendPushBtn">🔔 Bildirimi Gönder</button>
+      </div>
+
+      <p style="font-size:11px;color:var(--text-dim);margin-top:12px;line-height:1.5">
+        ⚠️ Gönderilen bildirim <b>geri alınamaz</b>. Göndermeden önce önizlemeyi kontrol et.
+        Sadece bildirime izin vermiş ve uygulamayı güncellemiş kullanıcılara ulaşır.
+      </p>
+    </section>
+
+    <section class="panel" style="position:static">
+      <div class="panel-head">
+        <h2>📜 Gönderim Geçmişi</h2>
+        <button class="btn" id="refreshPushBtn">↻</button>
+      </div>
+      <div id="pushHistory"><div class="gift-empty">Yükleniyor…</div></div>
     </section>
 
   </div>
@@ -1480,8 +1565,111 @@ document.querySelectorAll(".page-tab").forEach(tab => {
     if (tab.dataset.page === "users") loadUsers();
     if (tab.dataset.page === "paywall") loadConversions();
     if (tab.dataset.page === "revenue") { loadRevenue(); loadExpiry(); }
+    if (tab.dataset.page === "push") { loadPushReach(); loadPushHistory(); }
   };
 });
+
+/* ── 🔔 Push bildirimi ── */
+
+function updatePushPreview() {
+  $("pushPrevTitle").textContent = $("pushTitle").value.trim() || "Başlık";
+  $("pushPrevBody").textContent = $("pushBody").value.trim() || "Mesaj metni burada görünecek";
+}
+$("pushTitle").addEventListener("input", updatePushPreview);
+$("pushBody").addEventListener("input", updatePushPreview);
+
+let pushReachData = null;
+
+async function loadPushReach() {
+  if (!SESSION) { $("pushReach").textContent = "Önce giriş yap 🔑"; return; }
+  try {
+    const res = await fetch("/api/push/reach", { headers: headers() });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) { $("pushReach").textContent = json.error || "Hesaplanamadı"; return; }
+    pushReachData = json;
+    renderPushReach();
+  } catch {
+    $("pushReach").textContent = "Bağlantı hatası";
+  }
+}
+
+function renderPushReach() {
+  if (!pushReachData) return;
+  const t = $("pushTarget").value;
+  const n = pushReachData[t] ?? 0;
+  const extra = pushReachData.all === 0
+    ? " — henüz hiçbir cihaz bildirim için kayıtlı değil (yeni sürüm yayınlanmadan normal)"
+    : "";
+  $("pushReach").textContent =
+    `${n} cihaza ulaşır (toplam ${pushReachData.totalUsers} kullanıcı, ${pushReachData.all} tanesi bildirime açık)${extra}`;
+}
+$("pushTarget").addEventListener("change", renderPushReach);
+
+$("sendPushBtn").onclick = async () => {
+  const title = $("pushTitle").value.trim();
+  const body = $("pushBody").value.trim();
+  if (!title || !body) { toast("Başlık ve mesaj zorunlu", "err"); return; }
+
+  const t = $("pushTarget").value;
+  const n = pushReachData?.[t] ?? "?";
+  const label = { all: "TÜM kullanıcılara", nonpremium: "premium olmayanlara", premium: "premium olanlara" }[t];
+  if (!confirm(`"${title}" bildirimi ${label} (${n} cihaz) gönderilecek.\n\nBu işlem geri alınamaz. Emin misin?`)) return;
+
+  const btn = $("sendPushBtn");
+  btn.disabled = true; btn.textContent = "Gönderiliyor…";
+  try {
+    const res = await fetch("/api/push", {
+      method: "POST", headers: headers(),
+      body: JSON.stringify({ title, body, target: t, deepLink: $("pushDeepLink").value })
+    });
+    const json = await res.json().catch(() => ({}));
+    if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
+    else if (!res.ok) toast(json.error || "Gönderilemedi", "err");
+    else if (json.noTokens) toast("Bu segmentte bildirime açık cihaz yok", "err");
+    else {
+      toast(`🔔 ${json.sent} cihaza ulaştı${json.failed ? ` · ${json.failed} başarısız` : ""}`);
+      $("pushTitle").value = ""; $("pushBody").value = "";
+      updatePushPreview();
+      loadPushHistory(); loadPushReach();
+    }
+  } catch { toast("Bağlantı hatası", "err"); }
+  btn.disabled = false; btn.textContent = "🔔 Bildirimi Gönder";
+};
+
+const PUSH_TARGET_LABEL = { all: "Herkes", nonpremium: "Premium olmayanlar", premium: "Premium olanlar" };
+
+async function loadPushHistory() {
+  if (!SESSION) { $("pushHistory").innerHTML = '<div class="gift-empty">Önce giriş yap 🔑</div>'; return; }
+  try {
+    const res = await fetch("/api/push", { headers: headers() });
+    if (!res.ok) { $("pushHistory").innerHTML = '<div class="gift-empty">Geçmiş alınamadı</div>'; return; }
+    const list = await res.json();
+    if (!list.length) {
+      $("pushHistory").innerHTML = '<div class="gift-empty">Henüz bildirim gönderilmedi 🔔</div>';
+      return;
+    }
+    $("pushHistory").innerHTML = list.map(p => {
+      const when = p.sentAt ? new Date(p.sentAt).toLocaleString("tr-TR") : "";
+      const errs = Object.entries(p.errors || {});
+      return `<div style="padding:11px 13px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;background:var(--card)">
+        <div style="font-weight:700;font-size:13.5px">${esc(p.title || "")}</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:2px">${esc(p.body || "")}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:10.5px">
+          <span style="background:rgba(255,255,255,0.07);border-radius:6px;padding:2px 7px">${esc(PUSH_TARGET_LABEL[p.target] || p.target || "")}</span>
+          <span style="background:rgba(74,222,128,0.15);color:#4ade80;border-radius:6px;padding:2px 7px">${p.sent ?? 0} ulaştı</span>
+          ${p.failed ? `<span style="background:rgba(248,113,113,0.15);color:#f87171;border-radius:6px;padding:2px 7px">${p.failed} başarısız</span>` : ""}
+          ${p.removed ? `<span style="background:rgba(255,255,255,0.07);border-radius:6px;padding:2px 7px">${p.removed} ölü token silindi</span>` : ""}
+          <span style="color:var(--text-dim);padding:2px 0">${esc(when)}</span>
+        </div>
+        ${errs.length ? `<div style="font-size:10.5px;color:var(--text-dim);margin-top:6px">Hatalar: ${errs.map(([k, v]) => `${esc(k)}×${v}`).join(", ")}</div>` : ""}
+      </div>`;
+    }).join("");
+  } catch {
+    $("pushHistory").innerHTML = '<div class="gift-empty">Bağlantı hatası</div>';
+  }
+}
+
+$("refreshPushBtn").onclick = () => { loadPushHistory(); loadPushReach(); };
 
 /* ── 💵 Gelir (RevenueCat) ── */
 
@@ -2219,6 +2407,7 @@ $("saveThemesBtn").onclick = async () => {
 function applyPaywallUI() {
   const p = cfg.paywall || {};
   $("pwTrial").checked = p.trialEnabled !== false;
+  $("pwTrialAnim").checked = p.trialAnimationEnabled !== false;
   $("pwMonthly").value = p.monthlyProductID || "";
   $("pwYearly").value = p.yearlyProductID || "";
 }
@@ -2230,6 +2419,7 @@ $("savePaywallBtn").onclick = async () => {
   try {
     const paywall = {
       trialEnabled: $("pwTrial").checked,
+      trialAnimationEnabled: $("pwTrialAnim").checked,
       monthlyProductID: $("pwMonthly").value.trim(),
       yearlyProductID: $("pwYearly").value.trim()
     };
