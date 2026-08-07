@@ -21,7 +21,8 @@
     "disabledCategories": []
   },
   "paywall": {
-    "trialEnabled": true,
+    "trialEnabled": false,
+    "trialAnimationEnabled": false,
     "monthlyProductID": "",
     "yearlyProductID": ""
   },
