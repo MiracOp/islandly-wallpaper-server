@@ -53,13 +53,14 @@ const DEFAULT_CONFIG = {
   },
   // Ekran efekti — kar modunun genellenmişi (none | snow | confetti | hearts | leaves)
   effect: { type: "none", intensity: 60, speed: 1, size: 1 },
-  // Premium olmayan kullanıcılara review banner kampanyası
+  // Premium olmayan kullanıcılara review banner kampanyası.
+  // ⚠️ Bu banner premium VERMEZ — sadece App Store değerlendirme penceresini açar.
   reviewPromoBanner: {
     enabled: false,
-    premiumDays: 3,
+    premiumDays: 0,
     translations: {
-      en: "Rate us 5 stars and get 3 days free premium!",
-      tr: "5 Yıldız atarsanız 3 günlük deneme alın!",
+      en: "Enjoying the app? Rate us 5 stars!",
+      tr: "Uygulamayı beğendin mi? 5 yıldız ver!",
       de: "",
       es: "",
       fr: "",
@@ -171,6 +172,73 @@ async function pushFileToGitHub(repoPath, data, message) {
   } catch (error) {
     console.warn("GitHub push failed:", error.message);
   }
+}
+
+// ── RevenueCat (gelir metrikleri) ────────────────────────────
+// Railway'de tanımlanacak env değişkenleri:
+//   REVENUECAT_V2_KEY     → RevenueCat → Project settings → API keys → + New,
+//                           Version: V2, izin: charts_metrics:overview:read
+//                           ("sk_" ile başlar — GİZLİ, app'teki appl_ anahtarı DEĞİL)
+//   REVENUECAT_PROJECT_ID → RevenueCat → Project settings → General → Project ID
+//                           ("proj" ile başlar)
+const REVENUECAT_V2_KEY = process.env.REVENUECAT_V2_KEY || "";
+const REVENUECAT_PROJECT_ID = process.env.REVENUECAT_PROJECT_ID || "";
+const REVENUECAT_CURRENCY = process.env.REVENUECAT_CURRENCY || "USD";
+
+// RevenueCat'in "Charts & Metrics" limiti dakikada 25 istek. Panel her açılışta
+// çağırdığı için 5 dakikalık önbellek tutuyoruz — limite hiç yaklaşmayız.
+const RC_CACHE_TTL_MS = 5 * 60_000;
+let rcCache = { data: null, at: 0 };
+
+async function fetchRevenueCatOverview({ force = false } = {}) {
+  if (!REVENUECAT_V2_KEY || !REVENUECAT_PROJECT_ID) {
+    const missing = [
+      !REVENUECAT_V2_KEY && "REVENUECAT_V2_KEY",
+      !REVENUECAT_PROJECT_ID && "REVENUECAT_PROJECT_ID"
+    ].filter(Boolean);
+    const error = new Error(`${missing.join(" ve ")} tanımlı değil`);
+    error.statusCode = 501;
+    throw error;
+  }
+
+  if (!force && rcCache.data && Date.now() - rcCache.at < RC_CACHE_TTL_MS) {
+    return { ...rcCache.data, cached: true, fetchedAt: new Date(rcCache.at).toISOString() };
+  }
+
+  const url = new URL(
+    `https://api.revenuecat.com/v2/projects/${encodeURIComponent(REVENUECAT_PROJECT_ID)}/metrics/overview`
+  );
+  url.searchParams.set("currency", REVENUECAT_CURRENCY);
+
+  const res = await fetch(url, {
+    headers: {
+      authorization: `Bearer ${REVENUECAT_V2_KEY}`,
+      accept: "application/json"
+    }
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    // Sık yapılan hataları anlaşılır mesaja çevir
+    let hint = "";
+    if (res.status === 401) hint = " — anahtar geçersiz. V2 secret key (sk_…) kullandığından emin ol, app'teki appl_… anahtarı çalışmaz.";
+    else if (res.status === 403) hint = " — anahtarda 'charts_metrics:overview:read' izni yok.";
+    else if (res.status === 404) hint = " — REVENUECAT_PROJECT_ID hatalı görünüyor.";
+    else if (res.status === 429) hint = " — dakikalık istek limiti aşıldı, birazdan tekrar dene.";
+    const error = new Error(`RevenueCat ${res.status}${hint} ${body.slice(0, 200)}`.trim());
+    error.statusCode = res.status === 429 ? 429 : 502;
+    throw error;
+  }
+
+  const json = await res.json();
+  // ⚠️ metrics[].id değerleri RevenueCat dokümanında listelenmiyor. Bu yüzden
+  // sabit bir id listesine güvenmiyoruz — panel diziyi olduğu gibi render eder.
+  const data = {
+    currency: json.currency || REVENUECAT_CURRENCY,
+    metrics: Array.isArray(json.metrics) ? json.metrics : []
+  };
+  rcCache = { data, at: Date.now() };
+  return { ...data, cached: false, fetchedAt: new Date().toISOString() };
 }
 
 // ── Firebase (kullanıcı listesi + login takibi) ──────────────
@@ -348,7 +416,17 @@ async function grantPremiumOnServer(userID, days) {
   return { expiresAt: expiresAt.toISOString() };
 }
 
-/** Kullanıcının abonelik durumunu döner — iOS Firestore'u okuyamazsa buraya sorar. */
+/**
+ * Kullanıcının abonelik durumunu döner — iOS Firestore'u okuyamazsa buraya sorar.
+ *
+ * ⚠️ Otomatik "hoşgeldin hediyesi" (productID = welcome.*) ARTIK GEÇERSİZ sayılır.
+ * Eskiden uygulama her yeni girişte Firestore'a welcome.3days yazıyordu ve
+ * burası onu "aktif abonelik" diye döndüğü için indiren herkes premium oluyordu.
+ * Sadece panelden gönderilen manuel hediyeler (gift.*) geçerli kalır;
+ * App Store abonelikleri zaten StoreKit/RevenueCat üzerinden doğrulanır.
+ */
+const REVOKED_PRODUCT_PREFIXES = ["welcome."];
+
 async function readSubscriptionOnServer(userID) {
   const sa = firebaseServiceAccount();
   if (!sa) throw new Error("FIREBASE_SERVICE_ACCOUNT tanımlı değil");
@@ -357,14 +435,18 @@ async function readSubscriptionOnServer(userID) {
   const res = await fetch(`${base}/users/${encodeURIComponent(userID)}`, {
     headers: { authorization: `Bearer ${token}` }
   });
-  if (!res.ok) return { isActive: false, expiresAt: null };
+  if (!res.ok) return { isActive: false, expiresAt: null, productID: null };
   const doc = await res.json();
   const sub = doc.fields?.subscription?.mapValue?.fields;
-  if (!sub) return { isActive: false, expiresAt: null };
+  if (!sub) return { isActive: false, expiresAt: null, productID: null };
+
+  const productID = sub.productID?.stringValue || "";
   const expiresAt = sub.expiresAt?.timestampValue || null;
   const flag = sub.isActive?.booleanValue === true;
   const notExpired = !expiresAt || new Date(expiresAt) > new Date();
-  return { isActive: flag && notExpired, expiresAt };
+  const revoked = REVOKED_PRODUCT_PREFIXES.some((p) => productID.startsWith(p));
+
+  return { isActive: flag && notExpired && !revoked, expiresAt, productID };
 }
 
 const mimeTypes = {
@@ -813,6 +895,18 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    // Admin: RevenueCat gelir metrikleri (panel Gelir sekmesi)
+    // ?force=1 → önbelleği atla
+    if (req.method === "GET" && url.pathname === "/api/revenue") {
+      if (!requireAdmin(req, res)) return;
+      try {
+        send(res, 200, await fetchRevenueCatOverview({ force: url.searchParams.get("force") === "1" }));
+      } catch (error) {
+        send(res, error.statusCode || 502, { error: error.message });
+      }
+      return;
+    }
+
     // ── Toplu hediye kampanyası ─────────────────────────────
     // Admin: bir segmentteki TÜM kullanıcılara hediye oluşturur
     if (req.method === "POST" && url.pathname === "/api/gifts/bulk") {
@@ -827,9 +921,13 @@ const server = createServer(async (req, res) => {
         const users = await fetchFirebaseUsers();
         const now = new Date();
 
+        // Kaldırılan otomatik hoşgeldin hediyesi (welcome.*) premium sayılmaz —
+        // aksi halde "premium olmayanlara kampanya" segmenti bu kişileri atlar.
         const isPremium = (u) => {
           const sub = u.subscription;
           if (!sub || sub.isActive !== true) return false;
+          const pid = String(sub.productID || "");
+          if (REVOKED_PRODUCT_PREFIXES.some((p) => pid.startsWith(p))) return false;
           const exp = sub.expiresAt ? new Date(sub.expiresAt) : null;
           return !exp || exp > now;
         };
