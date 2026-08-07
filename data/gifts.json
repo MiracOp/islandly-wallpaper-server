@@ -98,5 +98,15 @@
     "claimed": false,
     "claimedAt": null,
     "premiumDays": 30
+  },
+  {
+    "id": "e4f82df5-654e-4c16-b843-e7a21685edff",
+    "userID": "apple:001133.8aae5e17e2a64f0aa3ddcaf459f24bf6.0208",
+    "kind": "pet",
+    "note": "Thanks <3",
+    "createdAt": "2026-08-07T23:04:03.747Z",
+    "claimed": false,
+    "claimedAt": null,
+    "petType": "unicorn"
   }
 ]
