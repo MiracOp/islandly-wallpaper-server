@@ -108,5 +108,15 @@
     "claimed": true,
     "claimedAt": "2026-08-08T13:22:28.264Z",
     "petType": "unicorn"
+  },
+  {
+    "id": "1cd977e3-95c6-4db4-9a8c-e718516058ee",
+    "userID": "apple:000496.4d3ab43bd00d4530bd9467f2de0b8a11.1643",
+    "kind": "premium",
+    "note": "",
+    "createdAt": "2026-08-08T17:39:55.088Z",
+    "claimed": false,
+    "claimedAt": null,
+    "premiumDays": 1
   }
 ]
