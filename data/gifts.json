@@ -105,8 +105,8 @@
     "kind": "pet",
     "note": "Thanks <3",
     "createdAt": "2026-08-07T23:04:03.747Z",
-    "claimed": false,
-    "claimedAt": null,
+    "claimed": true,
+    "claimedAt": "2026-08-08T13:22:28.264Z",
     "petType": "unicorn"
   }
 ]
