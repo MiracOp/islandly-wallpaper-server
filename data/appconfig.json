@@ -7,8 +7,8 @@
     "size": 0.9
   },
   "announcement": {
-    "enabled": true,
-    "id": "ann-1786225149487",
+    "enabled": false,
+    "id": "ann-1786225173153",
     "emoji": "📣",
     "title": "deneme",
     "message": "deneme",
