@@ -118,5 +118,15 @@
     "claimed": true,
     "claimedAt": "2026-08-08T17:40:00.424Z",
     "premiumDays": 1
+  },
+  {
+    "id": "734f35f4-6e2d-49a5-adf2-83e0886d4ea9",
+    "userID": "apple:000302.aa78b74984614693a9d71400b13ba1c1.2112",
+    "kind": "coins",
+    "note": "Thanks for",
+    "createdAt": "2026-08-08T21:47:46.172Z",
+    "claimed": false,
+    "claimedAt": null,
+    "coins": 50000
   }
 ]
