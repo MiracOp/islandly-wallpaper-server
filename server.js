@@ -533,6 +533,58 @@ async function trackFirebaseUser(input) {
 }
 
 /**
+ * Kullanıcıyı admin panelinden gizler/geri getirir.
+ *
+ * ÖNEMLİ: kullanıcının uygulama deneyimine HİÇBİR etkisi yok — premium,
+ * abonelik, hediyeler, kayıt tarihi hepsi yerinde kalır. Sadece panelin
+ * Kullanıcılar listesinde görünmez olur.
+ *
+ * Kayıt silinmediği için `/api/users/track` bir sonraki girişte belgeyi
+ * yeniden oluşturmaz; üstelik track updateMask'i `hiddenInAdmin` alanına
+ * dokunmadığından gizleme kullanıcı tekrar giriş yapsa da bozulmaz.
+ */
+async function setUserHiddenOnServer(userID, hidden) {
+  const sa = firebaseServiceAccount();
+  if (!sa) throw new Error("FIREBASE_SERVICE_ACCOUNT tanımlı değil");
+  const token = await firebaseAccessToken();
+  const docPath = `https://firestore.googleapis.com/v1/projects/${sa.project_id}` +
+    `/databases/(default)/documents/users/${encodeURIComponent(userID)}`;
+
+  // Yalnızca hiddenInAdmin alanına yazar — diğer alanlar korunur
+  const res = await fetch(`${docPath}?updateMask.fieldPaths=hiddenInAdmin`, {
+    method: "PATCH",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+    body: JSON.stringify({ fields: { hiddenInAdmin: { booleanValue: !!hidden } } })
+  });
+  if (!res.ok) throw new Error(`Gizleme yazılamadı: ${await res.text()}`);
+  return { userID, hidden: !!hidden };
+}
+
+/**
+ * Kullanıcı belgesini Firestore'dan KALICI siler.
+ *
+ * Dikkat: premium/hediye geçmişi ve kayıt tarihi de gider. Kullanıcı
+ * uygulamayı bir sonraki açışında `/api/users/track` belgeyi sıfırdan
+ * oluşturur — yani panelde yeni kullanıcı gibi tekrar belirir.
+ * Kalıcı olarak listeden çıkarmak için silmek değil GİZLEMEK gerekir.
+ */
+async function deleteUserOnServer(userID) {
+  const sa = firebaseServiceAccount();
+  if (!sa) throw new Error("FIREBASE_SERVICE_ACCOUNT tanımlı değil");
+  const token = await firebaseAccessToken();
+  const docPath = `https://firestore.googleapis.com/v1/projects/${sa.project_id}` +
+    `/databases/(default)/documents/users/${encodeURIComponent(userID)}`;
+
+  const res = await fetch(docPath, {
+    method: "DELETE",
+    headers: { authorization: `Bearer ${token}` }
+  });
+  // 404 = zaten yok, bunu hata sayma
+  if (!res.ok && res.status !== 404) throw new Error(`Silinemedi: ${await res.text()}`);
+  return { userID, deleted: true };
+}
+
+/**
  * Kullanıcıya premium yazar (hediye). Service account ile yazıldığı için
  * Firestore güvenlik kuralları kilitli olsa bile ÇALIŞIR — cihazdan yazma
  * kurallara takılıyordu, premium hediyelerin aktifleşmeme sebebi buydu.
@@ -1014,6 +1066,46 @@ const server = createServer(async (req, res) => {
         send(res, 200, await trackFirebaseUser(await parseBody(req)));
       } catch (error) {
         send(res, 400, { error: error.message });
+      }
+      return;
+    }
+
+    // Admin: kullanıcıyı panelden gizle / geri getir
+    // Body: { hidden: true|false } — false göndermek gizlemeyi kaldırır.
+    // Panelde "geri getir" butonu yok, geri almak istersen bu endpoint'e
+    // hidden:false gönder ya da Firestore Console'dan alanı sil.
+    const hideMatch = url.pathname.match(/^\/api\/users\/([^/]+)\/hide$/);
+    if (hideMatch && req.method === "POST") {
+      if (!requireAdmin(req, res)) return;
+      if (!firebaseServiceAccount()) {
+        send(res, 501, { error: "FIREBASE_SERVICE_ACCOUNT tanımlı değil" });
+        return;
+      }
+      try {
+        const body = await parseBody(req);
+        send(res, 200, await setUserHiddenOnServer(
+          decodeURIComponent(hideMatch[1]),
+          body.hidden !== false
+        ));
+      } catch (error) {
+        send(res, 502, { error: error.message });
+      }
+      return;
+    }
+
+    // Admin: kullanıcı belgesini KALICI sil
+    // (kullanıcı uygulamayı tekrar açarsa yeni kayıt olarak geri gelir)
+    const userDelMatch = url.pathname.match(/^\/api\/users\/([^/]+)$/);
+    if (userDelMatch && req.method === "DELETE") {
+      if (!requireAdmin(req, res)) return;
+      if (!firebaseServiceAccount()) {
+        send(res, 501, { error: "FIREBASE_SERVICE_ACCOUNT tanımlı değil" });
+        return;
+      }
+      try {
+        send(res, 200, await deleteUserOnServer(decodeURIComponent(userDelMatch[1])));
+      } catch (error) {
+        send(res, 502, { error: error.message });
       }
       return;
     }

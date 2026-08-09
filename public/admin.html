@@ -2108,7 +2108,10 @@ function renderUserStats() {
 
 function renderUserList() {
   const q = $("userSearch").value.trim().toLowerCase();
-  let list = [...allUsers].sort((a, b) =>
+  // Gizlenenler listede hiç görünmez. İstatistik kutuları allUsers'ı
+  // kullanmaya devam ettiği için toplam/premium sayıları değişmez.
+  let list = allUsers.filter(u => u.hiddenInAdmin !== true)
+    .sort((a, b) =>
     (fsDate(b.lastLoginAt)?.getTime() || 0) - (fsDate(a.lastLoginAt)?.getTime() || 0));
   if (q) {
     list = list.filter(u =>
@@ -2144,18 +2147,88 @@ function renderUserList() {
         <div>Kayıt: ${created ? created.toLocaleDateString("tr-TR") : "—"}</div>
       </div>
       <button class="btn gift-user-btn" title="Hediye gönder" data-uid="${esc(u.docID)}">🎁</button>
+      <button class="gift-del user-hide-btn" title="Panelden gizle (kullanıcı etkilenmez)" data-uid="${esc(u.docID)}" data-name="${esc(name)}">🙈</button>
+      <button class="gift-del user-del-btn" title="Kaydı kalıcı sil" data-uid="${esc(u.docID)}" data-name="${esc(name)}">🗑</button>
     </div>`;
   }).join("");
 }
 
 // Event delegation — ID'yi HTML'e gömülü onclick yerine data attribute'tan oku
 $("userList").addEventListener("click", (e) => {
-  const btn = e.target.closest(".gift-user-btn");
-  if (!btn) return;
-  $("giftUserID").value = btn.dataset.uid || "";
-  document.querySelector('.page-tab[data-page="gifts"]').click();
-  toast("Kullanıcı ID hediye formuna kopyalandı 🎁");
+  const giftBtn = e.target.closest(".gift-user-btn");
+  if (giftBtn) {
+    $("giftUserID").value = giftBtn.dataset.uid || "";
+    document.querySelector('.page-tab[data-page="gifts"]').click();
+    toast("Kullanıcı ID hediye formuna kopyalandı 🎁");
+    return;
+  }
+
+  const hideBtn = e.target.closest(".user-hide-btn");
+  if (hideBtn) return hideUser(hideBtn.dataset.uid, hideBtn.dataset.name);
+
+  const delBtn = e.target.closest(".user-del-btn");
+  if (delBtn) return deleteUser(delBtn.dataset.uid, delBtn.dataset.name);
 });
+
+/** Panelden gizler — kullanıcının uygulama deneyimi hiç değişmez. */
+async function hideUser(uid, name) {
+  if (!uid) return;
+  if (!confirm(
+    `"${name}" panel listesinden gizlensin mi?\n\n` +
+    `• Kullanıcı uygulamayı normal kullanmaya devam eder\n` +
+    `• Premium, abonelik ve hediyeleri aynen kalır\n` +
+    `• Tekrar giriş yapsa da listede geri belirmez\n\n` +
+    `Panelde geri getirme butonu YOK — geri almak istersen Firestore Console'dan ` +
+    `bu kullanıcının hiddenInAdmin alanını sil.`
+  )) return;
+  try {
+    const res = await fetch(`/api/users/${encodeURIComponent(uid)}/hide`, {
+      method: "POST",
+      headers: { ...headers(), "content-type": "application/json" },
+      body: JSON.stringify({ hidden: true })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return toast(err.error || "Gizlenemedi", "err");
+    }
+    // Sunucuyu tekrar çağırmadan yerel listede işaretle
+    const u = allUsers.find(x => x.docID === uid);
+    if (u) u.hiddenInAdmin = true;
+    renderUserList();
+    toast("🙈 Kullanıcı panelden gizlendi");
+  } catch {
+    toast("Bağlantı hatası", "err");
+  }
+}
+
+/** Firestore belgesini kalıcı siler — kullanıcı tekrar girerse yeni kayıt olarak döner. */
+async function deleteUser(uid, name) {
+  if (!uid) return;
+  if (!confirm(
+    `"${name}" KALICI olarak silinsin mi?\n\n` +
+    `• Premium, hediye geçmişi ve kayıt tarihi silinir\n` +
+    `• Kullanıcı uygulamayı açtığında sıfırdan yeni kayıt olarak geri gelir\n\n` +
+    `Listeden kalıcı çıkarmak istiyorsan silmek yerine 🙈 gizle butonunu kullan.\n` +
+    `Bu işlem geri alınamaz.`
+  )) return;
+  if (!confirm(`Son onay: "${name}" siliniyor. Emin misin?`)) return;
+  try {
+    const res = await fetch(`/api/users/${encodeURIComponent(uid)}`, {
+      method: "DELETE",
+      headers: headers()
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return toast(err.error || "Silinemedi", "err");
+    }
+    allUsers = allUsers.filter(x => x.docID !== uid);
+    renderUserStats();
+    renderUserList();
+    toast("🗑 Kullanıcı kaydı silindi");
+  } catch {
+    toast("Bağlantı hatası", "err");
+  }
+}
 
 async function loadUsers() {
   if (!SESSION) { $("userList").innerHTML = '<div class="gift-empty">Önce giriş yap 🔑</div>'; return; }
