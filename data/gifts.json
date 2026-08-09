@@ -125,8 +125,8 @@
     "kind": "coins",
     "note": "Thanks for",
     "createdAt": "2026-08-08T21:47:46.172Z",
-    "claimed": false,
-    "claimedAt": null,
+    "claimed": true,
+    "claimedAt": "2026-08-09T00:00:07.329Z",
     "coins": 50000
   }
 ]
