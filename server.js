@@ -532,6 +532,220 @@ async function trackFirebaseUser(input) {
   return { isNew };
 }
 
+// ── RevenueCat → Firestore abonelik senkronu ─────────────────
+//
+// SORUN: App Store'dan gerçekten satın alanların aboneliği Firestore'a hiç
+// yazılmıyordu. iOS'un yazması güvenlik kurallarıyla kapalı, sunucu ise
+// yalnızca hediye verirken yazıyordu. Sonuç: panelin premium listesi sadece
+// hediye alanları gösteriyordu, gerçek aboneler görünmüyordu.
+//
+// ÇÖZÜM: RevenueCat zaten her satın almayı biliyor (observer mode) ve
+// Purchases.logIn(user.id) sayesinde app_user_id = Firestore belge kimliği.
+// 1) Webhook  → anlık olaylar (satın alma, yenileme, süre bitişi, iade)
+// 2) Senkron  → mevcut abonelerin kaydını tek seferde doldurur
+
+/** Panelde "APP STORE" rozeti çıkması için productID bu önekle yazılır. */
+const APPSTORE_PRODUCT_PREFIX = "com.dynamicisland.premium";
+
+/** Webhook'ta RevenueCat'in göndereceği Authorization başlığı. */
+const REVENUECAT_WEBHOOK_SECRET = process.env.REVENUECAT_WEBHOOK_SECRET || "";
+
+/** SANDBOX (TestFlight/simülatör) satın almaları paneli kirletmesin. */
+const REVENUECAT_ALLOW_SANDBOX = process.env.REVENUECAT_ALLOW_SANDBOX === "1";
+
+/**
+ * Firestore'daki `subscription` alanını RevenueCat verisiyle yazar.
+ *
+ * Kullanıcı tercihi: gerçek abonelik hediyenin ÜZERİNE yazar. Yani panelden
+ * hediye verilmiş bir kullanıcı sonra abone olursa kayıt App Store aboneliğine
+ * döner. (Not: hediyenin kalan günleri bu durumda kaybolur.)
+ */
+async function writeSubscriptionOnServer(userID, { productID, expiresAt, isActive, planType }) {
+  const sa = firebaseServiceAccount();
+  if (!sa) throw new Error("FIREBASE_SERVICE_ACCOUNT tanımlı değil");
+  const token = await firebaseAccessToken();
+  const docPath = `https://firestore.googleapis.com/v1/projects/${sa.project_id}` +
+    `/databases/(default)/documents/users/${encodeURIComponent(userID)}`;
+
+  const fields = {
+    productID: { stringValue: String(productID || APPSTORE_PRODUCT_PREFIX) },
+    planType: { stringValue: planType || "PREMİUM - ÜCRETLİ" },
+    updatedAt: { timestampValue: new Date().toISOString() },
+    isActive: { booleanValue: !!isActive },
+    // Kaynağı işaretle — ileride hediye/abonelik ayrımı gerekirse elde dursun
+    source: { stringValue: "revenuecat" }
+  };
+  fields.expiresAt = expiresAt
+    ? { timestampValue: new Date(expiresAt).toISOString() }
+    : { nullValue: null };
+
+  const res = await fetch(`${docPath}?updateMask.fieldPaths=subscription`, {
+    method: "PATCH",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+    body: JSON.stringify({ fields: { subscription: { mapValue: { fields } } } })
+  });
+  if (!res.ok) throw new Error(`Abonelik yazılamadı: ${await res.text()}`);
+  return { userID, isActive: !!isActive, expiresAt: expiresAt || null };
+}
+
+/**
+ * Webhook olayını işler.
+ *
+ * Erişim VERİLEN olaylar: satın alma, yenileme, iptalin geri alınması,
+ * ürün değişikliği, süre uzatma, iade iptali, geçici erişim.
+ *
+ * ⚠️ CANCELLATION erişimi KALDIRMAZ — RevenueCat'te "iptal" otomatik
+ * yenilemenin kapatılması demek, kullanıcı dönem sonuna kadar premium kalır.
+ * Erişim yalnızca EXPIRATION ile kaldırılır. BILLING_ISSUE ve
+ * SUBSCRIPTION_PAUSED de erişimi kaldırmaz (doküman böyle diyor).
+ */
+const RC_GRANT_EVENTS = new Set([
+  "INITIAL_PURCHASE", "RENEWAL", "UNCANCELLATION", "PRODUCT_CHANGE",
+  "SUBSCRIPTION_EXTENDED", "NON_RENEWING_PURCHASE", "REFUND_REVERSED",
+  "TEMPORARY_ENTITLEMENT_GRANT"
+]);
+const RC_REVOKE_EVENTS = new Set(["EXPIRATION"]);
+
+async function handleRevenueCatEvent(event) {
+  const type = String(event?.type || "");
+
+  // TEST olayı: panelden "Send test event" denince gelir, veriye dokunma
+  if (type === "TEST") return { skipped: "test event" };
+
+  // Sandbox satın almaları gerçek kullanıcı sayılmasın
+  if (!REVENUECAT_ALLOW_SANDBOX && event?.environment === "SANDBOX") {
+    return { skipped: "sandbox" };
+  }
+
+  // TRANSFER: abonelik başka bir app_user_id'ye taşınmış
+  if (type === "TRANSFER") {
+    const results = [];
+    for (const from of event.transferred_from || []) {
+      results.push(await writeSubscriptionOnServer(from, { isActive: false, expiresAt: null }));
+    }
+    // Hedef kullanıcının gerçek durumu bir sonraki olayla/senkronla düzelir
+    return { transferred: results.length };
+  }
+
+  const grant = RC_GRANT_EVENTS.has(type);
+  const revoke = RC_REVOKE_EVENTS.has(type);
+  if (!grant && !revoke) return { skipped: `ilgisiz olay: ${type}` };
+
+  // Kullanıcıyı bulurken alias'lara da bak (doküman öneriyor)
+  const userID = event.app_user_id || event.original_app_user_id;
+  if (!userID) return { skipped: "app_user_id yok" };
+
+  const expiresAt = event.expiration_at_ms ? new Date(Number(event.expiration_at_ms)) : null;
+
+  // Süre bitişi geleceğe dönükse (nadiren olur) erişimi kaldırma
+  if (revoke && expiresAt && expiresAt > new Date()) {
+    return { skipped: "expiration ama tarih ileride" };
+  }
+
+  return await writeSubscriptionOnServer(userID, {
+    productID: event.product_id || APPSTORE_PRODUCT_PREFIX,
+    expiresAt: grant ? expiresAt : expiresAt,
+    isActive: grant,
+    planType: event.period_type === "TRIAL" ? "PREMİUM - DENEME" : "PREMİUM - ÜCRETLİ"
+  });
+}
+
+/**
+ * Tek bir kullanıcının RevenueCat'teki aboneliklerini okur.
+ * V2: GET /v2/projects/{id}/customers/{app_user_id}/subscriptions
+ *
+ * Not: kullanılan V2 anahtarında `customer_information:subscriptions:read`
+ * izni açık olmalı — gelir grafiği için verilen `charts_metrics` izni yetmez.
+ */
+async function fetchRevenueCatSubscriptions(appUserID) {
+  const url = `https://api.revenuecat.com/v2/projects/${encodeURIComponent(REVENUECAT_PROJECT_ID)}` +
+    `/customers/${encodeURIComponent(appUserID)}/subscriptions`;
+  const res = await fetch(url, {
+    headers: { authorization: `Bearer ${REVENUECAT_V2_KEY}`, accept: "application/json" }
+  });
+  if (res.status === 404) return [];           // RevenueCat'te böyle müşteri yok
+  if (!res.ok) throw new Error(`RevenueCat ${res.status}: ${(await res.text()).slice(0, 160)}`);
+  const json = await res.json();
+  return Array.isArray(json.items) ? json.items : [];
+}
+
+/**
+ * `items` dizisinden "şu an premium mi" sonucunu çıkarır.
+ *
+ * Durum (`status`) isimlerine güvenmek yerine bitiş tarihine bakıyoruz:
+ * iptal edilmiş ama süresi dolmamış abonelik hâlâ premiumdur. Yalnızca
+ * açıkça sonlanmış (expired/refund) kayıtlar elenir. Sıralama garantisi
+ * olmadığı için en ileri tarih seçilir.
+ */
+function resolveActiveSubscription(items) {
+  let best = null;
+  for (const it of items) {
+    const status = String(it.status || "").toLowerCase();
+    if (status.includes("expired") || status.includes("refund")) continue;
+    const raw = it.current_period_ends_at ?? it.expires_at ?? null;
+    const ends = raw == null ? null : new Date(Number(raw) || raw);
+    if (ends && !(ends > new Date())) continue;
+    if (!best || (ends && best.ends && ends > best.ends) || (ends && !best.ends)) {
+      best = { ends, productID: it.product_id || null, status };
+    }
+  }
+  return best;
+}
+
+/**
+ * Mevcut kullanıcıları RevenueCat ile karşılaştırıp Firestore'u doldurur.
+ * Webhook yalnızca bundan SONRAKİ olayları yakalar; bu fonksiyon geçmişi kapatır.
+ *
+ * RevenueCat'in istek limitine takılmamak için aynı anda 5 kullanıcı sorgulanır.
+ */
+async function syncSubscriptionsFromRevenueCat({ limit = 2000 } = {}) {
+  if (!REVENUECAT_V2_KEY || !REVENUECAT_PROJECT_ID) {
+    const e = new Error("REVENUECAT_V2_KEY ve REVENUECAT_PROJECT_ID gerekli");
+    e.statusCode = 501;
+    throw e;
+  }
+  const users = (await fetchFirebaseUsers()).slice(0, limit);
+  const summary = { checked: 0, activated: 0, deactivated: 0, unchanged: 0, errors: [] };
+
+  const CONCURRENCY = 5;
+  let cursor = 0;
+  async function worker() {
+    while (cursor < users.length) {
+      const u = users[cursor++];
+      const id = u.docID;
+      summary.checked++;
+      try {
+        const active = resolveActiveSubscription(await fetchRevenueCatSubscriptions(id));
+        const wasActive = u.subscription?.isActive === true;
+        const isGift = String(u.subscription?.productID || "").startsWith("gift.");
+
+        if (active) {
+          await writeSubscriptionOnServer(id, {
+            productID: active.productID || APPSTORE_PRODUCT_PREFIX,
+            expiresAt: active.ends,
+            isActive: true
+          });
+          summary.activated++;
+        } else if (wasActive && !isGift) {
+          // RevenueCat'e göre aktif değil — hediyeler korunur, App Store kayıtları kapanır
+          await writeSubscriptionOnServer(id, {
+            productID: u.subscription?.productID || APPSTORE_PRODUCT_PREFIX,
+            expiresAt: u.subscription?.expiresAt || null,
+            isActive: false
+          });
+          summary.deactivated++;
+        } else {
+          summary.unchanged++;
+        }
+      } catch (error) {
+        if (summary.errors.length < 10) summary.errors.push(`${id}: ${error.message}`);
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+  return summary;
+}
+
 /**
  * Kullanıcıyı admin panelinden gizler/geri getirir.
  *
@@ -1230,6 +1444,50 @@ const server = createServer(async (req, res) => {
       if (!requireAdmin(req, res)) return;
       try {
         send(res, 200, await fetchRevenueCatOverview({ force: url.searchParams.get("force") === "1" }));
+      } catch (error) {
+        send(res, error.statusCode || 502, { error: error.message });
+      }
+      return;
+    }
+
+    // ── RevenueCat webhook ──────────────────────────────────
+    // RevenueCat → Project settings → Integrations → Webhooks
+    //   URL                 : https://<railway-domain>/api/revenuecat/webhook
+    //   Authorization header: REVENUECAT_WEBHOOK_SECRET ile aynı değer
+    //
+    // Admin oturumu YOK — kimlik doğrulama paylaşılan sır ile yapılır.
+    if (req.method === "POST" && url.pathname === "/api/revenuecat/webhook") {
+      if (!REVENUECAT_WEBHOOK_SECRET) {
+        send(res, 501, { error: "REVENUECAT_WEBHOOK_SECRET tanımlı değil" });
+        return;
+      }
+      if (!safeEqual(req.headers.authorization || "", REVENUECAT_WEBHOOK_SECRET)) {
+        send(res, 401, { error: "Unauthorized" });
+        return;
+      }
+      // Firebase kontrolü bilerek burada yok: RevenueCat panelindeki
+      // "Send test event" butonu URL + sır doğruluğunu Firestore'a hiç
+      // dokunmadan teyit edebilsin. Gerçek yazma anında zaten hata fırlar.
+      try {
+        const body = await parseBody(req);
+        const result = await handleRevenueCatEvent(body?.event || {});
+        send(res, 200, { ok: true, ...result });
+      } catch (error) {
+        // 5xx dönersek RevenueCat tekrar dener — kalıcı hatalarda bu istenir
+        send(res, 500, { error: error.message });
+      }
+      return;
+    }
+
+    // Admin: mevcut aboneleri RevenueCat'ten çekip Firestore'u doldur
+    if (req.method === "POST" && url.pathname === "/api/revenue/sync") {
+      if (!requireAdmin(req, res)) return;
+      if (!firebaseServiceAccount()) {
+        send(res, 501, { error: "FIREBASE_SERVICE_ACCOUNT tanımlı değil" });
+        return;
+      }
+      try {
+        send(res, 200, await syncSubscriptionsFromRevenueCat({}));
       } catch (error) {
         send(res, error.statusCode || 502, { error: error.message });
       }

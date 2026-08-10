@@ -1062,7 +1062,10 @@
     <section class="panel" style="position:static">
       <div class="panel-head">
         <h2>📅 Abonelik Bitişleri</h2>
-        <button class="btn" id="refreshExpiryBtn">↻</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="syncRevBtn" title="RevenueCat'teki aboneleri Firestore'a yaz">🔄 RevenueCat senkron</button>
+          <button class="btn" id="refreshExpiryBtn">↻</button>
+        </div>
       </div>
       <div id="expiryStats" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
       <div id="expiryList"><div class="gift-empty">Yükleniyor…</div></div>
@@ -1813,6 +1816,41 @@ function renderExpiry() {
 }
 
 $("refreshExpiryBtn").onclick = () => { allUsers = []; loadExpiry(); };
+
+/* RevenueCat → Firestore senkronu.
+   Webhook yalnızca bundan sonraki olayları yakalar; bu buton mevcut
+   abonelerin kaydını doldurur. Kullanıcı sayısına göre biraz sürebilir. */
+$("syncRevBtn").onclick = async () => {
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
+  if (!confirm(
+    "RevenueCat'teki abonelikler Firestore'a yazılsın mı?\n\n" +
+    "• Gerçek App Store aboneleri panelde görünmeye başlar\n" +
+    "• Hediye verilmiş kullanıcılar korunur\n" +
+    "• Kullanıcı sayısına göre birkaç dakika sürebilir"
+  )) return;
+
+  const btn = $("syncRevBtn");
+  const old = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "⏳ Senkronlanıyor…";
+  try {
+    const res = await fetch("/api/revenue/sync", { method: "POST", headers: headers() });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast(json.error || "Senkron başarısız", "err");
+    } else {
+      toast(`✅ ${json.checked} kullanıcı tarandı — ${json.activated} premium yazıldı, ${json.deactivated} kapatıldı`);
+      if (json.errors?.length) console.warn("Senkron hataları:", json.errors);
+      allUsers = [];
+      loadExpiry();
+    }
+  } catch {
+    toast("Bağlantı hatası", "err");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = old;
+  }
+};
 
 $("expiryList").addEventListener("click", (e) => {
   const btn = e.target.closest(".gift-user-btn");
