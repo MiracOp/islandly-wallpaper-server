@@ -22,7 +22,7 @@
   },
   "paywall": {
     "trialEnabled": true,
-    "trialAnimationEnabled": false,
+    "trialAnimationEnabled": true,
     "monthlyProductID": "",
     "yearlyProductID": ""
   },
