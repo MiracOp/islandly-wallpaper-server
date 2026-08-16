@@ -135,8 +135,18 @@
     "kind": "premium",
     "note": "yarrk",
     "createdAt": "2026-08-16T21:40:37.698Z",
+    "claimed": true,
+    "claimedAt": "2026-08-16T21:40:38.016Z",
+    "premiumDays": 2000
+  },
+  {
+    "id": "aac07bbf-4766-481d-a5bf-33b9fc277c88",
+    "userID": "google:110220161988916777837",
+    "kind": "premium",
+    "note": "",
+    "createdAt": "2026-08-16T21:48:46.248Z",
     "claimed": false,
     "claimedAt": null,
-    "premiumDays": 2000
+    "premiumDays": 30
   }
 ]
