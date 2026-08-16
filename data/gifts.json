@@ -145,8 +145,8 @@
     "kind": "premium",
     "note": "",
     "createdAt": "2026-08-16T21:48:46.248Z",
-    "claimed": false,
-    "claimedAt": null,
+    "claimed": true,
+    "claimedAt": "2026-08-16T21:48:55.354Z",
     "premiumDays": 30
   }
 ]
