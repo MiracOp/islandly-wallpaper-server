@@ -128,5 +128,15 @@
     "claimed": true,
     "claimedAt": "2026-08-09T00:00:07.329Z",
     "coins": 50000
+  },
+  {
+    "id": "6bd78614-ed56-4a95-83e3-c94470028e6c",
+    "userID": "apple:001442.397d1259e84f41c595c4ad82ce99397d.2138",
+    "kind": "premium",
+    "note": "yarrk",
+    "createdAt": "2026-08-16T21:40:37.698Z",
+    "claimed": false,
+    "claimedAt": null,
+    "premiumDays": 2000
   }
 ]
