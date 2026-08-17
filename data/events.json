@@ -50,10 +50,10 @@
     }
   },
   "2026-08-17": {
-    "paywallShown": 115,
+    "paywallShown": 118,
     "purchases": {
       "com.dynamicisland.premium.yearly": 1,
-      "com.dynamicisland.premium.monthly": 2
+      "com.dynamicisland.premium.monthly": 3
     }
   }
 }
