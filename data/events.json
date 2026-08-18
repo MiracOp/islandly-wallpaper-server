@@ -57,7 +57,9 @@
     }
   },
   "2026-08-18": {
-    "paywallShown": 14,
-    "purchases": {}
+    "paywallShown": 16,
+    "purchases": {
+      "com.dynamicisland.premium.monthly": 1
+    }
   }
 }
