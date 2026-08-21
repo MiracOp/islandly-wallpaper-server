@@ -155,8 +155,8 @@
     "kind": "premium",
     "note": "nlksnfsan",
     "createdAt": "2026-08-21T14:36:51.006Z",
-    "claimed": false,
-    "claimedAt": null,
+    "claimed": true,
+    "claimedAt": "2026-08-21T14:36:55.582Z",
     "premiumDays": 3650
   }
 ]
