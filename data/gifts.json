@@ -148,5 +148,15 @@
     "claimed": true,
     "claimedAt": "2026-08-16T21:48:55.354Z",
     "premiumDays": 30
+  },
+  {
+    "id": "8e7171cc-446a-4c15-b6ce-86c9ac02a0a9",
+    "userID": "google:116272479247083517354",
+    "kind": "premium",
+    "note": "nlksnfsan",
+    "createdAt": "2026-08-21T14:36:51.006Z",
+    "claimed": false,
+    "claimedAt": null,
+    "premiumDays": 3650
   }
 ]
