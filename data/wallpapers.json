@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "id": "uchiha-madara",
+    "title": "Uchiha Madara",
+    "subtitle": "3 saniye döngü",
+    "imageURL": "/media/uchiha-madara.jpg",
+    "thumbURL": "/media/uchiha-madara-thumb.jpg",
+    "stillURL": "/media/uchiha-madara.jpg",
+    "videoURL": "/media/uchiha-madara.mov",
+    "category": "Live",
+    "accentRed": 0.72,
+    "accentGreen": 0.16,
+    "accentBlue": 0.2,
+    "isPremium": false,
+    "order": 1
+  },
+  {
+    "id": "dikey-manzara",
+    "title": "Dikey Manzara",
+    "subtitle": "3 saniye döngü",
+    "imageURL": "/media/dikey-manzara.jpg",
+    "thumbURL": "/media/dikey-manzara-thumb.jpg",
+    "stillURL": "/media/dikey-manzara.jpg",
+    "videoURL": "/media/dikey-manzara.mov",
+    "category": "Live",
+    "accentRed": 0.35,
+    "accentGreen": 0.55,
+    "accentBlue": 0.95,
+    "isPremium": false,
+    "order": 2
+  },
+  {
+    "id": "minimalist",
+    "title": "Minimalist",
+    "subtitle": "3 saniye döngü",
+    "imageURL": "/media/minimalist.jpg",
+    "thumbURL": "/media/minimalist-thumb.jpg",
+    "stillURL": "/media/minimalist.jpg",
+    "videoURL": "/media/minimalist.mov",
+    "category": "Live",
+    "accentRed": 0.85,
+    "accentGreen": 0.85,
+    "accentBlue": 0.88,
+    "isPremium": false,
+    "order": 3
+  },
+  {
+    "id": "dinamik-dalga",
+    "title": "Dinamik Dalga",
+    "subtitle": "3 saniye döngü",
+    "imageURL": "/media/dinamik-dalga.jpg",
+    "thumbURL": "/media/dinamik-dalga-thumb.jpg",
+    "stillURL": "/media/dinamik-dalga.jpg",
+    "videoURL": "/media/dinamik-dalga.mov",
+    "category": "Live",
+    "accentRed": 0.2,
+    "accentGreen": 0.85,
+    "accentBlue": 0.95,
+    "isPremium": true,
+    "order": 4
+  }
+]

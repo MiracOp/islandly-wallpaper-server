@@ -884,8 +884,18 @@ const mimeTypes = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
-  ".json": "application/json; charset=utf-8"
+  ".json": "application/json; charset=utf-8",
+  // public/media/ — canlı duvar kağıdı dosyaları
+  ".mov": "video/quicktime",
+  ".mp4": "video/mp4",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp"
 };
+
+/// Medya dosyaları isimleriyle sabit — uzun süre önbelleklensin.
+const MEDIA_EXTENSIONS = new Set([".mov", ".mp4", ".jpg", ".jpeg", ".png", ".webp"]);
 
 async function readWallpapers() {
   const raw = await readFile(DATA_FILE, "utf8");
@@ -1146,6 +1156,11 @@ function normalizeWallpaper(input, existing = {}) {
     title,
     subtitle: String(input.subtitle ?? existing.subtitle ?? ""),
     imageURL,
+    // Izgarada gösterilen küçük görsel (~420px). Boşsa app imageURL'e düşer.
+    thumbURL: String(input.thumbURL ?? existing.thumbURL ?? "").trim(),
+    // Live Photo'nun durağan karesi — tam çözünürlük, videonun ilk karesi.
+    // Boşsa app imageURL'e düşer.
+    stillURL: String(input.stillURL ?? existing.stillURL ?? "").trim(),
     // Doluysa canlı duvar kağıdı — iOS app videoyu Live Photo olarak kaydeder
     videoURL: String(input.videoURL ?? existing.videoURL ?? "").trim(),
     category: String(input.category || existing.category || "Nature"),
@@ -1175,6 +1190,11 @@ async function serveStatic(pathname, res) {
     "referrer-policy": "no-referrer",
     "strict-transport-security": "max-age=31536000"
   };
+  if (MEDIA_EXTENSIONS.has(ext)) {
+    // Duvar kağıtları değişmez — bir yıl önbellekle, aynı dosya iki kez inmesin.
+    headers["cache-control"] = "public, max-age=31536000, immutable";
+    headers["access-control-allow-origin"] = "*";
+  }
   if (ext === ".html") {
     // Panel dışarıdan hiçbir script/bağlantı yüklemez — CSP bunu zorunlu kılar:
     // XSS olsa bile çalınan veri dış sunuculara fetch ile GÖNDERİLEMEZ,
