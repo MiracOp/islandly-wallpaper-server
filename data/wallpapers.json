@@ -1,20 +1,5 @@
 [
   {
-    "id": "video-camera-sta-465-0",
-    "title": "Video Camera Sta 465 0",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/video-camera-sta-465-0.heic",
-    "thumbURL": "/media/video-camera-sta-465-0-thumb.jpg",
-    "stillURL": "/media/video-camera-sta-465-0.heic",
-    "videoURL": "/media/video-camera-sta-465-0.mov",
-    "category": "Live",
-    "accentRed": 0.341,
-    "accentGreen": 0.266,
-    "accentBlue": 0.95,
-    "isPremium": false,
-    "order": 12
-  },
-  {
     "id": "video-cinematic-110-0-kopyas",
     "title": "Video Cinematic 110 0 Kopyas",
     "subtitle": "canlı duvar kağıdı",
