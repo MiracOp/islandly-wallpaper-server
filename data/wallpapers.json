@@ -1,20 +1,5 @@
 [
   {
-    "id": "J-kamera",
-    "title": "TEST J — kamera kare",
-    "subtitle": "78 kare esitlendi",
-    "imageURL": "/media/J-kamera.heic",
-    "thumbURL": "/media/J-kamera-thumb.jpg",
-    "stillURL": "/media/J-kamera.heic",
-    "videoURL": "/media/J-kamera.mov",
-    "category": "Live",
-    "accentRed": 0.9,
-    "accentGreen": 0.4,
-    "accentBlue": 0.9,
-    "isPremium": false,
-    "order": 2
-  },
-  {
     "id": "H-duzeltme",
     "title": "TEST H — duzeltme",
     "subtitle": "reference-dimensions duzeltildi",
