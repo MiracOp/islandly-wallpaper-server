@@ -1,20 +1,5 @@
 [
   {
-    "id": "I-bizim",
-    "title": "TEST I — bizim kare",
-    "subtitle": "78 kare esitlendi",
-    "imageURL": "/media/I-bizim.heic",
-    "thumbURL": "/media/I-bizim-thumb.jpg",
-    "stillURL": "/media/I-bizim.heic",
-    "videoURL": "/media/I-bizim.mov",
-    "category": "Live",
-    "accentRed": 0.2,
-    "accentGreen": 0.9,
-    "accentBlue": 0.6,
-    "isPremium": false,
-    "order": 1
-  },
-  {
     "id": "J-kamera",
     "title": "TEST J — kamera kare",
     "subtitle": "78 kare esitlendi",
