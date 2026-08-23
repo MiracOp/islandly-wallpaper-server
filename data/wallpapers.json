@@ -1,20 +1,5 @@
 [
   {
-    "id": "R-gotik-ay",
-    "title": "Gotik Ay",
-    "subtitle": "Yeni test · gerçek 2,73 saniye",
-    "imageURL": "/media/R-gotik-ay.heic",
-    "thumbURL": "/media/R-gotik-ay-thumb.jpg",
-    "stillURL": "/media/R-gotik-ay.heic",
-    "videoURL": "/media/R-gotik-ay.mov",
-    "category": "Live",
-    "accentRed": 0.55,
-    "accentGreen": 0.6,
-    "accentBlue": 0.7,
-    "isPremium": false,
-    "order": -5
-  },
-  {
     "id": "S-gunbatimi-samuray",
     "title": "Günbatımı Samuray",
     "subtitle": "Yeni test · gerçek 2,80 saniye",
