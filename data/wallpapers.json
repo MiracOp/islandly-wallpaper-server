@@ -15,21 +15,6 @@
     "order": 0
   },
   {
-    "id": "N-3-saniye",
-    "title": "TEST N — 3 saniye",
-    "subtitle": "3 sn · 60 fps · uzatılmış Apple metadata",
-    "imageURL": "/media/N-3-saniye.heic",
-    "thumbURL": "/media/N-3-saniye-thumb.jpg",
-    "stillURL": "/media/N-3-saniye.heic",
-    "videoURL": "/media/N-3-saniye.mov",
-    "category": "Live",
-    "accentRed": 0.45,
-    "accentGreen": 0.35,
-    "accentBlue": 1,
-    "isPremium": false,
-    "order": -1
-  },
-  {
     "id": "M-myscreen-profili",
     "title": "TEST M — MyScreen profili",
     "subtitle": "0,916 sn · 60 fps · Apple metadata",
