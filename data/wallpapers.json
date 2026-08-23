@@ -1,20 +1,5 @@
 [
   {
-    "id": "K-apple",
-    "title": "TEST K — apple kodlayici",
-    "subtitle": "videotoolbox",
-    "imageURL": "/media/K-apple.heic",
-    "thumbURL": "/media/K-apple-thumb.jpg",
-    "stillURL": "/media/K-apple.heic",
-    "videoURL": "/media/K-apple.mov",
-    "category": "Live",
-    "accentRed": 1,
-    "accentGreen": 0.45,
-    "accentBlue": 0.05,
-    "isPremium": false,
-    "order": 0
-  },
-  {
     "id": "M-myscreen-profili",
     "title": "TEST M — MyScreen profili",
     "subtitle": "0,916 sn · 60 fps · Apple metadata",
