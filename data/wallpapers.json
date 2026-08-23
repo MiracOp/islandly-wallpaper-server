@@ -1,20 +1,5 @@
 [
   {
-    "id": "G-apple",
-    "title": "TEST G — apple ayarı",
-    "subtitle": "tek degiskenli test",
-    "imageURL": "/media/G-apple.heic",
-    "thumbURL": "/media/G-apple-thumb.jpg",
-    "stillURL": "/media/G-apple.heic",
-    "videoURL": "/media/G-apple.mov",
-    "category": "Live",
-    "accentRed": 0.95,
-    "accentGreen": 0.8,
-    "accentBlue": 0.2,
-    "isPremium": false,
-    "order": 6
-  },
-  {
     "id": "kanka-sana-4170-1",
     "title": "Kanka Sana 4170 1",
     "subtitle": "canlı duvar kağıdı",
