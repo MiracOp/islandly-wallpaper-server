@@ -1,20 +1,5 @@
 [
   {
-    "id": "H-duzeltme",
-    "title": "TEST H — duzeltme",
-    "subtitle": "reference-dimensions duzeltildi",
-    "imageURL": "/media/H-duzeltme.heic",
-    "thumbURL": "/media/H-duzeltme-thumb.jpg",
-    "stillURL": "/media/H-duzeltme.heic",
-    "videoURL": "/media/H-duzeltme.mov",
-    "category": "Live",
-    "accentRed": 0.15,
-    "accentGreen": 0.9,
-    "accentBlue": 0.5,
-    "isPremium": false,
-    "order": 3
-  },
-  {
     "id": "E-video",
     "title": "TEST E — bizim video",
     "subtitle": "tek degiskenli test",
