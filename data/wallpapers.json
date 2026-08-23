@@ -1,35 +1,5 @@
 [
   {
-    "id": "P-gece-macera",
-    "title": "Yıldızlı Gece",
-    "subtitle": "Yeni test · gerçek 3,00 saniye",
-    "imageURL": "/media/P-gece-macera.heic",
-    "thumbURL": "/media/P-gece-macera-thumb.jpg",
-    "stillURL": "/media/P-gece-macera.heic",
-    "videoURL": "/media/P-gece-macera.mov",
-    "category": "Live",
-    "accentRed": 0.25,
-    "accentGreen": 0.35,
-    "accentBlue": 1,
-    "isPremium": false,
-    "order": -7
-  },
-  {
-    "id": "Q-golge-buyucu",
-    "title": "Gölge Büyücü",
-    "subtitle": "Yeni test · gerçek 2,37 saniye",
-    "imageURL": "/media/Q-golge-buyucu.heic",
-    "thumbURL": "/media/Q-golge-buyucu-thumb.jpg",
-    "stillURL": "/media/Q-golge-buyucu.heic",
-    "videoURL": "/media/Q-golge-buyucu.mov",
-    "category": "Live",
-    "accentRed": 0.25,
-    "accentGreen": 0.75,
-    "accentBlue": 0.9,
-    "isPremium": false,
-    "order": -6
-  },
-  {
     "id": "R-gotik-ay",
     "title": "Gotik Ay",
     "subtitle": "Yeni test · gerçek 2,73 saniye",
