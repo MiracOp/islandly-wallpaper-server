@@ -1,20 +1,5 @@
 [
   {
-    "id": "F-kare",
-    "title": "TEST F — bizim kare",
-    "subtitle": "tek degiskenli test",
-    "imageURL": "/media/F-kare.heic",
-    "thumbURL": "/media/F-kare-thumb.jpg",
-    "stillURL": "/media/F-kare.heic",
-    "videoURL": "/media/F-kare.mov",
-    "category": "Live",
-    "accentRed": 0.25,
-    "accentGreen": 0.65,
-    "accentBlue": 0.95,
-    "isPremium": false,
-    "order": 5
-  },
-  {
     "id": "G-apple",
     "title": "TEST G — apple ayarı",
     "subtitle": "tek degiskenli test",
