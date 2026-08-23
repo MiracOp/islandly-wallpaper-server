@@ -1,20 +1,5 @@
 [
   {
-    "id": "S-gunbatimi-samuray",
-    "title": "Günbatımı Samuray",
-    "subtitle": "Yeni test · gerçek 2,80 saniye",
-    "imageURL": "/media/S-gunbatimi-samuray.heic",
-    "thumbURL": "/media/S-gunbatimi-samuray-thumb.jpg",
-    "stillURL": "/media/S-gunbatimi-samuray.heic",
-    "videoURL": "/media/S-gunbatimi-samuray.mov",
-    "category": "Live",
-    "accentRed": 1,
-    "accentGreen": 0.45,
-    "accentBlue": 0.1,
-    "isPremium": false,
-    "order": -4
-  },
-  {
     "id": "K-apple",
     "title": "TEST K — apple kodlayici",
     "subtitle": "videotoolbox",
