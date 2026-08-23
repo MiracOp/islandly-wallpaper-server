@@ -1,20 +1,5 @@
 [
   {
-    "id": "V-kizil-gozler-kisa",
-    "title": "Kızıl Gözler — Kısa Test",
-    "subtitle": "Yeni · 1,97 saniye · 118 kare",
-    "imageURL": "/media/V-kizil-gozler-kisa.heic",
-    "thumbURL": "/media/V-kizil-gozler-kisa-thumb.jpg",
-    "stillURL": "/media/V-kizil-gozler-kisa.heic",
-    "videoURL": "/media/V-kizil-gozler-kisa.mov",
-    "category": "Live",
-    "accentRed": 1,
-    "accentGreen": 0.12,
-    "accentBlue": 0.4,
-    "isPremium": false,
-    "order": -10
-  },
-  {
     "id": "T-kalite-tam-kadraj",
     "title": "TEST T — Kalite & Tam Kadraj",
     "subtitle": "15 Pro Max oranı · kayıpsız metadata · 2,80 saniye",
