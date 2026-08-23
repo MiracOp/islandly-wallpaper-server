@@ -309,9 +309,9 @@
     "videoURL": "/media/video-masterpiec-459-0.mov",
     "category": "Live",
     "accentRed": 0.95,
-    "accentGreen": 0.266,
-    "accentBlue": 0.771,
-    "isPremium": true,
+    "accentGreen": 0.27,
+    "accentBlue": 0.77,
+    "isPremium": false,
     "order": 21
   },
   {
