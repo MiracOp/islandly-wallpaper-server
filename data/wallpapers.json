@@ -1,20 +1,5 @@
 [
   {
-    "id": "E-video",
-    "title": "TEST E — bizim video",
-    "subtitle": "tek degiskenli test",
-    "imageURL": "/media/E-video.heic",
-    "thumbURL": "/media/E-video-thumb.jpg",
-    "stillURL": "/media/E-video.heic",
-    "videoURL": "/media/E-video.mov",
-    "category": "Live",
-    "accentRed": 0.95,
-    "accentGreen": 0.25,
-    "accentBlue": 0.2,
-    "isPremium": false,
-    "order": 4
-  },
-  {
     "id": "F-kare",
     "title": "TEST F — bizim kare",
     "subtitle": "tek degiskenli test",
