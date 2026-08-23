@@ -1,20 +1,5 @@
 [
   {
-    "id": "video-masterpiec-459-0",
-    "title": "Video Masterpiec 459 0",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/video-masterpiec-459-0.heic",
-    "thumbURL": "/media/video-masterpiec-459-0-thumb.jpg",
-    "stillURL": "/media/video-masterpiec-459-0.heic",
-    "videoURL": "/media/video-masterpiec-459-0.mov",
-    "category": "Live",
-    "accentRed": 0.95,
-    "accentGreen": 0.266,
-    "accentBlue": 0.771,
-    "isPremium": true,
-    "order": 28
-  },
-  {
     "id": "video-minecraft-204-0",
     "title": "Video Minecraft 204 0",
     "subtitle": "canlı duvar kağıdı",
