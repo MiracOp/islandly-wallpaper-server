@@ -105,6 +105,7 @@ func processStillImage(
     var makerApple: [String: Any] = metadata[kCGImagePropertyMakerAppleDictionary as String] as? [String: Any] ?? [:]
     makerApple["17"] = assetIdentifier
     metadata[kCGImagePropertyMakerAppleDictionary as String] = makerApple
+    metadata[kCGImageDestinationLossyCompressionQuality as String] = 1.0
 
     // Detect output format based on file extension
     let outputFormat: String
@@ -164,23 +165,25 @@ func copyMetadataFromTemplate(
         throw LivePhotoError.videoProcessingFailed("No video track")
     }
 
-    // Video reader output with proper pixel format
+    // Keep the already encoded HEVC samples compressed. Decoding to BGRA here and
+    // encoding again visibly reduced quality and increased generation time.
     let videoReaderOutput = AVAssetReaderTrackOutput(
         track: videoTrack,
-        outputSettings: [
-            kCVPixelBufferPixelFormatTypeKey as String: NSNumber(value: kCVPixelFormatType_32BGRA as UInt32)
-        ]
+        outputSettings: nil
     )
     videoReader.add(videoReaderOutput)
 
-    // Video writer input - PRESERVE transform for orientation
+    guard let sourceFormat = videoTrack.formatDescriptions.first else {
+        throw LivePhotoError.videoProcessingFailed("Cannot read source video format")
+    }
+    let sourceFormatHint = sourceFormat as! CMFormatDescription
+
+    // Passthrough input copies compressed video samples byte-for-byte while the
+    // camera-derived metadata tracks are added alongside them.
     let videoWriterInput = AVAssetWriterInput(
         mediaType: .video,
-        outputSettings: [
-            AVVideoCodecKey: AVVideoCodecType.hevc,
-            AVVideoWidthKey: videoTrack.naturalSize.width,
-            AVVideoHeightKey: videoTrack.naturalSize.height
-        ]
+        outputSettings: nil,
+        sourceFormatHint: sourceFormatHint
     )
     videoWriterInput.transform = videoTrack.preferredTransform // CRITICAL: Preserve orientation
     videoWriterInput.expectsMediaDataInRealTime = false
