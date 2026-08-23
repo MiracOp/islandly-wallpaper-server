@@ -105,6 +105,21 @@
     "order": 6
   },
   {
+    "id": "video-cinematic-110-0",
+    "title": "Video Cinematic 110 0",
+    "subtitle": "canlı duvar kağıdı",
+    "imageURL": "/media/video-cinematic-110-0.heic",
+    "thumbURL": "/media/video-cinematic-110-0-thumb.jpg",
+    "stillURL": "/media/video-cinematic-110-0.heic",
+    "videoURL": "/media/video-cinematic-110-0.mov",
+    "category": "Live",
+    "accentRed": 0.95,
+    "accentGreen": 0.266,
+    "accentBlue": 0.434,
+    "isPremium": false,
+    "order": 7
+  },
+  {
     "id": "video-cinematic-130-0",
     "title": "Video Cinematic 130 0",
     "subtitle": "canlı duvar kağıdı",
@@ -309,9 +324,9 @@
     "videoURL": "/media/video-masterpiec-459-0.mov",
     "category": "Live",
     "accentRed": 0.95,
-    "accentGreen": 0.27,
-    "accentBlue": 0.77,
-    "isPremium": false,
+    "accentGreen": 0.266,
+    "accentBlue": 0.771,
+    "isPremium": true,
     "order": 21
   },
   {
