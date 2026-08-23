@@ -30,21 +30,6 @@
     "order": 1
   },
   {
-    "id": "B-kontrol",
-    "title": "TEST B — Kontrol",
-    "subtitle": "duvar kağıdı testi",
-    "imageURL": "/media/B-kontrol.jpg",
-    "thumbURL": "/media/B-kontrol-thumb.jpg",
-    "stillURL": "/media/B-kontrol.jpg",
-    "videoURL": "/media/B-kontrol.mov",
-    "category": "Live",
-    "accentRed": 0.2,
-    "accentGreen": 0.8,
-    "accentBlue": 0.4,
-    "isPremium": false,
-    "order": 2
-  },
-  {
     "id": "uchiha-madara",
     "title": "Uchiha Madara",
     "subtitle": "3 saniye döngü",
