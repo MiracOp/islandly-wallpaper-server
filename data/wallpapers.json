@@ -1,5 +1,20 @@
 [
   {
+    "id": "Z-orijinal",
+    "title": "TEST Z — Orijinal",
+    "subtitle": "kameradan cikti gibi",
+    "imageURL": "/media/Z-orijinal.heic",
+    "thumbURL": "/media/Z-orijinal-thumb.jpg",
+    "stillURL": "/media/Z-orijinal.heic",
+    "videoURL": "/media/Z-orijinal.mov",
+    "category": "Live",
+    "accentRed": 0.95,
+    "accentGreen": 0.8,
+    "accentBlue": 0.15,
+    "isPremium": false,
+    "order": 0
+  },
+  {
     "id": "A-bizim",
     "title": "TEST A — Bizim",
     "subtitle": "duvar kağıdı testi",
@@ -12,7 +27,7 @@
     "accentGreen": 0.35,
     "accentBlue": 0.1,
     "isPremium": false,
-    "order": 0
+    "order": 1
   },
   {
     "id": "B-kontrol",
@@ -27,7 +42,7 @@
     "accentGreen": 0.8,
     "accentBlue": 0.4,
     "isPremium": false,
-    "order": 1
+    "order": 2
   },
   {
     "id": "uchiha-madara",
@@ -42,7 +57,7 @@
     "accentGreen": 0.16,
     "accentBlue": 0.2,
     "isPremium": false,
-    "order": 11
+    "order": 12
   },
   {
     "id": "dikey-manzara",
@@ -57,7 +72,7 @@
     "accentGreen": 0.55,
     "accentBlue": 0.95,
     "isPremium": false,
-    "order": 12
+    "order": 13
   },
   {
     "id": "minimalist",
@@ -72,7 +87,7 @@
     "accentGreen": 0.85,
     "accentBlue": 0.88,
     "isPremium": false,
-    "order": 13
+    "order": 14
   },
   {
     "id": "dinamik-dalga",
@@ -87,6 +102,6 @@
     "accentGreen": 0.85,
     "accentBlue": 0.95,
     "isPremium": true,
-    "order": 14
+    "order": 15
   }
 ]
