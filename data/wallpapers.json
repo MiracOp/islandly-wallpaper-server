@@ -1,20 +1,5 @@
 [
   {
-    "id": "M-myscreen-profili",
-    "title": "TEST M — MyScreen profili",
-    "subtitle": "0,916 sn · 60 fps · Apple metadata",
-    "imageURL": "/media/M-myscreen.heic",
-    "thumbURL": "/media/M-myscreen-thumb.jpg",
-    "stillURL": "/media/M-myscreen.heic",
-    "videoURL": "/media/M-myscreen.mov",
-    "category": "Live",
-    "accentRed": 0.95,
-    "accentGreen": 0.2,
-    "accentBlue": 0.55,
-    "isPremium": false,
-    "order": 0
-  },
-  {
     "id": "I-bizim",
     "title": "TEST I — bizim kare",
     "subtitle": "78 kare esitlendi",
