@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "id": "W-samuray-tam-kadraj-calisan",
+    "title": "Samuray — Tam Kadraj Çalışan Test",
+    "subtitle": "Eşlenmiş kadraj · çalışan 55 kare profili",
+    "imageURL": "/media/W-samuray-tam-kadraj-calisan.heic",
+    "thumbURL": "/media/W-samuray-tam-kadraj-calisan-thumb.jpg",
+    "stillURL": "/media/W-samuray-tam-kadraj-calisan.heic",
+    "videoURL": "/media/W-samuray-tam-kadraj-calisan.mov",
+    "category": "Live",
+    "accentRed": 1.0,
+    "accentGreen": 0.48,
+    "accentBlue": 0.08,
+    "isPremium": false,
+    "order": -11
+  }
+]
