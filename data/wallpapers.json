@@ -1,5 +1,20 @@
 [
   {
+    "id": "Z-orijinal-kamera-testi",
+    "title": "ORİJİNAL KAMERA TESTİ",
+    "subtitle": "El değmemiş Apple Live Photo — teşhis",
+    "imageURL": "/media/Z-orijinal.heic",
+    "thumbURL": "/media/Z-orijinal-thumb.jpg",
+    "stillURL": "/media/Z-orijinal.heic",
+    "videoURL": "/media/Z-orijinal.mov",
+    "category": "Live",
+    "accentRed": 0.2,
+    "accentGreen": 0.65,
+    "accentBlue": 1.0,
+    "isPremium": false,
+    "order": -1
+  },
+  {
     "id": "I-bizim",
     "title": "TEST I — bizim kare",
     "subtitle": "78 kare esitlendi",
