@@ -12,6 +12,21 @@
     "accentGreen": 0.65,
     "accentBlue": 1.0,
     "isPremium": false,
+    "order": -2
+  },
+  {
+    "id": "K-avfoundation-zamanlama",
+    "title": "TEST K — AVFOUNDATION",
+    "subtitle": "Apple track'leri korunarak yeniden kodlandı",
+    "imageURL": "/media/K-zamanlama.heic",
+    "thumbURL": "/media/K-zamanlama-thumb.jpg",
+    "stillURL": "/media/K-zamanlama.heic",
+    "videoURL": "/media/K-zamanlama.mov",
+    "category": "Live",
+    "accentRed": 0.25,
+    "accentGreen": 0.75,
+    "accentBlue": 1.0,
+    "isPremium": false,
     "order": -1
   },
   {
