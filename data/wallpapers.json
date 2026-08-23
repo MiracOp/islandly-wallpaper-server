@@ -1,5 +1,35 @@
 [
   {
+    "id": "C-hamkare",
+    "title": "TEST C — bizim kare",
+    "subtitle": "orijinal mov + bizim jpg",
+    "imageURL": "/media/C.jpg",
+    "thumbURL": "/media/C-thumb.jpg",
+    "stillURL": "/media/C.jpg",
+    "videoURL": "/media/C.mov",
+    "category": "Live",
+    "accentRed": 0.95,
+    "accentGreen": 0.55,
+    "accentBlue": 0.1,
+    "isPremium": false,
+    "order": 0
+  },
+  {
+    "id": "D-remux",
+    "title": "TEST D — bizim remux",
+    "subtitle": "bizim mov + orijinal heic",
+    "imageURL": "/media/D.heic",
+    "thumbURL": "/media/D-thumb.jpg",
+    "stillURL": "/media/D.heic",
+    "videoURL": "/media/D.mov",
+    "category": "Live",
+    "accentRed": 0.35,
+    "accentGreen": 0.55,
+    "accentBlue": 0.95,
+    "isPremium": false,
+    "order": 1
+  },
+  {
     "id": "Z-orijinal",
     "title": "TEST Z — Orijinal",
     "subtitle": "kameradan cikti gibi",
@@ -12,22 +42,7 @@
     "accentGreen": 0.8,
     "accentBlue": 0.15,
     "isPremium": false,
-    "order": 0
-  },
-  {
-    "id": "A-bizim",
-    "title": "TEST A — Bizim",
-    "subtitle": "duvar kağıdı testi",
-    "imageURL": "/media/A-bizim.jpg",
-    "thumbURL": "/media/A-bizim-thumb.jpg",
-    "stillURL": "/media/A-bizim.jpg",
-    "videoURL": "/media/A-bizim.mov",
-    "category": "Live",
-    "accentRed": 0.95,
-    "accentGreen": 0.35,
-    "accentBlue": 0.1,
-    "isPremium": false,
-    "order": 1
+    "order": 2
   },
   {
     "id": "uchiha-madara",
@@ -42,7 +57,7 @@
     "accentGreen": 0.16,
     "accentBlue": 0.2,
     "isPremium": false,
-    "order": 12
+    "order": 14
   },
   {
     "id": "dikey-manzara",
@@ -57,7 +72,7 @@
     "accentGreen": 0.55,
     "accentBlue": 0.95,
     "isPremium": false,
-    "order": 13
+    "order": 15
   },
   {
     "id": "minimalist",
@@ -72,7 +87,7 @@
     "accentGreen": 0.85,
     "accentBlue": 0.88,
     "isPremium": false,
-    "order": 14
+    "order": 16
   },
   {
     "id": "dinamik-dalga",
@@ -86,7 +101,7 @@
     "accentRed": 0.2,
     "accentGreen": 0.85,
     "accentBlue": 0.95,
-    "isPremium": false,
-    "order": 15
+    "isPremium": true,
+    "order": 17
   }
 ]
