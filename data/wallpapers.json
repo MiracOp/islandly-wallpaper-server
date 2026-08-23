@@ -1,20 +1,5 @@
 [
   {
-    "id": "video-minecraft-192-0",
-    "title": "Video Minecraft 192 0",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/video-minecraft-192-0.heic",
-    "thumbURL": "/media/video-minecraft-192-0-thumb.jpg",
-    "stillURL": "/media/video-minecraft-192-0.heic",
-    "videoURL": "/media/video-minecraft-192-0.mov",
-    "category": "Live",
-    "accentRed": 0.95,
-    "accentGreen": 0.266,
-    "accentBlue": 0.603,
-    "isPremium": true,
-    "order": 21
-  },
-  {
     "id": "video-slowly-bri-211-0",
     "title": "Video Slowly Bri 211 0",
     "subtitle": "canlı duvar kağıdı",
