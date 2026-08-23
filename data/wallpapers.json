@@ -1,20 +1,5 @@
 [
   {
-    "id": "video-cinematic-130-0",
-    "title": "Video Cinematic 130 0",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/video-cinematic-130-0.heic",
-    "thumbURL": "/media/video-cinematic-130-0-thumb.jpg",
-    "stillURL": "/media/video-cinematic-130-0.heic",
-    "videoURL": "/media/video-cinematic-130-0.mov",
-    "category": "Live",
-    "accentRed": 0.95,
-    "accentGreen": 0.66,
-    "accentBlue": 0.266,
-    "isPremium": true,
-    "order": 15
-  },
-  {
     "id": "video-dynamic-wa-488-0",
     "title": "Video Dynamic Wa 488 0",
     "subtitle": "canlı duvar kağıdı",
