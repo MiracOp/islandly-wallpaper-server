@@ -1,20 +1,5 @@
 [
   {
-    "id": "T-kalite-tam-kadraj",
-    "title": "TEST T — Kalite & Tam Kadraj",
-    "subtitle": "15 Pro Max oranı · kayıpsız metadata · 2,80 saniye",
-    "imageURL": "/media/T-kalite-tam-kadraj.heic",
-    "thumbURL": "/media/T-kalite-tam-kadraj-thumb.jpg",
-    "stillURL": "/media/T-kalite-tam-kadraj.heic",
-    "videoURL": "/media/T-kalite-tam-kadraj.mov",
-    "category": "Live",
-    "accentRed": 1,
-    "accentGreen": 0.45,
-    "accentBlue": 0.1,
-    "isPremium": false,
-    "order": -8
-  },
-  {
     "id": "P-gece-macera",
     "title": "Yıldızlı Gece",
     "subtitle": "Yeni test · gerçek 3,00 saniye",
