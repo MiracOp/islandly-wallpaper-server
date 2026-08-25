@@ -1,20 +1,5 @@
 [
   {
-    "id": "AQ-bart-isik-kilici-tam",
-    "title": "TEST — Bart Tam Hareket",
-    "subtitle": "2,73 sn · ana kare başlangıçta",
-    "imageURL": "/media/AQ-bart-isik-kilici-tam.heic",
-    "thumbURL": "/media/AQ-bart-isik-kilici-tam-thumb.jpg",
-    "stillURL": "/media/AQ-bart-isik-kilici-tam.heic",
-    "videoURL": "/media/AQ-bart-isik-kilici-tam.mov",
-    "category": "Live",
-    "accentRed": 1,
-    "accentGreen": 0.85,
-    "accentBlue": 0.3,
-    "isPremium": false,
-    "order": -4
-  },
-  {
     "id": "AR-kizil-mor-gozler-tam",
     "title": "TEST — Kızıl ve Mor Gözler Tam",
     "subtitle": "2,20 sn · ana kare başlangıçta",
