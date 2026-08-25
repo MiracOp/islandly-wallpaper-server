@@ -1,35 +1,5 @@
 [
   {
-    "id": "video-9-16-verti-523-0-3",
-    "title": "Video 9 16 Verti 523 0 3",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/video-9-16-verti-523-0-3.heic",
-    "thumbURL": "/media/video-9-16-verti-523-0-3-thumb.jpg",
-    "stillURL": "/media/video-9-16-verti-523-0-3.heic",
-    "videoURL": "/media/video-9-16-verti-523-0-3.mov",
-    "category": "Live",
-    "accentRed": 0.266,
-    "accentGreen": 0.95,
-    "accentBlue": 0.585,
-    "isPremium": false,
-    "order": 3
-  },
-  {
-    "id": "video-anime-girl-186-0",
-    "title": "Video Anime Girl 186 0",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/video-anime-girl-186-0.heic",
-    "thumbURL": "/media/video-anime-girl-186-0-thumb.jpg",
-    "stillURL": "/media/video-anime-girl-186-0.heic",
-    "videoURL": "/media/video-anime-girl-186-0.mov",
-    "category": "Live",
-    "accentRed": 0.266,
-    "accentGreen": 0.753,
-    "accentBlue": 0.95,
-    "isPremium": false,
-    "order": 4
-  },
-  {
     "id": "video-camera-sta-465-0",
     "title": "Video Camera Sta 465 0",
     "subtitle": "canlı duvar kağıdı",
