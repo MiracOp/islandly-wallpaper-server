@@ -1,20 +1,5 @@
 [
   {
-    "id": "AO-golge-savascisi-tam",
-    "title": "TEST — Gölge Savaşçısı Tam",
-    "subtitle": "2,37 sn · ana kare başlangıçta",
-    "imageURL": "/media/AO-golge-savascisi-tam.heic",
-    "thumbURL": "/media/AO-golge-savascisi-tam-thumb.jpg",
-    "stillURL": "/media/AO-golge-savascisi-tam.heic",
-    "videoURL": "/media/AO-golge-savascisi-tam.mov",
-    "category": "Live",
-    "accentRed": 0.55,
-    "accentGreen": 0.65,
-    "accentBlue": 0.8,
-    "isPremium": false,
-    "order": -6
-  },
-  {
     "id": "AP-ayli-gotik-sehir-tam",
     "title": "TEST — Aylı Gotik Şehir Tam",
     "subtitle": "2,73 sn · ana kare başlangıçta",
