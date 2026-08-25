@@ -1,20 +1,5 @@
 [
   {
-    "id": "AN-yildizli-kamp-tam",
-    "title": "TEST — Yıldızlı Kamp Tam",
-    "subtitle": "3,00 sn · ana kare başlangıçta",
-    "imageURL": "/media/AN-yildizli-kamp-tam.heic",
-    "thumbURL": "/media/AN-yildizli-kamp-tam-thumb.jpg",
-    "stillURL": "/media/AN-yildizli-kamp-tam.heic",
-    "videoURL": "/media/AN-yildizli-kamp-tam.mov",
-    "category": "Live",
-    "accentRed": 0.32,
-    "accentGreen": 0.38,
-    "accentBlue": 1,
-    "isPremium": false,
-    "order": -7
-  },
-  {
     "id": "AO-golge-savascisi-tam",
     "title": "TEST — Gölge Savaşçısı Tam",
     "subtitle": "2,37 sn · ana kare başlangıçta",
