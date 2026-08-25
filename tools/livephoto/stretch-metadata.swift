@@ -10,7 +10,7 @@ enum StretchError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .usage:
-            return "Usage: swift stretch-metadata.swift <input.mov> <output.mov> <seconds>"
+            return "Usage: swift stretch-metadata.swift <input.mov> <output.mov> <seconds> [still-seconds]"
         case .noMetadata:
             return "The template does not contain both Apple metadata tracks."
         case .exportUnavailable:
@@ -57,8 +57,18 @@ func export(_ composition: AVComposition, to output: URL) throws {
 
 do {
     let args = CommandLine.arguments
-    guard args.count == 4, let seconds = Double(args[3]), seconds > 0 else {
+    guard (args.count == 4 || args.count == 5),
+          let seconds = Double(args[3]), seconds > 0 else {
         throw StretchError.usage
+    }
+    let stillSeconds: Double
+    if args.count == 5 {
+        guard let value = Double(args[4]), value >= 0, value < seconds else {
+            throw StretchError.usage
+        }
+        stillSeconds = value
+    } else {
+        stillSeconds = seconds / 2
     }
 
     let input = URL(fileURLWithPath: args[1])
@@ -104,7 +114,7 @@ do {
 
     let stillSampleDuration = CMTime(value: 1, timescale: 600)
     let stillSourceStart = CMTime(seconds: 0.5, preferredTimescale: 600)
-    let photoTime = CMTime(seconds: seconds / 2, preferredTimescale: 600)
+    let photoTime = CMTime(seconds: stillSeconds, preferredTimescale: 600)
     try stillTrack.insertTimeRange(
         CMTimeRange(start: stillSourceStart, duration: stillSampleDuration),
         of: stillSource,
