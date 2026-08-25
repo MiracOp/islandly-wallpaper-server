@@ -10,7 +10,7 @@
     "category": "Live",
     "accentRed": 0.45,
     "accentGreen": 0.58,
-    "accentBlue": 1.0,
+    "accentBlue": 1,
     "isPremium": false,
     "order": -4
   },
@@ -25,24 +25,9 @@
     "category": "Live",
     "accentRed": 0.45,
     "accentGreen": 0.58,
-    "accentBlue": 1.0,
+    "accentBlue": 1,
     "isPremium": false,
     "order": -3
-  },
-  {
-    "id": "AB-bart-heic-transplant",
-    "title": "TEST — Apple HEIC Aktarımı",
-    "subtitle": "2,68 sn · orijinal Apple HEIC yapısı",
-    "imageURL": "/media/AB-bart-heic-transplant.heic",
-    "thumbURL": "/media/AB-bart-heic-transplant-thumb.jpg",
-    "stillURL": "/media/AB-bart-heic-transplant.heic",
-    "videoURL": "/media/AB-bart-heic-transplant.mov",
-    "category": "Live",
-    "accentRed": 1.0,
-    "accentGreen": 0.82,
-    "accentBlue": 0.05,
-    "isPremium": false,
-    "order": -2
   },
   {
     "id": "AA-bart-kamera-klon",
@@ -53,7 +38,7 @@
     "stillURL": "/media/AA-bart-kamera-klon.heic",
     "videoURL": "/media/AA-bart-kamera-klon.mov",
     "category": "Live",
-    "accentRed": 1.0,
+    "accentRed": 1,
     "accentGreen": 0.75,
     "accentBlue": 0.05,
     "isPremium": false,
