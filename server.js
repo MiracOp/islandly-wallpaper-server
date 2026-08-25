@@ -30,6 +30,9 @@ const GITHUB_PUSH_PATH = "data/push.json";
 // Uygulama görünüm ayarları (kar modu vb.) — panelden yönetilir
 const DEFAULT_CONFIG = {
   theme: "default",
+  // Duvar Kağıtları sekmesi — false yapınca uygulamada sekme hiç görünmez.
+  // App Store'a yeni sürüm göndermeden kapatıp açmak için.
+  wallpapersTabEnabled: true,
   snow: { enabled: false, intensity: 60, speed: 1, size: 1 },
   // Uygulama içi duyuru banner'ı — id değişince daha önce kapatan kullanıcıya tekrar gösterilir
   announcement: {

@@ -1155,6 +1155,29 @@
 <!-- ═══ Wallpaperlar ═══ -->
 <main class="layout page active" id="page-wallpapers">
 
+  <!-- ── Sekmeyi aç/kapa ── -->
+  <section class="panel" style="position:static;grid-column:1/-1">
+    <div class="panel-head">
+      <h2>Duvar Kağıtları Sekmesi</h2>
+      <span class="live-chip on" id="wpTabChip"><span class="dot"></span>AÇIK</span>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="t-label">🖼️ Uygulamada göster</div>
+        <div class="t-hint">Kapatınca alttaki "Duvar Kağıtları" sekmesi hiç görünmez. Uygulama güncellemesi gerekmiyor — kullanıcı uygulamayı bir sonraki açışında etkilenir.</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="wpTabEnabled">
+        <span class="track"></span>
+      </label>
+    </div>
+
+    <div class="form-actions" style="margin-top:20px">
+      <button class="btn btn-primary" id="saveWpTabBtn">🖼️ Sekme Ayarını Yayınla</button>
+    </div>
+  </section>
+
   <!-- ── Form ── -->
   <section class="panel">
     <div class="panel-head">
@@ -2347,7 +2370,46 @@ async function loadConfig() {
   applyAnnUI();
   applyThemesUI();
   applyPaywallUI();
+  applyWpTabUI();
 }
+
+/* ── Duvar Kağıtları sekmesi aç/kapa ── */
+function applyWpTabUI() {
+  // Varsayılan AÇIK — alan hiç yoksa sekme görünsün
+  const on = cfg.wallpapersTabEnabled !== false;
+  $("wpTabEnabled").checked = on;
+  paintWpTabChip(on);
+}
+
+function paintWpTabChip(on) {
+  const chip = $("wpTabChip");
+  if (!chip) return;
+  chip.className = `live-chip ${on ? "on" : "off"}`;
+  chip.innerHTML = `<span class="dot"></span>${on ? "AÇIK" : "KAPALI"}`;
+}
+
+$("wpTabEnabled").addEventListener("change", (e) => paintWpTabChip(e.target.checked));
+
+$("saveWpTabBtn").onclick = async () => {
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
+  const btn = $("saveWpTabBtn");
+  const on = $("wpTabEnabled").checked;
+  btn.disabled = true; btn.textContent = "Yayınlanıyor…";
+  try {
+    const res = await fetch("/api/config", {
+      method: "PUT", headers: headers(),
+      body: JSON.stringify({ wallpapersTabEnabled: on })
+    });
+    if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
+    else if (!res.ok) toast("Kaydedilemedi", "err");
+    else {
+      cfg = await res.json();
+      paintWpTabChip(cfg.wallpapersTabEnabled !== false);
+      toast(on ? "🖼️ Sekme açıldı!" : "🚫 Sekme kapatıldı");
+    }
+  } catch { toast("Bağlantı hatası", "err"); }
+  btn.disabled = false; btn.textContent = "🖼️ Sekme Ayarını Yayınla";
+};
 
 /* ── Duyuru ── */
 function applyAnnUI() {
