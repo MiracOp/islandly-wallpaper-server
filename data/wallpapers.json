@@ -1,20 +1,5 @@
 [
   {
-    "id": "AA-bart-kamera-klon",
-    "title": "TEST — Uzun Kamera Klonu",
-    "subtitle": "2,68 sn · gerçek kamera kabı · 78 kare",
-    "imageURL": "/media/AA-bart-kamera-klon.heic",
-    "thumbURL": "/media/AA-bart-kamera-klon-thumb.jpg",
-    "stillURL": "/media/AA-bart-kamera-klon.heic",
-    "videoURL": "/media/AA-bart-kamera-klon.mov",
-    "category": "Live",
-    "accentRed": 1,
-    "accentGreen": 0.75,
-    "accentBlue": 0.05,
-    "isPremium": false,
-    "order": -1
-  },
-  {
     "id": "0823-1",
     "title": "Canlı Duvar Kağıdı 1",
     "subtitle": "canlı duvar kağıdı",
