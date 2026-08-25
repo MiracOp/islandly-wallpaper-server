@@ -10,7 +10,7 @@ enum StretchError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .usage:
-            return "Usage: swift stretch-metadata.swift <input.mov> <output.mov> <seconds> [still-seconds]"
+            return "Usage: swift stretch-metadata.swift <input.mov> <output.mov> <seconds> [still-seconds] [fps]"
         case .noMetadata:
             return "The template does not contain both Apple metadata tracks."
         case .exportUnavailable:
@@ -57,18 +57,27 @@ func export(_ composition: AVComposition, to output: URL) throws {
 
 do {
     let args = CommandLine.arguments
-    guard (args.count == 4 || args.count == 5),
+    guard (4...6).contains(args.count),
           let seconds = Double(args[3]), seconds > 0 else {
         throw StretchError.usage
     }
     let stillSeconds: Double
-    if args.count == 5 {
+    if args.count >= 5 {
         guard let value = Double(args[4]), value >= 0, value < seconds else {
             throw StretchError.usage
         }
         stillSeconds = value
     } else {
         stillSeconds = seconds / 2
+    }
+    let targetFPS: Int
+    if args.count == 6 {
+        guard let value = Int(args[5]), value == 30 || value == 60 else {
+            throw StretchError.usage
+        }
+        targetFPS = value
+    } else {
+        targetFPS = 60
     }
 
     let input = URL(fileURLWithPath: args[1])
@@ -92,24 +101,46 @@ do {
         throw StretchError.noMetadata
     }
 
-    let infoUnit = CMTime(seconds: 1, preferredTimescale: 60_000)
     let infoStart = CMTime(seconds: 0.05, preferredTimescale: 60_000)
-    let repetitions = Int(ceil(seconds))
-    for index in 0..<repetitions {
-        let destination = infoStart + CMTime(seconds: Double(index), preferredTimescale: 60_000)
-        try infoTrack.insertTimeRange(
-            CMTimeRange(start: infoStart, duration: infoUnit),
-            of: infoSource,
-            at: destination
-        )
-    }
-
     let targetDuration = CMTime(seconds: seconds, preferredTimescale: 60_000)
-    if infoTrack.timeRange.end > targetDuration + infoStart {
-        infoTrack.removeTimeRange(CMTimeRange(
-            start: targetDuration + infoStart,
-            end: infoTrack.timeRange.end
-        ))
+    if targetFPS == 60 {
+        let infoUnit = CMTime(seconds: 1, preferredTimescale: 60_000)
+        let repetitions = Int(ceil(seconds))
+        for index in 0..<repetitions {
+            let destination = infoStart + CMTime(seconds: Double(index), preferredTimescale: 60_000)
+            try infoTrack.insertTimeRange(
+                CMTimeRange(start: infoStart, duration: infoUnit),
+                of: infoSource,
+                at: destination
+            )
+        }
+        if infoTrack.timeRange.end > targetDuration + infoStart {
+            infoTrack.removeTimeRange(CMTimeRange(
+                start: targetDuration + infoStart,
+                end: infoTrack.timeRange.end
+            ))
+        }
+    } else {
+        // The same camera-derived info sample is repeated, but its timing is
+        // stretched to a genuine 30 Hz cadence. This keeps one metadata sample
+        // per video frame instead of leaving a 60 Hz track beside a 30 fps clip.
+        let sampleCount = Int((seconds * Double(targetFPS)).rounded())
+        let sourceFrame = CMTime(value: 1, timescale: 60)
+        for index in 0..<sampleCount {
+            let sourceIndex = index % 60
+            let sourceStart = infoStart + CMTime(value: Int64(sourceIndex), timescale: 60)
+            let destination = infoStart + CMTime(value: Int64(index), timescale: 60)
+            try infoTrack.insertTimeRange(
+                CMTimeRange(start: sourceStart, duration: sourceFrame),
+                of: infoSource,
+                at: destination
+            )
+        }
+        let packedDuration = CMTime(value: Int64(sampleCount), timescale: 60)
+        infoTrack.scaleTimeRange(
+            CMTimeRange(start: infoStart, duration: packedDuration),
+            toDuration: targetDuration
+        )
     }
 
     let stillSampleDuration = CMTime(value: 1, timescale: 600)

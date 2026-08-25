@@ -1,5 +1,20 @@
 [
   {
+    "id": "AU-buyulu-sato-30fps",
+    "title": "TEST — Büyülü Şato Akış Testi",
+    "subtitle": "2,00 sn · 30 FPS · kilit ekranı odaklı",
+    "imageURL": "/media/AU-buyulu-sato-30fps.heic",
+    "thumbURL": "/media/AU-buyulu-sato-30fps-thumb.jpg",
+    "stillURL": "/media/AU-buyulu-sato-30fps.heic",
+    "videoURL": "/media/AU-buyulu-sato-30fps.mov",
+    "category": "Live",
+    "accentRed": 0.45,
+    "accentGreen": 0.58,
+    "accentBlue": 1.0,
+    "isPremium": false,
+    "order": -8
+  },
+  {
     "id": "AN-yildizli-kamp-tam",
     "title": "TEST — Yıldızlı Kamp Tam",
     "subtitle": "3,00 sn · ana kare başlangıçta",
