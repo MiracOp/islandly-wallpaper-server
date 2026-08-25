@@ -1,20 +1,5 @@
 [
   {
-    "id": "video-live-wallp-483-0",
-    "title": "Video Live Wallp 483 0",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/video-live-wallp-483-0.heic",
-    "thumbURL": "/media/video-live-wallp-483-0-thumb.jpg",
-    "stillURL": "/media/video-live-wallp-483-0.heic",
-    "videoURL": "/media/video-live-wallp-483-0.mov",
-    "category": "Live",
-    "accentRed": 0.567,
-    "accentGreen": 0.266,
-    "accentBlue": 0.95,
-    "isPremium": true,
-    "order": 20
-  },
-  {
     "id": "video-masterpiec-459-0",
     "title": "Video Masterpiec 459 0",
     "subtitle": "canlı duvar kağıdı",
