@@ -1,20 +1,5 @@
 [
   {
-    "id": "AR-kizil-mor-gozler-tam",
-    "title": "TEST — Kızıl ve Mor Gözler Tam",
-    "subtitle": "2,20 sn · ana kare başlangıçta",
-    "imageURL": "/media/AR-kizil-mor-gozler-tam.heic",
-    "thumbURL": "/media/AR-kizil-mor-gozler-tam-thumb.jpg",
-    "stillURL": "/media/AR-kizil-mor-gozler-tam.heic",
-    "videoURL": "/media/AR-kizil-mor-gozler-tam.mov",
-    "category": "Live",
-    "accentRed": 0.9,
-    "accentGreen": 0.2,
-    "accentBlue": 0.85,
-    "isPremium": false,
-    "order": -3
-  },
-  {
     "id": "AS-buyulu-sato-tam",
     "title": "TEST — Büyülü Şato Tam",
     "subtitle": "2,03 sn · ana kare başlangıçta",
