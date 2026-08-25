@@ -1,20 +1,5 @@
 [
   {
-    "id": "AL-buyulu-sato",
-    "title": "Büyülü Şato",
-    "subtitle": "2,03 sn · yıldızların altında masalsı gece",
-    "imageURL": "/media/AL-buyulu-sato.heic",
-    "thumbURL": "/media/AL-buyulu-sato-thumb.jpg",
-    "stillURL": "/media/AL-buyulu-sato.heic",
-    "videoURL": "/media/AL-buyulu-sato.mov",
-    "category": "Live",
-    "accentRed": 0.45,
-    "accentGreen": 0.58,
-    "accentBlue": 1,
-    "isPremium": false,
-    "order": 5
-  },
-  {
     "id": "AM-gunbatimi-samuray",
     "title": "Gün Batımı Samurayı",
     "subtitle": "2,80 sn · altın tarlalarda yalnız savaşçı",
