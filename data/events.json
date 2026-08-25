@@ -90,19 +90,9 @@
     }
   },
   "2026-08-23": {
-    "paywallShown": 59,
+    "paywallShown": 57,
     "purchases": {
       "com.dynamicisland.premium.monthly": 1
     }
-  },
-  "2026-08-24": {
-    "paywallShown": 56,
-    "purchases": {
-      "com.dynamicisland.premium.monthly": 1
-    }
-  },
-  "2026-08-25": {
-    "paywallShown": 26,
-    "purchases": {}
   }
 }
