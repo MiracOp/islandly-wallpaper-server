@@ -1,20 +1,5 @@
 [
   {
-    "id": "video-cinematic-110-0-kopyas",
-    "title": "Video Cinematic 110 0 Kopyas",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/video-cinematic-110-0-kopyas.heic",
-    "thumbURL": "/media/video-cinematic-110-0-kopyas-thumb.jpg",
-    "stillURL": "/media/video-cinematic-110-0-kopyas.heic",
-    "videoURL": "/media/video-cinematic-110-0-kopyas.mov",
-    "category": "Live",
-    "accentRed": 0.903,
-    "accentGreen": 0.266,
-    "accentBlue": 0.95,
-    "isPremium": false,
-    "order": 6
-  },
-  {
     "id": "video-cinematic-110-0",
     "title": "Video Cinematic 110 0",
     "subtitle": "canlı duvar kağıdı",
