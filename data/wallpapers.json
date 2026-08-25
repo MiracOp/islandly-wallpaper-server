@@ -1,20 +1,5 @@
 [
   {
-    "id": "AP-ayli-gotik-sehir-tam",
-    "title": "TEST — Aylı Gotik Şehir Tam",
-    "subtitle": "2,73 sn · ana kare başlangıçta",
-    "imageURL": "/media/AP-ayli-gotik-sehir-tam.heic",
-    "thumbURL": "/media/AP-ayli-gotik-sehir-tam-thumb.jpg",
-    "stillURL": "/media/AP-ayli-gotik-sehir-tam.heic",
-    "videoURL": "/media/AP-ayli-gotik-sehir-tam.mov",
-    "category": "Live",
-    "accentRed": 0.55,
-    "accentGreen": 0.62,
-    "accentBlue": 0.72,
-    "isPremium": false,
-    "order": -5
-  },
-  {
     "id": "AQ-bart-isik-kilici-tam",
     "title": "TEST — Bart Tam Hareket",
     "subtitle": "2,73 sn · ana kare başlangıçta",
