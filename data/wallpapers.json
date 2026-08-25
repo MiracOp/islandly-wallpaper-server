@@ -1,20 +1,5 @@
 [
   {
-    "id": "AK-kizil-mor-gozler",
-    "title": "Kızıl ve Mor Gözler",
-    "subtitle": "2,20 sn · iki efsanevi güç",
-    "imageURL": "/media/AK-kizil-mor-gozler.heic",
-    "thumbURL": "/media/AK-kizil-mor-gozler-thumb.jpg",
-    "stillURL": "/media/AK-kizil-mor-gozler.heic",
-    "videoURL": "/media/AK-kizil-mor-gozler.mov",
-    "category": "Live",
-    "accentRed": 0.9,
-    "accentGreen": 0.2,
-    "accentBlue": 0.85,
-    "isPremium": false,
-    "order": 4
-  },
-  {
     "id": "AL-buyulu-sato",
     "title": "Büyülü Şato",
     "subtitle": "2,03 sn · yıldızların altında masalsı gece",
