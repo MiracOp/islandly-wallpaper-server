@@ -1,20 +1,5 @@
 [
   {
-    "id": "AH-golge-savascisi",
-    "title": "Gölge Savaşçısı",
-    "subtitle": "2,37 sn · karanlığın içindeki güç",
-    "imageURL": "/media/AH-golge-savascisi.heic",
-    "thumbURL": "/media/AH-golge-savascisi-thumb.jpg",
-    "stillURL": "/media/AH-golge-savascisi.heic",
-    "videoURL": "/media/AH-golge-savascisi.mov",
-    "category": "Live",
-    "accentRed": 0.55,
-    "accentGreen": 0.65,
-    "accentBlue": 0.8,
-    "isPremium": false,
-    "order": 1
-  },
-  {
     "id": "AI-ayli-gotik-sehir",
     "title": "Aylı Gotik Şehir",
     "subtitle": "2,73 sn · ay ışığında karanlık şehir",
