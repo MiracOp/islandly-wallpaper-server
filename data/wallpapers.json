@@ -1,17 +1,1 @@
-[
-  {
-    "id": "AM-gunbatimi-samuray",
-    "title": "Gün Batımı Samurayı",
-    "subtitle": "2,80 sn · altın tarlalarda yalnız savaşçı",
-    "imageURL": "/media/AM-gunbatimi-samuray.heic",
-    "thumbURL": "/media/AM-gunbatimi-samuray-thumb.jpg",
-    "stillURL": "/media/AM-gunbatimi-samuray.heic",
-    "videoURL": "/media/AM-gunbatimi-samuray.mov",
-    "category": "Live",
-    "accentRed": 1,
-    "accentGreen": 0.48,
-    "accentBlue": 0.08,
-    "isPremium": false,
-    "order": 6
-  }
-]
+[]
