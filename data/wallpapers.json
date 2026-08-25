@@ -1,20 +1,5 @@
 [
   {
-    "id": "AD-buyulu-sato",
-    "title": "Büyülü Şato",
-    "subtitle": "Yıldızların altında masalsı bir gece",
-    "imageURL": "/media/AD-buyulu-sato.heic",
-    "thumbURL": "/media/AD-buyulu-sato-thumb.jpg",
-    "stillURL": "/media/AD-buyulu-sato.heic",
-    "videoURL": "/media/AD-buyulu-sato.mov",
-    "category": "Live",
-    "accentRed": 0.45,
-    "accentGreen": 0.58,
-    "accentBlue": 1,
-    "isPremium": false,
-    "order": -3
-  },
-  {
     "id": "AA-bart-kamera-klon",
     "title": "TEST — Uzun Kamera Klonu",
     "subtitle": "2,68 sn · gerçek kamera kabı · 78 kare",
