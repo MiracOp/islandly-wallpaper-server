@@ -161,7 +161,7 @@
     "accentRed": 0.27,
     "accentGreen": 0.95,
     "accentBlue": 0.42,
-    "isPremium": true,
+    "isPremium": false,
     "order": 10
   },
   {
