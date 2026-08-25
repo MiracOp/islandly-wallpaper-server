@@ -1,35 +1,5 @@
 [
   {
-    "id": "video-masterpiec-459-0",
-    "title": "Video Masterpiec 459 0",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/video-masterpiec-459-0.heic",
-    "thumbURL": "/media/video-masterpiec-459-0-thumb.jpg",
-    "stillURL": "/media/video-masterpiec-459-0.heic",
-    "videoURL": "/media/video-masterpiec-459-0.mov",
-    "category": "Live",
-    "accentRed": 0.95,
-    "accentGreen": 0.266,
-    "accentBlue": 0.771,
-    "isPremium": true,
-    "order": 21
-  },
-  {
-    "id": "video-minecraft-204-0",
-    "title": "Video Minecraft 204 0",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/video-minecraft-204-0.heic",
-    "thumbURL": "/media/video-minecraft-204-0-thumb.jpg",
-    "stillURL": "/media/video-minecraft-204-0.heic",
-    "videoURL": "/media/video-minecraft-204-0.mov",
-    "category": "Live",
-    "accentRed": 0.95,
-    "accentGreen": 0.323,
-    "accentBlue": 0.266,
-    "isPremium": true,
-    "order": 22
-  },
-  {
     "id": "video-minimalist-486-0",
     "title": "Video Minimalist 486 0",
     "subtitle": "canlı duvar kağıdı",
