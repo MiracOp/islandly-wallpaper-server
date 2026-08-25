@@ -1,5 +1,20 @@
 [
   {
+    "id": "AF-buyulu-sato-akici",
+    "title": "TEST — Büyülü Şato Akıcı",
+    "subtitle": "2,00 sn · 60 FPS · kilit ekranı optimizasyonu",
+    "imageURL": "/media/AF-buyulu-sato-akici.heic",
+    "thumbURL": "/media/AF-buyulu-sato-akici-thumb.jpg",
+    "stillURL": "/media/AF-buyulu-sato-akici.heic",
+    "videoURL": "/media/AF-buyulu-sato-akici.mov",
+    "category": "Live",
+    "accentRed": 0.45,
+    "accentGreen": 0.58,
+    "accentBlue": 1.0,
+    "isPremium": false,
+    "order": -5
+  },
+  {
     "id": "AE-buyulu-sato-2sn",
     "title": "TEST — Büyülü Şato 2 Sn",
     "subtitle": "2,00 sn · 120 kare · uzun hareket testi",
