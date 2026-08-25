@@ -1,20 +1,5 @@
 [
   {
-    "id": "AJ-bart-isik-kilici",
-    "title": "Bart — Işık Kılıcı",
-    "subtitle": "2,73 sn · karanlığa karşı ışık",
-    "imageURL": "/media/AJ-bart-isik-kilici.heic",
-    "thumbURL": "/media/AJ-bart-isik-kilici-thumb.jpg",
-    "stillURL": "/media/AJ-bart-isik-kilici.heic",
-    "videoURL": "/media/AJ-bart-isik-kilici.mov",
-    "category": "Live",
-    "accentRed": 1,
-    "accentGreen": 0.85,
-    "accentBlue": 0.3,
-    "isPremium": false,
-    "order": 3
-  },
-  {
     "id": "AK-kizil-mor-gozler",
     "title": "Kızıl ve Mor Gözler",
     "subtitle": "2,20 sn · iki efsanevi güç",
