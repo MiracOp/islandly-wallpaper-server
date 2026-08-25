@@ -1,20 +1,5 @@
 [
   {
-    "id": "AS-buyulu-sato-tam",
-    "title": "TEST — Büyülü Şato Tam",
-    "subtitle": "2,03 sn · ana kare başlangıçta",
-    "imageURL": "/media/AS-buyulu-sato-tam.heic",
-    "thumbURL": "/media/AS-buyulu-sato-tam-thumb.jpg",
-    "stillURL": "/media/AS-buyulu-sato-tam.heic",
-    "videoURL": "/media/AS-buyulu-sato-tam.mov",
-    "category": "Live",
-    "accentRed": 0.45,
-    "accentGreen": 0.58,
-    "accentBlue": 1,
-    "isPremium": false,
-    "order": -2
-  },
-  {
     "id": "AT-gunbatimi-samuray-tam",
     "title": "TEST — Gün Batımı Samurayı Tam",
     "subtitle": "2,80 sn · ana kare başlangıçta",
