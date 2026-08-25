@@ -1,20 +1,5 @@
 [
   {
-    "id": "AI-ayli-gotik-sehir",
-    "title": "Aylı Gotik Şehir",
-    "subtitle": "2,73 sn · ay ışığında karanlık şehir",
-    "imageURL": "/media/AI-ayli-gotik-sehir.heic",
-    "thumbURL": "/media/AI-ayli-gotik-sehir-thumb.jpg",
-    "stillURL": "/media/AI-ayli-gotik-sehir.heic",
-    "videoURL": "/media/AI-ayli-gotik-sehir.mov",
-    "category": "Live",
-    "accentRed": 0.55,
-    "accentGreen": 0.62,
-    "accentBlue": 0.72,
-    "isPremium": false,
-    "order": 2
-  },
-  {
     "id": "AJ-bart-isik-kilici",
     "title": "Bart — Işık Kılıcı",
     "subtitle": "2,73 sn · karanlığa karşı ışık",
