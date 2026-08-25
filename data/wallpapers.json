@@ -1,20 +1,5 @@
 [
   {
-    "id": "AT-gunbatimi-samuray-tam",
-    "title": "TEST — Gün Batımı Samurayı Tam",
-    "subtitle": "2,80 sn · ana kare başlangıçta",
-    "imageURL": "/media/AT-gunbatimi-samuray-tam.heic",
-    "thumbURL": "/media/AT-gunbatimi-samuray-tam-thumb.jpg",
-    "stillURL": "/media/AT-gunbatimi-samuray-tam.heic",
-    "videoURL": "/media/AT-gunbatimi-samuray-tam.mov",
-    "category": "Live",
-    "accentRed": 1,
-    "accentGreen": 0.48,
-    "accentBlue": 0.08,
-    "isPremium": false,
-    "order": -1
-  },
-  {
     "id": "AM-gunbatimi-samuray",
     "title": "Gün Batımı Samurayı",
     "subtitle": "2,80 sn · altın tarlalarda yalnız savaşçı",
