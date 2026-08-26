@@ -1282,9 +1282,8 @@
       </div>
       <div class="row">
         <div class="field">
-        <label>Kategori <span style="color:var(--text-dim);font-weight:400">— yeni bir ad da yazabilirsin</span></label>
-        <input type="text" id="fCategory" list="categorySuggestions" placeholder="Live, Anime, Space…">
-        <datalist id="categorySuggestions"></datalist>
+        <label>Kategori <span style="color:var(--text-dim);font-weight:400">— yeni kategori için üstte “Kategori Aç”ı kullan</span></label>
+        <select id="fCategory"></select>
       </div>
       <div class="field">
         <label>Sıra</label>
@@ -1540,8 +1539,11 @@ function renderCategoryControls() {
   ].filter(Boolean))]
     .sort((a, b) => a.localeCompare(b, "tr"));
 
-  $("categorySuggestions").innerHTML = categoryNames
-    .map(category => `<option value="${esc(category)}"></option>`).join("");
+  const selectedCategory = $("fCategory").value;
+  $("fCategory").innerHTML = categoryNames.length
+    ? categoryNames.map(category => `<option value="${esc(category)}">${esc(category)}</option>`).join("")
+    : '<option value="Live">Live</option>';
+  $("fCategory").value = categoryNames.includes(selectedCategory) ? selectedCategory : (categoryNames[0] || "Live");
 
   $("chips").innerHTML = [
     '<button class="chip active" data-cat="all">Tümü</button>',
