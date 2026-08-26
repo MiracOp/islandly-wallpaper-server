@@ -1,6 +1,6 @@
 {
   "theme": "default",
-  "wallpapersTabEnabled": false,
+  "wallpapersTabEnabled": true,
   "snow": {
     "enabled": false,
     "intensity": 40,
