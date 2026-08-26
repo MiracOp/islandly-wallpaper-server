@@ -1,35 +1,5 @@
 [
   {
-    "id": "0824-1",
-    "title": "Canlı Duvar Kağıdı 3",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/0824-1.heic",
-    "thumbURL": "/media/0824-1-thumb.jpg",
-    "stillURL": "/media/0824-1.heic",
-    "videoURL": "/media/0824-1.mov",
-    "category": "Live",
-    "accentRed": 0.51,
-    "accentGreen": 0.95,
-    "accentBlue": 0.266,
-    "isPremium": false,
-    "order": 2
-  },
-  {
-    "id": "0824-2",
-    "title": "Canlı Duvar Kağıdı 4",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/0824-2.heic",
-    "thumbURL": "/media/0824-2-thumb.jpg",
-    "stillURL": "/media/0824-2.heic",
-    "videoURL": "/media/0824-2.mov",
-    "category": "Live",
-    "accentRed": 0.266,
-    "accentGreen": 0.95,
-    "accentBlue": 0.585,
-    "isPremium": false,
-    "order": 3
-  },
-  {
     "id": "0824-3",
     "title": "Canlı Duvar Kağıdı 5",
     "subtitle": "canlı duvar kağıdı",
