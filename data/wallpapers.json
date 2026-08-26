@@ -1,20 +1,5 @@
 [
   {
-    "id": "0824-4-kopyas",
-    "title": "0824 4 Kopyas",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/0824-4-kopyas.heic",
-    "thumbURL": "/media/0824-4-kopyas-thumb.jpg",
-    "stillURL": "/media/0824-4-kopyas.heic",
-    "videoURL": "/media/0824-4-kopyas.mov",
-    "category": "Live",
-    "accentRed": 0.341,
-    "accentGreen": 0.266,
-    "accentBlue": 0.95,
-    "isPremium": false,
-    "order": 5
-  },
-  {
     "id": "0824-4",
     "title": "Canlı Duvar Kağıdı 7",
     "subtitle": "canlı duvar kağıdı",
