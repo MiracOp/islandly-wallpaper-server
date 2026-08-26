@@ -9,7 +9,6 @@ const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const PORT = Number(process.env.PORT || 3000);
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "change-me";
 const DATA_FILE = process.env.DATA_FILE || join(__dirname, "data", "wallpapers.json");
-const CATEGORY_FILE = process.env.CATEGORY_FILE || join(__dirname, "data", "wallpaper-categories.json");
 const PUBLIC_DIR = join(__dirname, "public");
 
 // ── GitHub sync ──────────────────────────────────────────────
@@ -19,7 +18,6 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
 const GITHUB_REPO = process.env.GITHUB_REPO || "MiracOp/islandly-wallpaper-server";
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH || "main";
 const GITHUB_DATA_PATH = "data/wallpapers.json";
-const GITHUB_CATEGORY_PATH = "data/wallpaper-categories.json";
 const CONFIG_FILE = process.env.CONFIG_FILE || join(__dirname, "data", "appconfig.json");
 const GITHUB_CONFIG_PATH = "data/appconfig.json";
 const GIFTS_FILE = process.env.GIFTS_FILE || join(__dirname, "data", "gifts.json");
@@ -913,18 +911,6 @@ async function writeWallpapers(items) {
     "chore: update wallpapers via admin panel [skip railway]"); // arka planda
 }
 
-async function readWallpaperCategories() {
-  const raw = await readFile(CATEGORY_FILE, "utf8");
-  const categories = JSON.parse(raw);
-  return Array.isArray(categories) ? categories : [];
-}
-
-async function writeWallpaperCategories(categories) {
-  await writeFile(CATEGORY_FILE, `${JSON.stringify(categories, null, 2)}\n`, "utf8");
-  pushFileToGitHub(GITHUB_CATEGORY_PATH, categories,
-    "chore: update wallpaper categories via admin panel [skip railway]");
-}
-
 async function readConfig() {
   try {
     const raw = JSON.parse(await readFile(CONFIG_FILE, "utf8"));
@@ -1180,33 +1166,14 @@ function normalizeWallpaper(input, existing = {}) {
     stillURL: String(input.stillURL ?? existing.stillURL ?? "").trim(),
     // Doluysa canlı duvar kağıdı — iOS app videoyu Live Photo olarak kaydeder
     videoURL: String(input.videoURL ?? existing.videoURL ?? "").trim(),
-    // Çiftli set: iki görsel aynı set ID altında, lock/home veya sol/sağ olarak eşleşir.
-    pairSetID: String(input.pairSetID ?? existing.pairSetID ?? "").trim(),
-    pairPosition: String(input.pairPosition ?? existing.pairPosition ?? "").trim(),
-    pairName: String(input.pairName ?? existing.pairName ?? "").trim(),
+    // Çift duvar kağıdının ikinci yarısı. Doluysa app ızgarada tek kart
+    // gösterir, açılınca iki duvar kağıdı sunar (Couples kategorisi).
+    partnerURL: String(input.partnerURL ?? existing.partnerURL ?? "").trim(),
     category: String(input.category || existing.category || "Nature"),
     accentRed: Number(input.accentRed ?? existing.accentRed ?? 0.45),
     accentGreen: Number(input.accentGreen ?? existing.accentGreen ?? 0.65),
     accentBlue: Number(input.accentBlue ?? existing.accentBlue ?? 1),
     isPremium: Boolean(input.isPremium ?? existing.isPremium ?? false),
-    order: Number(input.order ?? existing.order ?? 999)
-  };
-}
-
-function normalizeWallpaperCategory(input, existing = {}) {
-  const id = String(input.id || existing.id || "").trim();
-  const name = String(input.name || existing.name || id).trim();
-  if (!id || !/^[A-Za-z0-9_-]+$/.test(id)) {
-    throw new Error("Kategori ID yalnızca harf, sayı, _ ve - içerebilir");
-  }
-  if (!name) throw new Error("Kategori adı zorunlu");
-  return {
-    id,
-    name,
-    symbol: String(input.symbol || existing.symbol || "photo.fill").trim(),
-    accentRed: Number(input.accentRed ?? existing.accentRed ?? 0.48),
-    accentGreen: Number(input.accentGreen ?? existing.accentGreen ?? 0.36),
-    accentBlue: Number(input.accentBlue ?? existing.accentBlue ?? 0.95),
     order: Number(input.order ?? existing.order ?? 999)
   };
 }
@@ -1704,53 +1671,6 @@ const server = createServer(async (req, res) => {
       return;
     }
 
-    if (req.method === "GET" && url.pathname === "/api/wallpaper-categories") {
-      const categories = await readWallpaperCategories();
-      send(res, 200, categories.sort((a, b) => Number(a.order || 999) - Number(b.order || 999)));
-      return;
-    }
-
-    if (req.method === "POST" && url.pathname === "/api/wallpaper-categories") {
-      if (!requireAdmin(req, res)) return;
-      const categories = await readWallpaperCategories();
-      const category = normalizeWallpaperCategory(await parseBody(req));
-      if (categories.some((item) => item.id === category.id)) {
-        send(res, 409, { error: "Bu kategori ID zaten var" });
-        return;
-      }
-      categories.push(category);
-      await writeWallpaperCategories(categories);
-      send(res, 201, category);
-      return;
-    }
-
-    const categoryMatch = url.pathname.match(/^\/api\/wallpaper-categories\/([^/]+)$/);
-    if (categoryMatch && req.method === "PUT") {
-      if (!requireAdmin(req, res)) return;
-      const id = decodeURIComponent(categoryMatch[1]);
-      const categories = await readWallpaperCategories();
-      const index = categories.findIndex((item) => item.id === id);
-      if (index === -1) { send(res, 404, { error: "Kategori bulunamadı" }); return; }
-      categories[index] = normalizeWallpaperCategory({ ...(await parseBody(req)), id }, categories[index]);
-      await writeWallpaperCategories(categories);
-      send(res, 200, categories[index]);
-      return;
-    }
-
-    if (categoryMatch && req.method === "DELETE") {
-      if (!requireAdmin(req, res)) return;
-      const id = decodeURIComponent(categoryMatch[1]);
-      const wallpapers = await readWallpapers();
-      if (wallpapers.some((item) => item.category === id)) {
-        send(res, 409, { error: "Önce bu kategorideki duvar kağıtlarını taşı" });
-        return;
-      }
-      const categories = await readWallpaperCategories();
-      await writeWallpaperCategories(categories.filter((item) => item.id !== id));
-      send(res, 200, { deleted: true });
-      return;
-    }
-
     if (req.method === "GET" && url.pathname === "/api/wallpapers") {
       const items = await readWallpapers();
       send(res, 200, items.sort((a, b) => Number(a.order || 999) - Number(b.order || 999)));
@@ -1804,7 +1724,6 @@ const server = createServer(async (req, res) => {
 });
 
 await pullFileFromGitHub(GITHUB_DATA_PATH, DATA_FILE);
-await pullFileFromGitHub(GITHUB_CATEGORY_PATH, CATEGORY_FILE);
 await pullFileFromGitHub(GITHUB_CONFIG_PATH, CONFIG_FILE);
 await pullFileFromGitHub(GITHUB_GIFTS_PATH, GIFTS_FILE);
 await pullFileFromGitHub(GITHUB_EVENTS_PATH, EVENTS_FILE);
