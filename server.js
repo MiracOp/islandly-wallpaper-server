@@ -1180,6 +1180,10 @@ function normalizeWallpaper(input, existing = {}) {
     stillURL: String(input.stillURL ?? existing.stillURL ?? "").trim(),
     // Doluysa canlı duvar kağıdı — iOS app videoyu Live Photo olarak kaydeder
     videoURL: String(input.videoURL ?? existing.videoURL ?? "").trim(),
+    // Çiftli set: iki görsel aynı set ID altında, lock/home veya sol/sağ olarak eşleşir.
+    pairSetID: String(input.pairSetID ?? existing.pairSetID ?? "").trim(),
+    pairPosition: String(input.pairPosition ?? existing.pairPosition ?? "").trim(),
+    pairName: String(input.pairName ?? existing.pairName ?? "").trim(),
     category: String(input.category || existing.category || "Nature"),
     accentRed: Number(input.accentRed ?? existing.accentRed ?? 0.45),
     accentGreen: Number(input.accentGreen ?? existing.accentGreen ?? 0.65),

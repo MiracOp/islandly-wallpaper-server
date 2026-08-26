@@ -176,6 +176,9 @@
   .field input:focus, .field select:focus { border-color: var(--accent); }
   .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239a9db4' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .pair-fields { margin: 2px 0 16px; padding: 14px; border-radius: 15px; border: 1px solid rgba(244,87,177,.26); background: rgba(244,87,177,.06); }
+  .pair-fields-head { margin-bottom: 13px; color: #ffd3e7; font-size: 12px; font-weight: 800; }
+  .pair-fields-head span { margin-left: 5px; color: var(--text-dim); font-weight: 500; }
   .row3 { display: grid; grid-template-columns: auto 1fr 1fr; gap: 12px; align-items: end; }
 
   .color-well {
@@ -1216,6 +1219,14 @@
       <label>Video URL <span style="color:var(--text-dim);font-weight:400">— opsiyonel, canlı duvar kağıdı (.mp4)</span></label>
       <input type="url" id="fVideo" placeholder="https://…/video.mp4">
     </div>
+    <div class="pair-fields">
+      <div class="pair-fields-head">🤝 Çiftli Wallpaper Seti <span>iki görsel yan yana birleşir</span></div>
+      <div class="row">
+        <div class="field"><label>Set ID</label><input type="text" id="fPairSetID" placeholder="couple-spongebob-01"></div>
+        <div class="field"><label>Bu görselin yeri</label><select id="fPairPosition"><option value="">Tekli wallpaper</option><option value="lock">Lock Screen / Sol</option><option value="home">Home Screen / Sağ</option></select></div>
+      </div>
+      <div class="field"><label>Set adı</label><input type="text" id="fPairName" placeholder="SpongeBob & Patrick"></div>
+    </div>
     <div class="row">
       <div class="field">
         <label>Kategori</label>
@@ -1493,6 +1504,9 @@ function collect() {
     subtitle: $("fSubtitle").value.trim(),
     imageURL: $("fImage").value.trim(),
     videoURL: $("fVideo").value.trim(),
+    pairSetID: $("fPairSetID").value.trim(),
+    pairPosition: $("fPairPosition").value,
+    pairName: $("fPairName").value.trim(),
     category: $("fCategory").value,
     accentRed: r, accentGreen: g, accentBlue: b,
     isPremium: $("fPremium").checked,
@@ -1502,7 +1516,8 @@ function collect() {
 
 function resetForm() {
   editingId = null;
-  ["fId", "fTitle", "fSubtitle", "fImage", "fVideo"].forEach(id => $(id).value = "");
+  ["fId", "fTitle", "fSubtitle", "fImage", "fVideo", "fPairSetID", "fPairName"].forEach(id => $(id).value = "");
+  $("fPairPosition").value = "";
   $("fCategory").value = "Space";
   $("fOrder").value = 100;
   $("fPremium").checked = false;
@@ -1523,6 +1538,9 @@ window.startEdit = (id) => {
   $("fSubtitle").value = w.subtitle || "";
   $("fImage").value = w.imageURL || "";
   $("fVideo").value = w.videoURL || "";
+  $("fPairSetID").value = w.pairSetID || "";
+  $("fPairPosition").value = w.pairPosition || "";
+  $("fPairName").value = w.pairName || "";
   $("fCategory").value = w.category || "Space";
   $("fOrder").value = w.order ?? 100;
   $("fPremium").checked = !!w.isPremium;
