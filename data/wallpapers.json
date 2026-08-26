@@ -1,20 +1,5 @@
 [
   {
-    "id": "0823-1",
-    "title": "Canlı Duvar Kağıdı 2",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/0823-1.heic",
-    "thumbURL": "/media/0823-1-thumb.jpg",
-    "stillURL": "/media/0823-1.heic",
-    "videoURL": "/media/0823-1.mov",
-    "category": "Live",
-    "accentRed": 0.95,
-    "accentGreen": 0.828,
-    "accentBlue": 0.266,
-    "isPremium": false,
-    "order": 1
-  },
-  {
     "id": "0824-1",
     "title": "Canlı Duvar Kağıdı 3",
     "subtitle": "canlı duvar kağıdı",
