@@ -175,8 +175,8 @@
     "kind": "pet",
     "note": "free",
     "createdAt": "2026-08-26T14:07:55.788Z",
-    "claimed": false,
-    "claimedAt": null,
+    "claimed": true,
+    "claimedAt": "2026-08-26T14:08:07.029Z",
     "petType": "penguin"
   }
 ]
