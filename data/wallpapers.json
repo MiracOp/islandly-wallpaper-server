@@ -103,5 +103,20 @@
     "accentBlue": 0.08,
     "isPremium": false,
     "order": 6
+  },
+  {
+    "id": "BH-uzay-salyangozlari",
+    "title": "Uzay Salyangozları",
+    "subtitle": "2,27 sn · yıldızların altında",
+    "imageURL": "/media/BH-uzay-salyangozlari.heic",
+    "thumbURL": "/media/BH-uzay-salyangozlari-thumb.jpg",
+    "stillURL": "/media/BH-uzay-salyangozlari.heic",
+    "videoURL": "/media/BH-uzay-salyangozlari.mov",
+    "category": "Live",
+    "accentRed": 0.22,
+    "accentGreen": 0.38,
+    "accentBlue": 0.18,
+    "isPremium": false,
+    "order": 7
   }
 ]
