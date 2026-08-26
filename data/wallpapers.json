@@ -1,17 +1,1 @@
-[
-  {
-    "id": "0826-1",
-    "title": "Canlı Duvar Kağıdı 1",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/0826-1.heic",
-    "thumbURL": "/media/0826-1-thumb.jpg",
-    "stillURL": "/media/0826-1.heic",
-    "videoURL": "/media/0826-1.mov",
-    "category": "Live",
-    "accentRed": 0.95,
-    "accentGreen": 0.266,
-    "accentBlue": 0.266,
-    "isPremium": false,
-    "order": 0
-  }
-]
+[]
