@@ -1,0 +1,7 @@
+[
+  { "id": "Live", "name": "Live", "symbol": "livephoto", "accentRed": 1, "accentGreen": 0.24, "accentBlue": 0.56, "order": 0 },
+  { "id": "Anime", "name": "Anime", "symbol": "star.bubble.fill", "accentRed": 1, "accentGreen": 0.4, "accentBlue": 0.55, "order": 10 },
+  { "id": "Space", "name": "Space", "symbol": "sparkles", "accentRed": 0.55, "accentGreen": 0.4, "accentBlue": 1, "order": 20 },
+  { "id": "Dark", "name": "Dark", "symbol": "moon.fill", "accentRed": 0.3, "accentGreen": 0.2, "accentBlue": 0.6, "order": 30 },
+  { "id": "Cute", "name": "Cute", "symbol": "heart.circle.fill", "accentRed": 1, "accentGreen": 0.55, "accentBlue": 0.78, "order": 40 }
+]

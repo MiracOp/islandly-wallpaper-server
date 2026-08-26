@@ -228,6 +228,12 @@
   .collection-metrics div { min-width:76px; padding:13px 10px; text-align:center; border:1px solid rgba(255,255,255,.12); border-radius:15px; background:rgba(3,4,16,.30); }
   .collection-metrics b { display:block; font-size:21px; color:#fff; }
   .collection-metrics span { display:block; margin-top:3px; color:var(--text-dim); font-size:10px; font-weight:600; }
+  .category-create { display:grid; grid-template-columns:1.1fr 1.2fr 1fr 46px 72px auto; gap:9px; align-items:center; }
+  .category-create input:not([type="color"]) { width:100%; padding:10px 12px; border:1px solid var(--stroke); border-radius:11px; color:var(--text); background:rgba(0,0,0,.28); outline:none; }
+  .category-admin-list { display:flex; gap:8px; flex-wrap:wrap; margin-top:15px; }
+  .category-admin-item { display:flex; align-items:center; gap:7px; padding:7px 9px; border-radius:12px; background:rgba(255,255,255,.055); border:1px solid var(--stroke-soft); font-size:11px; }
+  .category-admin-item i { width:8px; height:8px; border-radius:50%; }
+  .category-admin-item button { border:0; background:none; color:var(--text-dim); cursor:pointer; padding:1px 3px; }
 
   /* ── Gallery ────────────────────────────────────── */
   .gallery-head {
@@ -539,6 +545,8 @@
     .collection-copy h1 { font-size:23px; }
     .collection-metrics { width:100%; }
     .collection-metrics div { min-width:0; }
+    .category-create { grid-template-columns:1fr 1fr; }
+    .category-create .color-well { width:100%; }
 
     /* Kar önizleme telefonu: küçült */
     .snow-preview-zone { padding: 8px 0 20px; }
@@ -1216,6 +1224,20 @@
     </div>
   </section>
 
+  <section class="panel category-manager" style="position:static;grid-column:1/-1">
+    <div class="panel-head"><h2>🏷️ Kategoriler</h2><span class="mode-badge show">UYGULAMADA GÖRÜNÜR</span></div>
+    <p class="t-hint" style="margin:-5px 0 16px">Buradan açtığın kategori, uygulamadaki filtre şeridinde ikon ve rengiyle görünür.</p>
+    <div class="category-create">
+      <input type="text" id="cId" placeholder="ID · örn. Nature">
+      <input type="text" id="cName" placeholder="Görünen ad · Nature">
+      <input type="text" id="cSymbol" value="photo.fill" placeholder="SF Symbol">
+      <input type="color" class="color-well" id="cColor" value="#7c5cff">
+      <input type="number" id="cOrder" value="100" placeholder="Sıra">
+      <button class="btn btn-primary" id="saveCategoryBtn">Kategori Aç</button>
+    </div>
+    <div class="category-admin-list" id="categoryAdminList"></div>
+  </section>
+
   <!-- ── Form ── -->
   <section class="panel">
     <div class="panel-head">
@@ -1320,7 +1342,9 @@
 
 <script>
 const API = "/api/wallpapers";
+const CATEGORY_API = "/api/wallpaper-categories";
 let items = [];
+let categories = [];
 let editingId = null;
 let activeCat = "all";
 
@@ -1453,10 +1477,12 @@ $("fPremium").addEventListener("change", updatePreview);
 /* ── Load & render ── */
 async function load() {
   try {
-    const res = await fetch(API);
-    items = await res.json();
+    const [wallpaperRes, categoryRes] = await Promise.all([fetch(API), fetch(CATEGORY_API)]);
+    items = await wallpaperRes.json();
+    categories = categoryRes.ok ? await categoryRes.json() : [];
     renderCategoryControls();
     renderCollectionOverview();
+    renderCategoryManager();
     render();
   } catch {
     toast("Liste yüklenemedi — sunucu ayakta mı?", "err");
@@ -1474,16 +1500,52 @@ function renderCollectionOverview() {
     : '<span>Henüz kategori yok</span>';
 }
 
+function renderCategoryManager() {
+  $("categoryAdminList").innerHTML = categories.length
+    ? [...categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999)).map(category => {
+        const hex = rgb01ToHex(category.accentRed ?? .48, category.accentGreen ?? .36, category.accentBlue ?? .95);
+        const used = items.filter(item => item.category === category.id).length;
+        const remove = used ? "" : `<button title="Sil" onclick="deleteCategory('${esc(category.id)}')">×</button>`;
+        return `<div class="category-admin-item"><i style="background:${hex}"></i><b>${esc(category.name || category.id)}</b><span>${esc(category.id)} · ${used}</span>${remove}</div>`;
+      }).join("")
+    : '<span class="t-hint">Henüz kategori açılmamış.</span>';
+}
+
+$("saveCategoryBtn").onclick = async () => {
+  const id = $("cId").value.trim();
+  const name = $("cName").value.trim() || id;
+  if (!id || !name) return toast("Kategori ID ve adı gerekli", "err");
+  const [accentRed, accentGreen, accentBlue] = hexToRgb01($("cColor").value);
+  const body = { id, name, symbol: $("cSymbol").value.trim() || "photo.fill", accentRed, accentGreen, accentBlue, order: Number($("cOrder").value || 999) };
+  const res = await fetch(CATEGORY_API, { method: "POST", headers: headers(), body: JSON.stringify(body) });
+  if (!res.ok) return toast((await res.json()).error || "Kategori açılamadı", "err");
+  ["cId", "cName"].forEach(id => $(id).value = "");
+  $("cOrder").value = 100;
+  toast("Kategori açıldı ✓");
+  await load();
+};
+
+window.deleteCategory = async (id) => {
+  if (!confirm(`“${id}” kategorisini silmek istiyor musun?`)) return;
+  const res = await fetch(`${CATEGORY_API}/${encodeURIComponent(id)}`, { method: "DELETE", headers: headers() });
+  if (!res.ok) return toast((await res.json()).error || "Kategori silinemedi", "err");
+  toast("Kategori silindi");
+  await load();
+};
+
 function renderCategoryControls() {
-  const categories = [...new Set(items.map(w => String(w.category || "").trim()).filter(Boolean))]
+  const categoryNames = [...new Set([
+    ...categories.map(c => String(c.id || "").trim()),
+    ...items.map(w => String(w.category || "").trim())
+  ].filter(Boolean))]
     .sort((a, b) => a.localeCompare(b, "tr"));
 
-  $("categorySuggestions").innerHTML = categories
+  $("categorySuggestions").innerHTML = categoryNames
     .map(category => `<option value="${esc(category)}"></option>`).join("");
 
   $("chips").innerHTML = [
     '<button class="chip active" data-cat="all">Tümü</button>',
-    ...categories.map(category => `<button class="chip" data-cat="${esc(category)}">${esc(category)}</button>`),
+    ...categoryNames.map(category => `<button class="chip" data-cat="${esc(category)}">${esc(category)}</button>`),
     '<button class="chip" data-cat="premium">⭐ Premium</button>',
     '<button class="chip" data-cat="live">▶ Canlı</button>'
   ].join("");
