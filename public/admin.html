@@ -209,6 +209,26 @@
   .form-actions { display: flex; gap: 10px; }
   .form-actions .btn { flex: 1; padding: 12px; font-size: 14px; }
 
+  /* ── Wallpaper Vault ───────────────────────────── */
+  .collection-hero {
+    grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between;
+    gap: 24px; overflow: hidden; padding: 26px 28px; border-radius: 22px;
+    border: 1px solid rgba(155,125,255,.28);
+    background:
+      radial-gradient(560px 180px at 0% 0%, rgba(244,87,177,.20), transparent 70%),
+      radial-gradient(420px 220px at 100% 100%, rgba(77,214,255,.16), transparent 72%),
+      linear-gradient(135deg, rgba(36,25,76,.92), rgba(15,18,43,.94));
+  }
+  .collection-eyebrow { color:#c8b9ff; font-size:10px; font-weight:800; letter-spacing:1.5px; }
+  .collection-copy h1 { margin:5px 0 7px; font-size:26px; letter-spacing:-.7px; }
+  .collection-copy p { max-width:520px; color:var(--text-mid); font-size:12.5px; line-height:1.5; }
+  .collection-categories { display:flex; gap:6px; flex-wrap:wrap; margin-top:14px; }
+  .collection-categories span { padding:5px 9px; border-radius:999px; background:rgba(255,255,255,.09); color:rgba(255,255,255,.8); font-size:10px; font-weight:700; }
+  .collection-metrics { display:grid; grid-template-columns:repeat(3, minmax(74px,1fr)); gap:8px; flex-shrink:0; }
+  .collection-metrics div { min-width:76px; padding:13px 10px; text-align:center; border:1px solid rgba(255,255,255,.12); border-radius:15px; background:rgba(3,4,16,.30); }
+  .collection-metrics b { display:block; font-size:21px; color:#fff; }
+  .collection-metrics span { display:block; margin-top:3px; color:var(--text-dim); font-size:10px; font-weight:600; }
+
   /* ── Gallery ────────────────────────────────────── */
   .gallery-head {
     display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
@@ -515,6 +535,10 @@
     .gallery-head { gap: 8px; }
     .search-wrap { max-width: 100%; min-width: 150px; }
     .form-actions { flex-wrap: wrap; }
+    .collection-hero { padding:20px; align-items:flex-start; flex-direction:column; }
+    .collection-copy h1 { font-size:23px; }
+    .collection-metrics { width:100%; }
+    .collection-metrics div { min-width:0; }
 
     /* Kar önizleme telefonu: küçült */
     .snow-preview-zone { padding: 8px 0 20px; }
@@ -1178,6 +1202,20 @@
     </div>
   </section>
 
+  <section class="collection-hero" aria-label="Wallpaper koleksiyon özeti">
+    <div class="collection-copy">
+      <span class="collection-eyebrow">WALLPAPER VAULT</span>
+      <h1>Koleksiyonunu yönet.</h1>
+      <p>Kategorileri, Live Photo paketlerini ve premium içerikleri tek akıştan düzenle.</p>
+      <div class="collection-categories" id="categoryOverview"></div>
+    </div>
+    <div class="collection-metrics">
+      <div><b id="collectionTotal">0</b><span>Toplam</span></div>
+      <div><b id="collectionLive">0</b><span>Live Photo</span></div>
+      <div><b id="collectionPremium">0</b><span>Premium</span></div>
+    </div>
+  </section>
+
   <!-- ── Form ── -->
   <section class="panel">
     <div class="panel-head">
@@ -1418,10 +1456,22 @@ async function load() {
     const res = await fetch(API);
     items = await res.json();
     renderCategoryControls();
+    renderCollectionOverview();
     render();
   } catch {
     toast("Liste yüklenemedi — sunucu ayakta mı?", "err");
   }
+}
+
+function renderCollectionOverview() {
+  const categories = [...new Set(items.map(w => String(w.category || "").trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "tr"));
+  $("collectionTotal").textContent = items.length;
+  $("collectionLive").textContent = items.filter(w => w.videoURL).length;
+  $("collectionPremium").textContent = items.filter(w => w.isPremium).length;
+  $("categoryOverview").innerHTML = categories.length
+    ? categories.map(category => `<span>${esc(category)} · ${items.filter(w => w.category === category).length}</span>`).join("")
+    : '<span>Henüz kategori yok</span>';
 }
 
 function renderCategoryControls() {
