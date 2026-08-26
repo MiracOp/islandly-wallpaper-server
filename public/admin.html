@@ -209,32 +209,6 @@
   .form-actions { display: flex; gap: 10px; }
   .form-actions .btn { flex: 1; padding: 12px; font-size: 14px; }
 
-  /* ── Wallpaper Vault ───────────────────────────── */
-  .collection-hero {
-    grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between;
-    gap: 24px; overflow: hidden; padding: 26px 28px; border-radius: 22px;
-    border: 1px solid rgba(155,125,255,.28);
-    background:
-      radial-gradient(560px 180px at 0% 0%, rgba(244,87,177,.20), transparent 70%),
-      radial-gradient(420px 220px at 100% 100%, rgba(77,214,255,.16), transparent 72%),
-      linear-gradient(135deg, rgba(36,25,76,.92), rgba(15,18,43,.94));
-  }
-  .collection-eyebrow { color:#c8b9ff; font-size:10px; font-weight:800; letter-spacing:1.5px; }
-  .collection-copy h1 { margin:5px 0 7px; font-size:26px; letter-spacing:-.7px; }
-  .collection-copy p { max-width:520px; color:var(--text-mid); font-size:12.5px; line-height:1.5; }
-  .collection-categories { display:flex; gap:6px; flex-wrap:wrap; margin-top:14px; }
-  .collection-categories span { padding:5px 9px; border-radius:999px; background:rgba(255,255,255,.09); color:rgba(255,255,255,.8); font-size:10px; font-weight:700; }
-  .collection-metrics { display:grid; grid-template-columns:repeat(3, minmax(74px,1fr)); gap:8px; flex-shrink:0; }
-  .collection-metrics div { min-width:76px; padding:13px 10px; text-align:center; border:1px solid rgba(255,255,255,.12); border-radius:15px; background:rgba(3,4,16,.30); }
-  .collection-metrics b { display:block; font-size:21px; color:#fff; }
-  .collection-metrics span { display:block; margin-top:3px; color:var(--text-dim); font-size:10px; font-weight:600; }
-  .category-create { display:grid; grid-template-columns:1.1fr 1.2fr 1fr 46px 72px auto; gap:9px; align-items:center; }
-  .category-create input:not([type="color"]) { width:100%; padding:10px 12px; border:1px solid var(--stroke); border-radius:11px; color:var(--text); background:rgba(0,0,0,.28); outline:none; }
-  .category-admin-list { display:flex; gap:8px; flex-wrap:wrap; margin-top:15px; }
-  .category-admin-item { display:flex; align-items:center; gap:7px; padding:7px 9px; border-radius:12px; background:rgba(255,255,255,.055); border:1px solid var(--stroke-soft); font-size:11px; }
-  .category-admin-item i { width:8px; height:8px; border-radius:50%; }
-  .category-admin-item button { border:0; background:none; color:var(--text-dim); cursor:pointer; padding:1px 3px; }
-
   /* ── Gallery ────────────────────────────────────── */
   .gallery-head {
     display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
@@ -541,12 +515,6 @@
     .gallery-head { gap: 8px; }
     .search-wrap { max-width: 100%; min-width: 150px; }
     .form-actions { flex-wrap: wrap; }
-    .collection-hero { padding:20px; align-items:flex-start; flex-direction:column; }
-    .collection-copy h1 { font-size:23px; }
-    .collection-metrics { width:100%; }
-    .collection-metrics div { min-width:0; }
-    .category-create { grid-template-columns:1fr 1fr; }
-    .category-create .color-well { width:100%; }
 
     /* Kar önizleme telefonu: küçült */
     .snow-preview-zone { padding: 8px 0 20px; }
@@ -1210,34 +1178,6 @@
     </div>
   </section>
 
-  <section class="collection-hero" aria-label="Wallpaper koleksiyon özeti">
-    <div class="collection-copy">
-      <span class="collection-eyebrow">WALLPAPER VAULT</span>
-      <h1>Koleksiyonunu yönet.</h1>
-      <p>Kategorileri, Live Photo paketlerini ve premium içerikleri tek akıştan düzenle.</p>
-      <div class="collection-categories" id="categoryOverview"></div>
-    </div>
-    <div class="collection-metrics">
-      <div><b id="collectionTotal">0</b><span>Toplam</span></div>
-      <div><b id="collectionLive">0</b><span>Live Photo</span></div>
-      <div><b id="collectionPremium">0</b><span>Premium</span></div>
-    </div>
-  </section>
-
-  <section class="panel category-manager" style="position:static;grid-column:1/-1">
-    <div class="panel-head"><h2>🏷️ Kategoriler</h2><span class="mode-badge show">UYGULAMADA GÖRÜNÜR</span></div>
-    <p class="t-hint" style="margin:-5px 0 16px">Buradan açtığın kategori, uygulamadaki filtre şeridinde ikon ve rengiyle görünür.</p>
-    <div class="category-create">
-      <input type="text" id="cId" placeholder="ID · örn. Nature">
-      <input type="text" id="cName" placeholder="Görünen ad · Nature">
-      <input type="text" id="cSymbol" value="photo.fill" placeholder="SF Symbol">
-      <input type="color" class="color-well" id="cColor" value="#7c5cff">
-      <input type="number" id="cOrder" value="100" placeholder="Sıra">
-      <button class="btn btn-primary" id="saveCategoryBtn">Kategori Aç</button>
-    </div>
-    <div class="category-admin-list" id="categoryAdminList"></div>
-  </section>
-
   <!-- ── Form ── -->
   <section class="panel">
     <div class="panel-head">
@@ -1269,21 +1209,21 @@
       <input type="text" id="fSubtitle" placeholder="Northern lights for Dynamic Island">
     </div>
     <div class="field">
-      <label>Kapak görseli URL <span style="color:var(--text-dim);font-weight:400">— Live Photo için .heic</span></label>
-      <input type="url" id="fImage" placeholder="/media/wallpaper.heic">
+      <label>Görsel URL</label>
+      <input type="url" id="fImage" placeholder="https://…/image.jpg">
     </div>
     <div class="field">
-      <label>Küçük önizleme URL <span style="color:var(--text-dim);font-weight:400">— kartlarda gösterilir, .jpg önerilir</span></label>
-      <input type="url" id="fThumb" placeholder="/media/wallpaper-thumb.jpg">
+      <label>Video URL <span style="color:var(--text-dim);font-weight:400">— opsiyonel, canlı duvar kağıdı (.mp4)</span></label>
+      <input type="url" id="fVideo" placeholder="https://…/video.mp4">
     </div>
+    <div class="row">
       <div class="field">
-        <label>Live Photo video URL <span style="color:var(--text-dim);font-weight:400">— opsiyonel, eşleşmiş .mov</span></label>
-        <input type="url" id="fVideo" placeholder="/media/wallpaper.mov">
-      </div>
-      <div class="row">
-        <div class="field">
-        <label>Kategori <span style="color:var(--text-dim);font-weight:400">— yeni kategori için üstte “Kategori Aç”ı kullan</span></label>
-        <select id="fCategory"></select>
+        <label>Kategori</label>
+        <select id="fCategory">
+          <option>Toons</option>
+          <option>Space</option><option>Nature</option><option>City</option>
+          <option>Seasonal</option><option>Sports</option>
+        </select>
       </div>
       <div class="field">
         <label>Sıra</label>
@@ -1329,6 +1269,13 @@
       </div>
       <div class="chips" id="chips">
         <button class="chip active" data-cat="all">Tümü</button>
+        <button class="chip" data-cat="Space">Space</button>
+        <button class="chip" data-cat="Nature">Nature</button>
+        <button class="chip" data-cat="City">City</button>
+        <button class="chip" data-cat="Seasonal">Seasonal</button>
+        <button class="chip" data-cat="Sports">Sports</button>
+        <button class="chip" data-cat="premium">⭐ Premium</button>
+        <button class="chip" data-cat="live">▶ Canlı</button>
       </div>
     </div>
     <div class="grid" id="grid">
@@ -1341,9 +1288,7 @@
 
 <script>
 const API = "/api/wallpapers";
-const CATEGORY_API = "/api/wallpaper-categories";
 let items = [];
-let categories = [];
 let editingId = null;
 let activeCat = "all";
 
@@ -1476,89 +1421,11 @@ $("fPremium").addEventListener("change", updatePreview);
 /* ── Load & render ── */
 async function load() {
   try {
-    const [wallpaperRes, categoryRes] = await Promise.all([fetch(API), fetch(CATEGORY_API)]);
-    items = await wallpaperRes.json();
-    categories = categoryRes.ok ? await categoryRes.json() : [];
-    renderCategoryControls();
-    renderCollectionOverview();
-    renderCategoryManager();
+    const res = await fetch(API);
+    items = await res.json();
     render();
   } catch {
     toast("Liste yüklenemedi — sunucu ayakta mı?", "err");
-  }
-}
-
-function renderCollectionOverview() {
-  const categories = [...new Set(items.map(w => String(w.category || "").trim()).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b, "tr"));
-  $("collectionTotal").textContent = items.length;
-  $("collectionLive").textContent = items.filter(w => w.videoURL).length;
-  $("collectionPremium").textContent = items.filter(w => w.isPremium).length;
-  $("categoryOverview").innerHTML = categories.length
-    ? categories.map(category => `<span>${esc(category)} · ${items.filter(w => w.category === category).length}</span>`).join("")
-    : '<span>Henüz kategori yok</span>';
-}
-
-function renderCategoryManager() {
-  $("categoryAdminList").innerHTML = categories.length
-    ? [...categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999)).map(category => {
-        const hex = rgb01ToHex(category.accentRed ?? .48, category.accentGreen ?? .36, category.accentBlue ?? .95);
-        const used = items.filter(item => item.category === category.id).length;
-        const remove = used ? "" : `<button title="Sil" onclick="deleteCategory('${esc(category.id)}')">×</button>`;
-        return `<div class="category-admin-item"><i style="background:${hex}"></i><b>${esc(category.name || category.id)}</b><span>${esc(category.id)} · ${used}</span>${remove}</div>`;
-      }).join("")
-    : '<span class="t-hint">Henüz kategori açılmamış.</span>';
-}
-
-$("saveCategoryBtn").onclick = async () => {
-  const id = $("cId").value.trim();
-  const name = $("cName").value.trim() || id;
-  if (!id || !name) return toast("Kategori ID ve adı gerekli", "err");
-  const [accentRed, accentGreen, accentBlue] = hexToRgb01($("cColor").value);
-  const body = { id, name, symbol: $("cSymbol").value.trim() || "photo.fill", accentRed, accentGreen, accentBlue, order: Number($("cOrder").value || 999) };
-  const res = await fetch(CATEGORY_API, { method: "POST", headers: headers(), body: JSON.stringify(body) });
-  if (!res.ok) return toast((await res.json()).error || "Kategori açılamadı", "err");
-  ["cId", "cName"].forEach(id => $(id).value = "");
-  $("cOrder").value = 100;
-  toast("Kategori açıldı ✓");
-  await load();
-};
-
-window.deleteCategory = async (id) => {
-  if (!confirm(`“${id}” kategorisini silmek istiyor musun?`)) return;
-  const res = await fetch(`${CATEGORY_API}/${encodeURIComponent(id)}`, { method: "DELETE", headers: headers() });
-  if (!res.ok) return toast((await res.json()).error || "Kategori silinemedi", "err");
-  toast("Kategori silindi");
-  await load();
-};
-
-function renderCategoryControls() {
-  const categoryNames = [...new Set([
-    ...categories.map(c => String(c.id || "").trim()),
-    ...items.map(w => String(w.category || "").trim())
-  ].filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b, "tr"));
-
-  const selectedCategory = $("fCategory").value;
-  $("fCategory").innerHTML = categoryNames.length
-    ? categoryNames.map(category => `<option value="${esc(category)}">${esc(category)}</option>`).join("")
-    : '<option value="Live">Live</option>';
-  $("fCategory").value = categoryNames.includes(selectedCategory) ? selectedCategory : (categoryNames[0] || "Live");
-
-  $("chips").innerHTML = [
-    '<button class="chip active" data-cat="all">Tümü</button>',
-    ...categoryNames.map(category => `<button class="chip" data-cat="${esc(category)}">${esc(category)}</button>`),
-    '<button class="chip" data-cat="premium">⭐ Premium</button>',
-    '<button class="chip" data-cat="live">▶ Canlı</button>'
-  ].join("");
-
-  const current = [...$("chips").querySelectorAll(".chip")]
-    .find(chip => chip.dataset.cat === activeCat);
-  if (current) {
-    $("chips").querySelectorAll(".chip").forEach(chip => chip.classList.remove("active"));
-    current.classList.add("active");
-  } else {
-    activeCat = "all";
   }
 }
 
@@ -1625,8 +1492,6 @@ function collect() {
     title: $("fTitle").value.trim(),
     subtitle: $("fSubtitle").value.trim(),
     imageURL: $("fImage").value.trim(),
-    thumbURL: $("fThumb").value.trim(),
-    stillURL: $("fImage").value.trim(),
     videoURL: $("fVideo").value.trim(),
     category: $("fCategory").value,
     accentRed: r, accentGreen: g, accentBlue: b,
@@ -1637,8 +1502,8 @@ function collect() {
 
 function resetForm() {
   editingId = null;
-  ["fId", "fTitle", "fSubtitle", "fImage", "fThumb", "fVideo"].forEach(id => $(id).value = "");
-  $("fCategory").value = "Live";
+  ["fId", "fTitle", "fSubtitle", "fImage", "fVideo"].forEach(id => $(id).value = "");
+  $("fCategory").value = "Space";
   $("fOrder").value = 100;
   $("fPremium").checked = false;
   $("fId").disabled = false;
@@ -1657,9 +1522,8 @@ window.startEdit = (id) => {
   $("fTitle").value = w.title || "";
   $("fSubtitle").value = w.subtitle || "";
   $("fImage").value = w.imageURL || "";
-  $("fThumb").value = w.thumbURL || "";
   $("fVideo").value = w.videoURL || "";
-  $("fCategory").value = w.category || "Live";
+  $("fCategory").value = w.category || "Space";
   $("fOrder").value = w.order ?? 100;
   $("fPremium").checked = !!w.isPremium;
   syncColor(rgb01ToHex(w.accentRed ?? 0.49, w.accentGreen ?? 0.36, w.accentBlue ?? 1));
