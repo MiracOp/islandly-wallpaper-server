@@ -1216,6 +1216,14 @@
       <label>Video URL <span style="color:var(--text-dim);font-weight:400">— opsiyonel, canlı duvar kağıdı (.mp4)</span></label>
       <input type="url" id="fVideo" placeholder="https://…/video.mp4">
     </div>
+    <div class="field">
+      <label>Couples tema kapak URL <span style="color:var(--text-dim);font-weight:400">— ana sayfada tek görsel olarak görünür, opsiyonel</span></label>
+      <input type="url" id="fCoupleCover" placeholder="Boşsa varsayılan Couples teması kullanılır">
+    </div>
+    <div class="field">
+      <label>Partner wallpaper URL <span style="color:var(--text-dim);font-weight:400">— Couples için ikinci görsel</span></label>
+      <input type="url" id="fPartner" placeholder="https://…/partner-wallpaper.jpg">
+    </div>
     <div class="row">
       <div class="field">
         <label>Kategori</label>
@@ -1493,6 +1501,8 @@ function collect() {
     subtitle: $("fSubtitle").value.trim(),
     imageURL: $("fImage").value.trim(),
     videoURL: $("fVideo").value.trim(),
+    coupleCoverURL: $("fCoupleCover").value.trim(),
+    partnerURL: $("fPartner").value.trim(),
     category: $("fCategory").value,
     accentRed: r, accentGreen: g, accentBlue: b,
     isPremium: $("fPremium").checked,
@@ -1502,7 +1512,7 @@ function collect() {
 
 function resetForm() {
   editingId = null;
-  ["fId", "fTitle", "fSubtitle", "fImage", "fVideo"].forEach(id => $(id).value = "");
+  ["fId", "fTitle", "fSubtitle", "fImage", "fVideo", "fCoupleCover", "fPartner"].forEach(id => $(id).value = "");
   $("fCategory").value = "Space";
   $("fOrder").value = 100;
   $("fPremium").checked = false;
@@ -1523,6 +1533,8 @@ window.startEdit = (id) => {
   $("fSubtitle").value = w.subtitle || "";
   $("fImage").value = w.imageURL || "";
   $("fVideo").value = w.videoURL || "";
+  $("fCoupleCover").value = w.coupleCoverURL || "";
+  $("fPartner").value = w.partnerURL || "";
   $("fCategory").value = w.category || "Space";
   $("fOrder").value = w.order ?? 100;
   $("fPremium").checked = !!w.isPremium;

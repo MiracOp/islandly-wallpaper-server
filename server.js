@@ -1169,6 +1169,9 @@ function normalizeWallpaper(input, existing = {}) {
     // Çift duvar kağıdının ikinci yarısı. Doluysa app ızgarada tek kart
     // gösterir, açılınca iki duvar kağıdı sunar (Couples kategorisi).
     partnerURL: String(input.partnerURL ?? existing.partnerURL ?? "").trim(),
+    // Couples ana sayfa kartında tek bir tema kapağı gösterilir.
+    // Boş bırakılırsa uygulama varsayılan Couples temasını kullanır.
+    coupleCoverURL: String(input.coupleCoverURL ?? existing.coupleCoverURL ?? "").trim(),
     category: String(input.category || existing.category || "Nature"),
     accentRed: Number(input.accentRed ?? existing.accentRed ?? 0.45),
     accentGreen: Number(input.accentGreen ?? existing.accentGreen ?? 0.65),
