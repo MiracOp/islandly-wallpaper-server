@@ -188,5 +188,39 @@
     "accentBlue": 1,
     "isPremium": false,
     "order": 39
+  },
+  {
+    "id": "animals-uluyan-kurt-mor-vadi",
+    "title": "Uluyan Kurt Mor Vadi",
+    "subtitle": "",
+    "imageURL": "/media/animals-uluyan-kurt-mor-vadi.jpg",
+    "thumbURL": "/media/animals-uluyan-kurt-mor-vadi-thumb.jpg",
+    "stillURL": "",
+    "videoURL": "",
+    "partnerURL": "",
+    "coupleCoverURL": "",
+    "category": "Animals",
+    "accentRed": 0.45,
+    "accentGreen": 0.65,
+    "accentBlue": 1,
+    "isPremium": false,
+    "order": 49
+  },
+  {
+    "id": "space-galaksi-girdabi",
+    "title": "Galaksi Girdabi",
+    "subtitle": "",
+    "imageURL": "/media/space-galaksi-girdabi.jpg",
+    "thumbURL": "/media/space-galaksi-girdabi-thumb.jpg",
+    "stillURL": "",
+    "videoURL": "",
+    "partnerURL": "",
+    "coupleCoverURL": "",
+    "category": "Space",
+    "accentRed": 0.45,
+    "accentGreen": 0.65,
+    "accentBlue": 1,
+    "isPremium": false,
+    "order": 59
   }
 ]
