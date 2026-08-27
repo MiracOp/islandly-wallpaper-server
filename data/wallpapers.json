@@ -222,5 +222,39 @@
     "accentBlue": 1,
     "isPremium": false,
     "order": 59
+  },
+  {
+    "id": "space-halkali-gezegen",
+    "title": "Halkali Gezegen",
+    "subtitle": "",
+    "imageURL": "/media/space-halkali-gezegen.jpg",
+    "thumbURL": "/media/space-halkali-gezegen-thumb.jpg",
+    "stillURL": "",
+    "videoURL": "",
+    "partnerURL": "",
+    "coupleCoverURL": "",
+    "category": "Space",
+    "accentRed": 0.45,
+    "accentGreen": 0.65,
+    "accentBlue": 1,
+    "isPremium": false,
+    "order": 69
+  },
+  {
+    "id": "space-cift-gezegen",
+    "title": "Cift Gezegen",
+    "subtitle": "",
+    "imageURL": "/media/space-cift-gezegen.jpg",
+    "thumbURL": "/media/space-cift-gezegen-thumb.jpg",
+    "stillURL": "",
+    "videoURL": "",
+    "partnerURL": "",
+    "coupleCoverURL": "",
+    "category": "Space",
+    "accentRed": 0.45,
+    "accentGreen": 0.65,
+    "accentBlue": 1,
+    "isPremium": false,
+    "order": 79
   }
 ]
