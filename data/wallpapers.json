@@ -123,22 +123,6 @@
     "order": 7
   },
   {
-    "id": "wall-e",
-    "title": "Wall E",
-    "subtitle": "çift duvar kağıdı",
-    "imageURL": "/media/wall-e-cover.jpg",
-    "thumbURL": "/media/wall-e-thumb.jpg",
-    "stillURL": "/media/wall-e-left.jpg",
-    "partnerURL": "/media/wall-e-right.jpg",
-    "videoURL": "",
-    "category": "Couples",
-    "accentRed": 0.887,
-    "accentGreen": 0.98,
-    "accentBlue": 0.314,
-    "isPremium": false,
-    "order": 8
-  },
-  {
     "id": "animals-kurt-gun-batimi-vadi",
     "title": "Kurt Gun Batimi Vadi",
     "subtitle": "",
