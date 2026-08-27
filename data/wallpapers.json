@@ -275,23 +275,6 @@
     "order": 89
   },
   {
-    "id": "football-galatasaray-stadyum",
-    "title": "Galatasaray Stadyum",
-    "subtitle": "",
-    "imageURL": "/media/football-galatasaray-stadyum.jpg",
-    "thumbURL": "/media/football-galatasaray-stadyum-thumb.jpg",
-    "stillURL": "",
-    "videoURL": "",
-    "partnerURL": "",
-    "coupleCoverURL": "",
-    "category": "Football",
-    "accentRed": 0.45,
-    "accentGreen": 0.65,
-    "accentBlue": 1,
-    "isPremium": false,
-    "order": 99
-  },
-  {
     "id": "nature-karli-noel-koyu",
     "title": "Karli Noel Koyu",
     "subtitle": "",
