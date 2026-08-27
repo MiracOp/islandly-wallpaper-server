@@ -44,6 +44,12 @@ const DEFAULT_CONFIG = {
     ctaText: "",
     ctaAction: "none" // none | paywall | themes | pets
   },
+  // Duvar kağıdı kategorileri — uygulama güncellemesi olmadan panelden kontrol.
+  // Buradaki id'ler app'teki WallpaperCategory id'leriyle aynıdır; ayrıca
+  // "Live" ve "Couples" özel raflarını da kapatmak için kullanılabilir.
+  wallpapers: {
+    disabledCategories: []   // bu kategoriler duvar kağıdı sekmesinde hiç görünmez
+  },
   // Tema yönetimi — uygulama güncellemesi olmadan panelden kontrol
   themes: {
     freeThemeNames: [],      // bu isimli temalar premium'suz kullanılabilir (app'teki isFree'ye ek)
@@ -919,6 +925,7 @@ async function readConfig() {
       ...raw,
       snow: { ...DEFAULT_CONFIG.snow, ...(raw.snow || {}) },
       announcement: { ...DEFAULT_CONFIG.announcement, ...(raw.announcement || {}) },
+      wallpapers: { ...DEFAULT_CONFIG.wallpapers, ...(raw.wallpapers || {}) },
       themes: { ...DEFAULT_CONFIG.themes, ...(raw.themes || {}) },
       paywall: { ...DEFAULT_CONFIG.paywall, ...(raw.paywall || {}) },
       effect: { ...DEFAULT_CONFIG.effect, ...(raw.effect || {}) },
@@ -1172,7 +1179,9 @@ function normalizeWallpaper(input, existing = {}) {
     // Couples ana sayfa kartında tek bir tema kapağı gösterilir.
     // Boş bırakılırsa uygulama varsayılan Couples temasını kullanır.
     coupleCoverURL: String(input.coupleCoverURL ?? existing.coupleCoverURL ?? "").trim(),
-    category: String(input.category || existing.category || "Nature"),
+    // Varsayılan, uygulamanın builtIn listesinde olan bir kategori olmalı —
+    // aksi halde duvar kağıdı jenerik gri bir rafta görünür.
+    category: String(input.category || existing.category || "Cute"),
     accentRed: Number(input.accentRed ?? existing.accentRed ?? 0.45),
     accentGreen: Number(input.accentGreen ?? existing.accentGreen ?? 0.65),
     accentBlue: Number(input.accentBlue ?? existing.accentBlue ?? 1),
@@ -1384,6 +1393,7 @@ const server = createServer(async (req, res) => {
         ...body,
         snow: { ...current.snow, ...(body.snow || {}) },
         announcement: { ...current.announcement, ...(body.announcement || {}) },
+        wallpapers: { ...current.wallpapers, ...(body.wallpapers || {}) },
         themes: { ...current.themes, ...(body.themes || {}) },
         paywall: { ...current.paywall, ...(body.paywall || {}) },
         effect: { ...current.effect, ...(body.effect || {}) }
@@ -1691,6 +1701,54 @@ const server = createServer(async (req, res) => {
       items.push(item);
       await writeWallpapers(items);
       send(res, 201, item);
+      return;
+    }
+
+    // ── Kategori toplu işlemi ────────────────────────────────
+    // Bir kategorinin tüm duvar kağıtlarını başka kategoriye taşır ya da siler.
+    // Panelde "Kategori Yönetimi" bölümü kullanır.
+    //   { action: "move", category: "City", target: "Nature" }
+    //   { action: "delete", category: "Seasonal" }
+    if (req.method === "POST" && url.pathname === "/api/wallpapers/category") {
+      if (!requireAdmin(req, res)) return;
+      const body = await parseBody(req);
+      const action = String(body.action || "");
+      const category = String(body.category || "").trim();
+
+      if (!category) {
+        send(res, 400, { error: "category is required" });
+        return;
+      }
+
+      const items = await readWallpapers();
+      const affected = items.filter((w) => w.category === category);
+
+      if (action === "move") {
+        const target = String(body.target || "").trim();
+        if (!target) {
+          send(res, 400, { error: "target is required for move" });
+          return;
+        }
+        if (target === category) {
+          send(res, 400, { error: "target must differ from category" });
+          return;
+        }
+        for (const w of items) {
+          if (w.category === category) w.category = target;
+        }
+        await writeWallpapers(items);
+        send(res, 200, { action, category, target, affected: affected.length });
+        return;
+      }
+
+      if (action === "delete") {
+        const next = items.filter((w) => w.category !== category);
+        await writeWallpapers(next);
+        send(res, 200, { action, category, affected: items.length - next.length });
+        return;
+      }
+
+      send(res, 400, { error: "action must be 'move' or 'delete'" });
       return;
     }
 

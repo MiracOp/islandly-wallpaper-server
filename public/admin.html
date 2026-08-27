@@ -112,6 +112,82 @@
   @media (max-width: 1080px) { .panel { position: static; } }
   .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
   .panel-head h2 { font-size: 16px; font-weight: 700; letter-spacing: -0.2px; }
+
+  /* ── Raf önizlemesi + kategori sağlığı ─────────── */
+  .shelf-intro {
+    font-size: 12.5px; line-height: 1.6; color: var(--text-mid);
+    margin: -6px 0 18px; max-width: 720px;
+  }
+  .shelf-foot { font-size: 11.5px; color: var(--text-dim); margin-top: 14px; }
+  .shelf-list { display: flex; flex-direction: column; gap: 8px; }
+  .shelf-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border-radius: 14px;
+    background: rgba(255,255,255,0.035);
+    border: 1px solid var(--stroke-soft);
+  }
+  .shelf-row .idx {
+    font-size: 11px; font-weight: 700; color: var(--text-dim);
+    min-width: 18px; text-align: right;
+  }
+  .shelf-row .name { font-size: 13.5px; font-weight: 650; }
+  .shelf-row .kind {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    padding: 3px 8px; border-radius: 999px;
+    background: rgba(124,92,255,0.18); color: #b9a6ff;
+  }
+  .shelf-row .kind.auto { background: rgba(77,214,255,0.16); color: #8fe3ff; }
+  .shelf-row .count { margin-left: auto; font-size: 12px; color: var(--text-mid); }
+  .shelf-row .strip { display: flex; gap: 4px; }
+  .shelf-row .strip i {
+    width: 20px; height: 34px; border-radius: 5px; display: block;
+    background-size: cover; background-position: center;
+    background-color: rgba(255,255,255,0.07);
+  }
+  .shelf-row.thin { opacity: 0.75; border-color: rgba(255,196,84,0.28); }
+
+  .issue-list { display: flex; flex-direction: column; gap: 7px; margin-top: 16px; }
+  .issue {
+    display: flex; gap: 9px; align-items: flex-start;
+    font-size: 12px; line-height: 1.55;
+    padding: 10px 13px; border-radius: 12px;
+    background: rgba(255,196,84,0.07); border: 1px solid rgba(255,196,84,0.20);
+    color: #ffd79a;
+  }
+  .issue.bad { background: rgba(255,92,122,0.08); border-color: rgba(255,92,122,0.24); color: #ffabbc; }
+  .issue.ok  { background: rgba(74,222,128,0.07); border-color: rgba(74,222,128,0.20); color: #a7f0c1; }
+  .issue b { font-weight: 700; }
+  .cat-note { font-size: 11.5px; line-height: 1.5; color: var(--text-dim); margin: -8px 0 16px; }
+  .cat-note.warn { color: #ffd79a; }
+
+  /* ── Kategori yönetimi ─────────────────────────── */
+  .cat-manager { display: flex; flex-direction: column; gap: 8px; }
+  .cat-row {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 11px 14px; border-radius: 14px;
+    background: rgba(255,255,255,0.035);
+    border: 1px solid var(--stroke-soft);
+  }
+  .cat-row.hidden-cat { opacity: 0.5; }
+  .cat-row.special { border-color: rgba(124,92,255,0.22); background: rgba(124,92,255,0.05); }
+  .cat-row .cat-emoji { font-size: 16px; width: 22px; text-align: center; }
+  .cat-row .cat-name { font-size: 13.5px; font-weight: 650; min-width: 92px; }
+  .cat-row .cat-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.4px;
+    padding: 3px 8px; border-radius: 999px;
+    background: rgba(255,255,255,0.07); color: var(--text-mid);
+  }
+  .cat-row .cat-tag.unknown { background: rgba(255,196,84,0.16); color: #ffd79a; }
+  .cat-row .cat-tag.special { background: rgba(124,92,255,0.18); color: #b9a6ff; }
+  .cat-row .cat-count { font-size: 12px; color: var(--text-mid); min-width: 62px; }
+  .cat-row .spacer { flex: 1 1 auto; }
+  .cat-row select {
+    background: rgba(255,255,255,0.05); color: var(--text);
+    border: 1px solid var(--stroke); border-radius: 10px;
+    padding: 7px 9px; font-size: 12px; font-family: inherit;
+  }
+  .cat-row .btn { padding: 7px 12px; font-size: 12px; }
+  .cat-row .vis-label { font-size: 11px; color: var(--text-dim); }
   .mode-badge {
     font-size: 11px; font-weight: 700; letter-spacing: 0.6px;
     padding: 4px 10px; border-radius: 999px;
@@ -1178,6 +1254,44 @@
     </div>
   </section>
 
+  <!-- ── Kategori yönetimi: gizle / taşı / sil ── -->
+  <section class="panel" style="position:static;grid-column:1/-1">
+    <div class="panel-head">
+      <h2>Kategori Yönetimi</h2>
+      <span class="mode-badge show" id="catHiddenCount">0 gizli</span>
+    </div>
+    <p class="shelf-intro">
+      <b>Gizle</b> geri alınabilir: kategori uygulamada hiç görünmez (rafı da,
+      Popular / New Drops'taki kartları da) ama kayıtlar sunucuda durur.
+      <b>Taşı</b> ve <b>Sil</b> ise verinin kendisini değiştirir —
+      <b>geri alınamaz</b>.
+    </p>
+    <div id="catManager" class="cat-manager"></div>
+    <div class="form-actions" style="margin-top:18px">
+      <button class="btn btn-primary" id="saveWpCatsBtn">👁️ Görünürlüğü Yayınla</button>
+    </div>
+  </section>
+
+  <!-- ── Uygulama ana sayfası: raf önizlemesi + kategori sağlığı ── -->
+  <section class="panel" style="position:static;grid-column:1/-1">
+    <div class="panel-head">
+      <h2>Uygulama Ana Sayfası — Raf Önizlemesi</h2>
+      <span class="mode-badge show" id="shelfCount">0 raf</span>
+    </div>
+    <p class="shelf-intro">
+      Duvar kağıdı sekmesi artık dikey ızgara değil: üstte kategori çipleri, altında
+      her kategori için sağdan sola kayan raflar var. Aşağısı, şu anki verilerle
+      uygulamanın ana sayfasında ne göreceğini gösterir. <b>Sıra</b> alanı
+      “Popular” ve “New Drops” raflarını doğrudan belirler.
+    </p>
+    <div id="shelfPreview" class="shelf-list"></div>
+    <div id="shelfIssues" class="issue-list"></div>
+    <p class="shelf-foot">
+      Not: uygulamanın içinde kodla çizilen tasarımlar (Island Originals) da aynı
+      kategorilere eklenir — burada sadece sunucudan gelen kayıtlar sayılır.
+    </p>
+  </section>
+
   <!-- ── Form ── -->
   <section class="panel">
     <div class="panel-head">
@@ -1209,12 +1323,20 @@
       <input type="text" id="fSubtitle" placeholder="Northern lights for Dynamic Island">
     </div>
     <div class="field">
-      <label>Görsel URL</label>
+      <label>Görsel URL <span style="color:var(--text-dim);font-weight:400">— tam çözünürlük, kaydedilen dosya</span></label>
       <input type="url" id="fImage" placeholder="https://…/image.jpg">
+    </div>
+    <div class="field">
+      <label>Küçük görsel (thumb) URL <span style="color:var(--text-dim);font-weight:400">— opsiyonel, ~420px. Raflarda ve ızgarada bu kullanılır; boşsa tam boy iner</span></label>
+      <input type="url" id="fThumb" placeholder="https://…/image-420.jpg">
     </div>
     <div class="field">
       <label>Video URL <span style="color:var(--text-dim);font-weight:400">— opsiyonel, canlı duvar kağıdı (.mp4)</span></label>
       <input type="url" id="fVideo" placeholder="https://…/video.mp4">
+    </div>
+    <div class="field">
+      <label>Durağan kare (still) URL <span style="color:var(--text-dim);font-weight:400">— canlı duvar kağıtları için videonun ilk karesi. Boşsa tam boy görsel kullanılır</span></label>
+      <input type="url" id="fStill" placeholder="https://…/video-frame.jpg">
     </div>
     <div class="field">
       <label>Couples tema kapak URL <span style="color:var(--text-dim);font-weight:400">— ana sayfada tek görsel olarak görünür, opsiyonel</span></label>
@@ -1227,17 +1349,14 @@
     <div class="row">
       <div class="field">
         <label>Kategori</label>
-        <select id="fCategory">
-          <option>Toons</option><option>Couples</option>
-          <option>Space</option><option>Nature</option><option>City</option>
-          <option>Seasonal</option><option>Sports</option>
-        </select>
+        <select id="fCategory"></select>
       </div>
       <div class="field">
-        <label>Sıra</label>
+        <label>Sıra <span style="color:var(--text-dim);font-weight:400">— küçük = önde</span></label>
         <input type="number" id="fOrder" value="100">
       </div>
     </div>
+    <div class="cat-note" id="catNote"></div>
     <div class="field">
       <label>Vurgu rengi <span style="color:var(--text-dim);font-weight:400">— Island parlaması</span></label>
       <div class="row3">
@@ -1275,16 +1394,7 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
         <input type="text" id="search" placeholder="Başlık veya ID ara…">
       </div>
-      <div class="chips" id="chips">
-        <button class="chip active" data-cat="all">Tümü</button>
-        <button class="chip" data-cat="Space">Space</button>
-        <button class="chip" data-cat="Nature">Nature</button>
-        <button class="chip" data-cat="City">City</button>
-        <button class="chip" data-cat="Seasonal">Seasonal</button>
-        <button class="chip" data-cat="Sports">Sports</button>
-        <button class="chip" data-cat="premium">⭐ Premium</button>
-        <button class="chip" data-cat="live">▶ Canlı</button>
-      </div>
+      <div class="chips" id="chips"></div>
     </div>
     <div class="grid" id="grid">
       <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
@@ -1301,6 +1411,111 @@ let editingId = null;
 let activeCat = "all";
 
 const $ = (id) => document.getElementById(id);
+
+/* ── Kategoriler — uygulamayla birebir aynı olmak zorunda ─────────────
+   Kaynak: DynamicIslandWallpapers/Wallpapers/WallpaperDesignModels.swift
+           → WallpaperCategory.builtIn
+   Buradaki id uygulamadakiyle eşleşmezse duvar kağıdı yine görünür ama
+   kendi renkli rafı yerine jenerik gri bir rafta çıkar.
+   Yeni kategori eklerken önce uygulamada builtIn listesine ekle.        */
+const WP_APP_CATEGORIES = [
+  { id: "Cute",     emoji: "💗" },
+  { id: "Minimal",  emoji: "◽️" },
+  { id: "Funny",    emoji: "😄" },
+  { id: "Animals",  emoji: "🐾" },
+  { id: "Dark",     emoji: "🌙" },
+  { id: "Space",    emoji: "✨" },
+  { id: "Abstract", emoji: "🎨" },
+  { id: "Anime",    emoji: "⭐️" },
+  { id: "Toons",    emoji: "📺" },
+  { id: "Couples",  emoji: "❤️" },
+  { id: "Football", emoji: "⚽️" },
+  { id: "Nature",   emoji: "🌿" },
+  { id: "City",     emoji: "🌃" }
+];
+/* Uygulamada kodla özel işleniyor ama builtIn listesinde yok — jenerik görünür */
+const WP_SPECIAL_CATEGORIES = [{ id: "Watch", emoji: "⌚️" }];
+/* Eski panelden kalanlar — uygulama bunları tanımıyor, taşınmaları önerilir */
+const WP_LEGACY_CATEGORIES = [
+  { id: "Seasonal", emoji: "🍂" },
+  { id: "Sports",   emoji: "⚽️" }
+];
+const WP_APP_CATEGORY_IDS = new Set(WP_APP_CATEGORIES.map(c => c.id));
+const WP_KNOWN_CATEGORY_IDS = new Set([
+  ...WP_APP_CATEGORIES, ...WP_SPECIAL_CATEGORIES, ...WP_LEGACY_CATEGORIES
+].map(c => c.id));
+const WP_CAT_EMOJI = Object.fromEntries(
+  [...WP_APP_CATEGORIES, ...WP_SPECIAL_CATEGORIES, ...WP_LEGACY_CATEGORIES].map(c => [c.id, c.emoji])
+);
+/* Uygulamadaki raf mantığı ile aynı sayılar (WallpaperGalleryView.swift) */
+const WP_POPULAR_LIMIT = 14;
+const WP_NEW_LIMIT = 14;
+const WP_THIN_SHELF = 3;
+
+function catEmoji(id) { return WP_CAT_EMOJI[id] || "🏷️"; }
+
+/* Yeni kayıt için bir sonraki boş sıra — "New Drops" rafına düşsün diye sona ekler */
+function nextOrder() {
+  const used = items
+    .map(w => Number(w.order ?? 0))
+    .filter(n => Number.isFinite(n) && n < 999);
+  if (!used.length) return 100;
+  return Math.max(...used) + 10;
+}
+
+/* Veride var olan ama listelerde olmayan kategorileri de yakala */
+function allCategoryIDs() {
+  const seen = new Set(items.map(w => w.category).filter(Boolean));
+  const ordered = [
+    ...WP_APP_CATEGORIES.map(c => c.id),
+    ...WP_SPECIAL_CATEGORIES.map(c => c.id),
+    ...WP_LEGACY_CATEGORIES.map(c => c.id)
+  ];
+  const extras = [...seen].filter(id => !WP_KNOWN_CATEGORY_IDS.has(id)).sort();
+  return [...ordered, ...extras];
+}
+
+/* Kategori seçicisini doldur — gruplanmış, hangisi uygulamada tanımlı belli */
+function buildCategorySelect() {
+  const sel = $("fCategory");
+  if (!sel) return;
+  const current = sel.value;
+  const group = (label, list) => {
+    if (!list.length) return "";
+    const opts = list.map(c =>
+      `<option value="${c.id}">${c.emoji} ${c.id}</option>`).join("");
+    return `<optgroup label="${label}">${opts}</optgroup>`;
+  };
+  const unknown = [...new Set(items.map(w => w.category).filter(Boolean))]
+    .filter(id => !WP_KNOWN_CATEGORY_IDS.has(id))
+    .sort()
+    .map(id => ({ id, emoji: "❔" }));
+
+  sel.innerHTML =
+    group("Uygulama kategorileri", WP_APP_CATEGORIES) +
+    group("Özel", WP_SPECIAL_CATEGORIES) +
+    group("Eski — uygulamada tanımsız", WP_LEGACY_CATEGORIES) +
+    group("Veride bulunan diğerleri", unknown);
+
+  if (current && sel.querySelector(`option[value="${CSS.escape(current)}"]`)) {
+    sel.value = current;
+  }
+  updateCatNote();
+}
+
+function updateCatNote() {
+  const note = $("catNote");
+  const sel = $("fCategory");
+  if (!note || !sel) return;
+  const id = sel.value;
+  if (WP_APP_CATEGORY_IDS.has(id)) {
+    note.className = "cat-note";
+    note.textContent = `${catEmoji(id)} “${id}” uygulamada tanımlı — kendi rengi, ikonu ve rafıyla görünür.`;
+  } else {
+    note.className = "cat-note warn";
+    note.textContent = `⚠️ “${id}” uygulamanın builtIn listesinde yok. Duvar kağıdı görünür ama rafı jenerik gri ikonla çıkar. Kalıcı kullanacaksan WallpaperDesignModels.swift içindeki builtIn listesine eklemek gerekir.`;
+  }
+}
 
 /* ── Auth (kullanıcı adı + şifre) ── */
 let SESSION = localStorage.getItem("islandly.session") || "";
@@ -1425,6 +1640,7 @@ function updatePreview() {
 }
 ["fImage", "fTitle", "fSubtitle"].forEach(id => $(id).addEventListener("input", updatePreview));
 $("fPremium").addEventListener("change", updatePreview);
+$("fCategory").addEventListener("change", updateCatNote);
 
 /* ── Load & render ── */
 async function load() {
@@ -1437,15 +1653,328 @@ async function load() {
   }
 }
 
+/* ── Uygulamadaki raf mantığının aynısı (WallpaperGalleryView.swift) ── */
+function shelfModel() {
+  // Gizlenen kategoriler uygulamada hiç görünmez — önizleme de aynısını yapar
+  const hidden = pendingHidden || hiddenCats();
+  const visible = (w) => !hidden.has(w.category || "");
+
+  const byOrder = (a, b) => (Number(a.order ?? 999)) - (Number(b.order ?? 999));
+  const live    = hidden.has("Live") ? [] : items.filter(w => w.videoURL && visible(w)).sort(byOrder);
+  const rest    = items.filter(w => !w.videoURL).sort(byOrder);
+  const couples = hidden.has("Couples") ? [] : rest.filter(w => w.partnerURL);
+  const flat    = rest.filter(w => !w.partnerURL && visible(w));
+
+  const shelves = [];
+  if (flat.length) shelves.push({ name: "Popular", kind: "auto", items: flat.slice(0, WP_POPULAR_LIMIT) });
+  if (couples.length) shelves.push({ name: "Couples", kind: "kategori", items: couples });
+  if (live.length) shelves.push({ name: "Live Wallpapers", kind: "kategori", items: live });
+  if (flat.length) shelves.push({ name: "New Drops", kind: "auto", items: flat.slice(-WP_NEW_LIMIT).reverse() });
+
+  for (const id of allCategoryIDs()) {
+    if (id === "Couples" || hidden.has(id)) continue;
+    const list = flat.filter(w => w.category === id);
+    if (!list.length) continue;
+    shelves.push({ name: id, kind: "kategori", items: list, categoryID: id });
+  }
+  return { shelves, live, couples, flat, hidden };
+}
+
+function renderShelves() {
+  const host = $("shelfPreview");
+  const issuesHost = $("shelfIssues");
+  if (!host || !issuesHost) return;
+
+  const { shelves, live, hidden } = shelfModel();
+  $("shelfCount").textContent = `${shelves.length} raf`;
+
+  if (!shelves.length) {
+    host.innerHTML = `<div class="issue bad"><span>⚠️</span><div>Hiç duvar kağıdı yok — uygulamanın ana sayfası boş görünür.</div></div>`;
+    issuesHost.innerHTML = "";
+    return;
+  }
+
+  host.innerHTML = shelves.map((s, i) => {
+    const strip = s.items.slice(0, 8).map(w =>
+      `<i style="background-image:url('${String(w.thumbURL || w.imageURL || "").replace(/'/g, "%27")}')"></i>`
+    ).join("");
+    const thin = s.kind === "kategori" && s.items.length < WP_THIN_SHELF;
+    const unknown = s.categoryID && !WP_APP_CATEGORY_IDS.has(s.categoryID);
+    return `
+      <div class="shelf-row${thin ? " thin" : ""}">
+        <span class="idx">${i + 1}</span>
+        <span class="name">${unknown ? "❔ " : (s.categoryID ? catEmoji(s.categoryID) + " " : "")}${esc(s.name)}</span>
+        <span class="kind ${s.kind === "auto" ? "auto" : ""}">${s.kind === "auto" ? "OTOMATİK" : "KATEGORİ"}</span>
+        <span class="strip">${strip}</span>
+        <span class="count">${s.items.length} kart</span>
+      </div>`;
+  }).join("");
+
+  /* ── Sağlık kontrolü ── */
+  const issues = [];
+
+  const published = hiddenCats();
+  const same = hidden.size === published.size && [...hidden].every(x => published.has(x));
+  if (!same) {
+    issues.push({ level: "warn", html:
+      `<b>Yayınlanmamış görünürlük değişikliği var</b> — yukarıdaki önizleme yeni haline göre. ` +
+      `Uygulamaya yansıması için “Görünürlüğü Yayınla” butonuna bas.` });
+  }
+  if (hidden.size) {
+    issues.push({ level: "ok", html:
+      `<b>Gizli:</b> ${[...hidden].map(esc).join(", ")} — uygulamada hiç görünmüyor, kayıtlar duruyor.` });
+  }
+
+  const unknownCats = [...new Set(items.map(w => w.category).filter(Boolean))]
+    .filter(id => !WP_APP_CATEGORY_IDS.has(id) && !hidden.has(id));
+  if (unknownCats.length) {
+    issues.push({ level: "warn", html:
+      `<b>Uygulamanın tanımadığı kategori:</b> ${unknownCats.map(esc).join(", ")} — ` +
+      `bu raflar jenerik gri ikonla çıkar. Ya uygulamadaki <code>builtIn</code> listesine ekle, ` +
+      `ya da bu kayıtları tanımlı bir kategoriye taşı.` });
+  }
+
+  const thinShelves = shelves.filter(s => s.kind === "kategori" && s.items.length < WP_THIN_SHELF);
+  if (thinShelves.length) {
+    issues.push({ level: "warn", html:
+      `<b>Az içerikli raf:</b> ${thinShelves.map(s => `${esc(s.name)} (${s.items.length})`).join(", ")} — ` +
+      `${WP_THIN_SHELF}'ten az kart olan raf ekranda yarım görünür. Ya içerik ekle ya da geçici olarak başka kategoriye al.` });
+  }
+
+  const noThumb = items.filter(w => !w.thumbURL).length;
+  if (noThumb) {
+    issues.push({ level: "warn", html:
+      `<b>${noThumb} kayıtta küçük görsel (thumb) yok</b> — raflardaki 140px kartlar tam boy dosyayı indiriyor. ` +
+      `~420px bir kopya yükleyip “Küçük görsel URL” alanına koymak ilk açılışı belirgin hızlandırır.` });
+  }
+
+  const noStill = live.filter(w => !w.stillURL).length;
+  if (noStill) {
+    issues.push({ level: "warn", html:
+      `<b>${noStill} canlı duvar kağıdında durağan kare (still) yok</b> — Live Photo kaydedilirken ` +
+      `kapak olarak tam boy görsel kullanılır; videonun ilk karesi değilse kaydedilen Live Photo titrek görünür.` });
+  }
+
+  const noOrder = items.filter(w => w.order == null || Number(w.order) === 999).length;
+  if (noOrder) {
+    issues.push({ level: "warn", html:
+      `<b>${noOrder} kayıtta sıra ayarlanmamış (999)</b> — “Popular” ilk ${WP_POPULAR_LIMIT}, ` +
+      `“New Drops” son ${WP_NEW_LIMIT} kaydı sıraya göre alır. Sırasız kayıtlar hep en sonda kalır.` });
+  }
+
+  const dupOrders = Object.entries(
+    items.reduce((acc, w) => { const k = String(w.order ?? 999); acc[k] = (acc[k] || 0) + 1; return acc; }, {})
+  ).filter(([k, n]) => n > 1 && k !== "999");
+  if (dupOrders.length) {
+    issues.push({ level: "warn", html:
+      `<b>Aynı sıra numarası birden fazla kayıtta:</b> ${dupOrders.map(([k, n]) => `#${k} ×${n}`).join(", ")} — ` +
+      `sıralama tahmin edilemez olur.` });
+  }
+
+  if (!issues.length) {
+    issuesHost.innerHTML = `<div class="issue ok"><span>✓</span><div>Her şey yolunda — kategoriler uygulamayla uyumlu, görseller ve sıralar tamam.</div></div>`;
+  } else {
+    issuesHost.innerHTML = issues.map(i => {
+      const cls = i.level === "bad" ? "bad" : (i.level === "ok" ? "ok" : "");
+      const icon = i.level === "ok" ? "👁️" : "⚠️";
+      return `<div class="issue ${cls}"><span>${icon}</span><div>${i.html}</div></div>`;
+    }).join("");
+  }
+}
+
+/* ── Kategori yönetimi: gizle / taşı / sil ───────────────────────────
+   Gizleme sunucu config'ine yazılır (config.wallpapers.disabledCategories);
+   uygulama bunu okuyup o kategoriyi hiç göstermez. Taşı/Sil ise doğrudan
+   duvar kağıdı kayıtlarını değiştirir.                                  */
+function hiddenCats() {
+  return new Set((cfg.wallpapers && cfg.wallpapers.disabledCategories) || []);
+}
+
+/* Ekranda düzenlenmekte olan görünürlük durumu — kaydedilene kadar burada durur */
+let pendingHidden = null;
+
+function applyWpCategoriesUI() {
+  const host = $("catManager");
+  if (!host) return;
+  if (!pendingHidden) pendingHidden = hiddenCats();
+
+  const counts = {};
+  for (const w of items) {
+    const c = w.category || "—";
+    counts[c] = (counts[c] || 0) + 1;
+  }
+
+  const moveTargets = WP_APP_CATEGORIES.map(c => c.id);
+
+  const rows = [];
+
+  // Özel raflar — kategori alanından değil, veri şeklinden doğar.
+  // Sadece gizlenebilir; taşınamaz/silinemez.
+  const specials = [
+    { id: "Live",    emoji: "▶️", label: "Live Wallpapers", n: items.filter(w => w.videoURL).length },
+    { id: "Couples", emoji: "❤️", label: "Couples",         n: items.filter(w => w.partnerURL).length }
+  ];
+  for (const s of specials) {
+    const off = pendingHidden.has(s.id);
+    rows.push(`
+      <div class="cat-row special${off ? " hidden-cat" : ""}">
+        <span class="cat-emoji">${s.emoji}</span>
+        <span class="cat-name">${esc(s.label)}</span>
+        <span class="cat-tag special">ÖZEL RAF</span>
+        <span class="cat-count">${s.n} kart</span>
+        <span class="spacer"></span>
+        <span class="vis-label">${off ? "gizli" : "görünür"}</span>
+        <label class="switch">
+          <input type="checkbox" data-vis="${s.id}" ${off ? "" : "checked"}>
+          <span class="track"></span>
+        </label>
+      </div>`);
+  }
+
+  // Gerçek kategoriler
+  for (const id of allCategoryIDs()) {
+    const n = counts[id] || 0;
+    const known = WP_APP_CATEGORY_IDS.has(id);
+    const off = pendingHidden.has(id);
+    const opts = moveTargets
+      .filter(t => t !== id)
+      .map(t => `<option value="${esc(t)}">${catEmoji(t)} ${esc(t)}</option>`)
+      .join("");
+    rows.push(`
+      <div class="cat-row${off ? " hidden-cat" : ""}">
+        <span class="cat-emoji">${known ? catEmoji(id) : "❔"}</span>
+        <span class="cat-name">${esc(id)}</span>
+        <span class="cat-tag${known ? "" : " unknown"}">${known ? "UYGULAMADA VAR" : "TANIMSIZ"}</span>
+        <span class="cat-count">${n} kart</span>
+        <span class="spacer"></span>
+        ${n ? `<select data-target="${esc(id)}">${opts}</select>
+               <button class="btn" data-move="${esc(id)}">Taşı</button>
+               <button class="btn btn-danger" data-del="${esc(id)}">Sil</button>`
+            : `<span class="vis-label">içerik yok</span>`}
+        <span class="vis-label">${off ? "gizli" : "görünür"}</span>
+        <label class="switch">
+          <input type="checkbox" data-vis="${esc(id)}" ${off ? "" : "checked"}>
+          <span class="track"></span>
+        </label>
+      </div>`);
+  }
+
+  host.innerHTML = rows.join("");
+  $("catHiddenCount").textContent = `${pendingHidden.size} gizli`;
+}
+
+/* Anahtarlar — sadece ekrandaki durumu değiştirir, yayınlamak ayrı buton */
+$("catManager").addEventListener("change", (e) => {
+  const box = e.target.closest("input[data-vis]");
+  if (!box) return;
+  if (!pendingHidden) pendingHidden = hiddenCats();
+  if (box.checked) pendingHidden.delete(box.dataset.vis);
+  else pendingHidden.add(box.dataset.vis);
+  applyWpCategoriesUI();
+});
+
+/* Taşı / Sil */
+$("catManager").addEventListener("click", async (e) => {
+  const moveBtn = e.target.closest("button[data-move]");
+  const delBtn = e.target.closest("button[data-del]");
+  if (!moveBtn && !delBtn) return;
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
+
+  const category = (moveBtn || delBtn).dataset.move || delBtn.dataset.del;
+  const n = items.filter(w => w.category === category).length;
+
+  let payload;
+  if (moveBtn) {
+    const sel = document.querySelector(`#catManager select[data-target="${CSS.escape(category)}"]`);
+    const target = sel && sel.value;
+    if (!target) return toast("Hedef kategori seç", "err");
+    if (!confirm(`"${category}" kategorisindeki ${n} duvar kağıdı "${target}" kategorisine taşınacak.\n\nDevam edilsin mi?`)) return;
+    payload = { action: "move", category, target };
+  } else {
+    if (!confirm(`"${category}" kategorisindeki ${n} duvar kağıdı KALICI OLARAK SİLİNECEK.\n\nBu geri alınamaz. Devam edilsin mi?`)) return;
+    if (!confirm(`Son onay: ${n} kayıt silinecek.`)) return;
+    payload = { action: "delete", category };
+  }
+
+  const btn = moveBtn || delBtn;
+  btn.disabled = true;
+  try {
+    const res = await fetch("/api/wallpapers/category", {
+      method: "POST", headers: headers(), body: JSON.stringify(payload)
+    });
+    if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
+    else if (!res.ok) toast("İşlem başarısız", "err");
+    else {
+      const out = await res.json();
+      toast(payload.action === "move"
+        ? `📦 ${out.affected} kayıt ${payload.target} kategorisine taşındı`
+        : `🗑️ ${out.affected} kayıt silindi`);
+      await load();
+    }
+  } catch { toast("Bağlantı hatası", "err"); }
+  btn.disabled = false;
+});
+
+$("saveWpCatsBtn").onclick = async () => {
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
+  const btn = $("saveWpCatsBtn");
+  btn.disabled = true; btn.textContent = "Yayınlanıyor…";
+  try {
+    const res = await fetch("/api/config", {
+      method: "PUT", headers: headers(),
+      body: JSON.stringify({ wallpapers: { disabledCategories: [...(pendingHidden || new Set())] } })
+    });
+    if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
+    else if (!res.ok) toast("Kaydedilemedi", "err");
+    else {
+      cfg = await res.json();
+      pendingHidden = hiddenCats();
+      applyWpCategoriesUI();
+      renderShelves();
+      toast("👁️ Kategori görünürlüğü yayında!");
+    }
+  } catch { toast("Bağlantı hatası", "err"); }
+  btn.disabled = false; btn.textContent = "👁️ Görünürlüğü Yayınla";
+};
+
+/* ── Filtre çipleri — veriye göre kurulur ── */
+function buildChips() {
+  const host = $("chips");
+  if (!host) return;
+  const used = allCategoryIDs().filter(id => items.some(w => w.category === id));
+  const chips = [
+    `<button class="chip${activeCat === "all" ? " active" : ""}" data-cat="all">Tümü</button>`,
+    ...used.map(id =>
+      `<button class="chip${activeCat === id ? " active" : ""}" data-cat="${esc(id)}">` +
+      `${WP_APP_CATEGORY_IDS.has(id) ? catEmoji(id) : "❔"} ${esc(id)}</button>`),
+    `<button class="chip${activeCat === "premium" ? " active" : ""}" data-cat="premium">⭐ Premium</button>`,
+    `<button class="chip${activeCat === "live" ? " active" : ""}" data-cat="live">▶ Canlı</button>`,
+    `<button class="chip${activeCat === "couples" ? " active" : ""}" data-cat="couples">❤️ Couples set</button>`,
+    `<button class="chip${activeCat === "nothumb" ? " active" : ""}" data-cat="nothumb">🐢 Thumb'sız</button>`
+  ];
+  host.innerHTML = chips.join("");
+}
+
 function render() {
   const q = $("search").value.trim().toLowerCase();
   const grid = $("grid");
   $("statTotal").textContent = items.length;
   $("statPremium").textContent = items.filter(w => w.isPremium).length;
 
+  buildCategorySelect();
+  buildChips();
+  applyWpCategoriesUI();
+  renderShelves();
+
+  const { flat } = shelfModel();
+  const popularIDs = new Set(flat.slice(0, WP_POPULAR_LIMIT).map(w => w.id));
+  const newIDs = new Set(flat.slice(-WP_NEW_LIMIT).map(w => w.id));
+
   let list = [...items].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
   if (activeCat === "premium") list = list.filter(w => w.isPremium);
   else if (activeCat === "live") list = list.filter(w => w.videoURL);
+  else if (activeCat === "couples") list = list.filter(w => w.partnerURL);
+  else if (activeCat === "nothumb") list = list.filter(w => !w.thumbURL);
   else if (activeCat !== "all") list = list.filter(w => w.category === activeCat);
   if (q) list = list.filter(w =>
     (w.title || "").toLowerCase().includes(q) || (w.id || "").toLowerCase().includes(q));
@@ -1459,13 +1988,17 @@ function render() {
     const hex = rgb01ToHex(w.accentRed ?? 0.49, w.accentGreen ?? 0.36, w.accentBlue ?? 1);
     return `
     <article class="card" style="--glow:${hex}99">
-      <div class="thumb" style="background-image:url('${(w.imageURL || "").replace(/'/g, "%27")}')">
+      <div class="thumb" style="background-image:url('${(w.thumbURL || w.imageURL || "").replace(/'/g, "%27")}')">
         <div class="mini-island"></div>
         <span class="order-tag">#${w.order ?? "–"}</span>
         <div class="badges">
-          <span class="badge">${w.category || "–"}</span>
+          <span class="badge"${WP_APP_CATEGORY_IDS.has(w.category) ? "" : ' style="background:rgba(255,196,84,0.35)" title="Uygulama bu kategoriyi tanımıyor"'}>${WP_APP_CATEGORY_IDS.has(w.category) ? "" : "❔ "}${w.category || "–"}</span>
           ${w.isPremium ? '<span class="badge premium">PREMIUM</span>' : '<span class="badge">FREE</span>'}
           ${w.videoURL ? '<span class="badge" style="background:rgba(77,214,255,0.35)">▶ CANLI</span>' : ''}
+          ${w.partnerURL ? '<span class="badge" style="background:rgba(255,92,122,0.35)">❤️ SET</span>' : ''}
+          ${popularIDs.has(w.id) ? '<span class="badge" style="background:rgba(255,140,60,0.38)">🔥 POPULAR</span>' : ''}
+          ${newIDs.has(w.id) ? '<span class="badge" style="background:rgba(124,92,255,0.38)">✨ NEW DROPS</span>' : ''}
+          ${!w.thumbURL ? '<span class="badge" style="background:rgba(255,196,84,0.30)" title="Küçük görsel yok — tam boy dosya iniyor">🐢 THUMB YOK</span>' : ''}
         </div>
       </div>
       <div class="meta">
@@ -1500,6 +2033,8 @@ function collect() {
     title: $("fTitle").value.trim(),
     subtitle: $("fSubtitle").value.trim(),
     imageURL: $("fImage").value.trim(),
+    thumbURL: $("fThumb").value.trim(),
+    stillURL: $("fStill").value.trim(),
     videoURL: $("fVideo").value.trim(),
     coupleCoverURL: $("fCoupleCover").value.trim(),
     partnerURL: $("fPartner").value.trim(),
@@ -1512,9 +2047,11 @@ function collect() {
 
 function resetForm() {
   editingId = null;
-  ["fId", "fTitle", "fSubtitle", "fImage", "fVideo", "fCoupleCover", "fPartner"].forEach(id => $(id).value = "");
-  $("fCategory").value = "Space";
-  $("fOrder").value = 100;
+  ["fId", "fTitle", "fSubtitle", "fImage", "fThumb", "fStill", "fVideo", "fCoupleCover", "fPartner"]
+    .forEach(id => $(id).value = "");
+  $("fCategory").value = "Cute";
+  updateCatNote();
+  $("fOrder").value = nextOrder();
   $("fPremium").checked = false;
   $("fId").disabled = false;
   syncColor("#7c5cff");
@@ -1532,10 +2069,14 @@ window.startEdit = (id) => {
   $("fTitle").value = w.title || "";
   $("fSubtitle").value = w.subtitle || "";
   $("fImage").value = w.imageURL || "";
+  $("fThumb").value = w.thumbURL || "";
+  $("fStill").value = w.stillURL || "";
   $("fVideo").value = w.videoURL || "";
   $("fCoupleCover").value = w.coupleCoverURL || "";
   $("fPartner").value = w.partnerURL || "";
-  $("fCategory").value = w.category || "Space";
+  buildCategorySelect();
+  $("fCategory").value = w.category || "Cute";
+  updateCatNote();
   $("fOrder").value = w.order ?? 100;
   $("fPremium").checked = !!w.isPremium;
   syncColor(rgb01ToHex(w.accentRed ?? 0.49, w.accentGreen ?? 0.36, w.accentBlue ?? 1));
@@ -2384,6 +2925,10 @@ async function loadConfig() {
   applyThemesUI();
   applyPaywallUI();
   applyWpTabUI();
+  // Config geldikten sonra kategori görünürlüğü tazelensin
+  pendingHidden = hiddenCats();
+  applyWpCategoriesUI();
+  renderShelves();
 }
 
 /* ── Duvar Kağıtları sekmesi aç/kapa ── */
@@ -2760,6 +3305,9 @@ const snowEngine = (() => {
 })();
 
 /* init */
+buildCategorySelect();
+$("fCategory").value = "Cute";
+updateCatNote();
 syncColor("#7c5cff");
 updatePreview();
 load();
