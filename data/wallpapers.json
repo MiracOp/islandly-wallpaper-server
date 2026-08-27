@@ -463,5 +463,22 @@
     "accentBlue": 1,
     "isPremium": false,
     "order": 269
+  },
+  {
+    "id": "spatial-deneme-1",
+    "title": "Deneme 1",
+    "subtitle": "",
+    "imageURL": "/media/spatial-deneme-1.jpg",
+    "thumbURL": "/media/spatial-deneme-1-thumb.jpg",
+    "stillURL": "",
+    "videoURL": "/media/spatial-deneme-1.mp4",
+    "partnerURL": "",
+    "coupleCoverURL": "",
+    "category": "Spatial",
+    "accentRed": 0.45,
+    "accentGreen": 0.65,
+    "accentBlue": 1,
+    "isPremium": false,
+    "order": 279
   }
 ]
