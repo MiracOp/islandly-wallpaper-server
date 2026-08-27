@@ -137,5 +137,22 @@
     "accentBlue": 0.314,
     "isPremium": false,
     "order": 8
+  },
+  {
+    "id": "animals-kurt-gun-batimi-vadi",
+    "title": "Kurt Gun Batimi Vadi",
+    "subtitle": "",
+    "imageURL": "/media/animals-kurt-gun-batimi-vadi.jpg",
+    "thumbURL": "/media/animals-kurt-gun-batimi-vadi-thumb.jpg",
+    "stillURL": "",
+    "videoURL": "",
+    "partnerURL": "",
+    "coupleCoverURL": "",
+    "category": "Animals",
+    "accentRed": 0.45,
+    "accentGreen": 0.65,
+    "accentBlue": 1,
+    "isPremium": false,
+    "order": 19
   }
 ]
