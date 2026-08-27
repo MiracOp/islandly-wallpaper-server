@@ -1,5 +1,6 @@
 {
   "theme": "default",
+  "wallpapersTabEnabled": true,
   "snow": {
     "enabled": false,
     "intensity": 40,
@@ -14,6 +15,9 @@
     "message": "deneme",
     "ctaText": "paywall",
     "ctaAction": "paywall"
+  },
+  "wallpapers": {
+    "disabledCategories": []
   },
   "themes": {
     "freeThemeNames": [],
