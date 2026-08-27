@@ -1,20 +1,5 @@
 [
   {
-    "id": "0826",
-    "title": "Canlı Duvar Kağıdı 10",
-    "subtitle": "canlı duvar kağıdı",
-    "imageURL": "/media/0826.heic",
-    "thumbURL": "/media/0826-thumb.jpg",
-    "stillURL": "/media/0826.heic",
-    "videoURL": "/media/0826.mov",
-    "category": "Live",
-    "accentRed": 0.678,
-    "accentGreen": 0.95,
-    "accentBlue": 0.266,
-    "isPremium": true,
-    "order": 9
-  },
-  {
     "id": "toons-1",
     "title": "Cars Wallpaper",
     "subtitle": "4K",
