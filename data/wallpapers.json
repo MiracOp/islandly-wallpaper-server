@@ -309,23 +309,6 @@
     "order": 109
   },
   {
-    "id": "football-galatasaray-logo",
-    "title": "Galatasaray Logo",
-    "subtitle": "",
-    "imageURL": "/media/football-galatasaray-logo.jpg",
-    "thumbURL": "/media/football-galatasaray-logo-thumb.jpg",
-    "stillURL": "",
-    "videoURL": "",
-    "partnerURL": "",
-    "coupleCoverURL": "",
-    "category": "Football",
-    "accentRed": 0.45,
-    "accentGreen": 0.65,
-    "accentBlue": 1,
-    "isPremium": false,
-    "order": 129
-  },
-  {
     "id": "nature-karli-noel-koyu",
     "title": "Karli Noel Koyu",
     "subtitle": "",
