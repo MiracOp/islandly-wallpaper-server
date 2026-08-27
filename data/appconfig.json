@@ -17,7 +17,11 @@
     "ctaAction": "paywall"
   },
   "wallpapers": {
-    "disabledCategories": []
+    "disabledCategories": [
+      "Watch",
+      "Seasonal",
+      "Sports"
+    ]
   },
   "themes": {
     "freeThemeNames": [],
