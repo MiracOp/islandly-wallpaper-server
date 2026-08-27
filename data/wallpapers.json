@@ -290,5 +290,39 @@
     "accentBlue": 1,
     "isPremium": false,
     "order": 99
+  },
+  {
+    "id": "football-fenerbahce-yilbasi",
+    "title": "Fenerbahce Yilbasi",
+    "subtitle": "",
+    "imageURL": "/media/football-fenerbahce-yilbasi.jpg",
+    "thumbURL": "/media/football-fenerbahce-yilbasi-thumb.jpg",
+    "stillURL": "",
+    "videoURL": "",
+    "partnerURL": "",
+    "coupleCoverURL": "",
+    "category": "Football",
+    "accentRed": 0.45,
+    "accentGreen": 0.65,
+    "accentBlue": 1,
+    "isPremium": false,
+    "order": 109
+  },
+  {
+    "id": "football-galatasaray-yilbasi",
+    "title": "Galatasaray Yilbasi",
+    "subtitle": "",
+    "imageURL": "/media/football-galatasaray-yilbasi.jpg",
+    "thumbURL": "/media/football-galatasaray-yilbasi-thumb.jpg",
+    "stillURL": "",
+    "videoURL": "",
+    "partnerURL": "",
+    "coupleCoverURL": "",
+    "category": "Football",
+    "accentRed": 0.45,
+    "accentGreen": 0.65,
+    "accentBlue": 1,
+    "isPremium": false,
+    "order": 119
   }
 ]
