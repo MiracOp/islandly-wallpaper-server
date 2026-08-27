@@ -154,5 +154,39 @@
     "accentBlue": 1,
     "isPremium": false,
     "order": 19
+  },
+  {
+    "id": "animals-kurt-ruhu-gokyuzu",
+    "title": "Kurt Ruhu Gokyuzu",
+    "subtitle": "",
+    "imageURL": "/media/animals-kurt-ruhu-gokyuzu.jpg",
+    "thumbURL": "/media/animals-kurt-ruhu-gokyuzu-thumb.jpg",
+    "stillURL": "",
+    "videoURL": "",
+    "partnerURL": "",
+    "coupleCoverURL": "",
+    "category": "Animals",
+    "accentRed": 0.45,
+    "accentGreen": 0.65,
+    "accentBlue": 1,
+    "isPremium": false,
+    "order": 29
+  },
+  {
+    "id": "animals-kurt-aurora-gol",
+    "title": "Kurt Aurora Gol",
+    "subtitle": "",
+    "imageURL": "/media/animals-kurt-aurora-gol.jpg",
+    "thumbURL": "/media/animals-kurt-aurora-gol-thumb.jpg",
+    "stillURL": "",
+    "videoURL": "",
+    "partnerURL": "",
+    "coupleCoverURL": "",
+    "category": "Animals",
+    "accentRed": 0.45,
+    "accentGreen": 0.65,
+    "accentBlue": 1,
+    "isPremium": false,
+    "order": 39
   }
 ]
