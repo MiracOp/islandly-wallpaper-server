@@ -1431,7 +1431,8 @@ const WP_APP_CATEGORIES = [
   { id: "Couples",  emoji: "❤️" },
   { id: "Football", emoji: "⚽️" },
   { id: "Nature",   emoji: "🌿" },
-  { id: "City",     emoji: "🌃" }
+  { id: "City",     emoji: "🌃" },
+  { id: "Spatial",  emoji: "🧊" }
 ];
 /* Uygulamada kodla özel işleniyor ama builtIn listesinde yok — jenerik görünür */
 const WP_SPECIAL_CATEGORIES = [{ id: "Watch", emoji: "⌚️" }];
@@ -1746,6 +1747,16 @@ function renderShelves() {
     issues.push({ level: "warn", html:
       `<b>${noThumb} kayıtta küçük görsel (thumb) yok</b> — raflardaki 140px kartlar tam boy dosyayı indiriyor. ` +
       `~420px bir kopya yükleyip “Küçük görsel URL” alanına koymak ilk açılışı belirgin hızlandırır.` });
+  }
+
+  const spatialBroken = items.filter(w =>
+    (w.category || "").toLowerCase() === "spatial" && (!w.videoURL || !w.imageURL));
+  if (spatialBroken.length) {
+    issues.push({ level: "bad", html:
+      `<b>${spatialBroken.length} Uzamsal kayıtta eksik dosya var</b> — ` +
+      `Spatial kategorisinde hem <code>imageURL</code> (indirilen duvar kağıdı) ` +
+      `hem <code>videoURL</code> (vitrin videosu) dolu olmak zorunda. ` +
+      `Eksikse kart video yerine düz görsel gösterir.` });
   }
 
   const noStill = live.filter(w => !w.stillURL).length;
