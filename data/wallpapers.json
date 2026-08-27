@@ -463,22 +463,5 @@
     "accentBlue": 1,
     "isPremium": false,
     "order": 269
-  },
-  {
-    "id": "spatial-kuzey-isiklari",
-    "title": "Kuzey Isiklari",
-    "subtitle": "",
-    "imageURL": "/media/spatial-kuzey-isiklari.jpg",
-    "thumbURL": "/media/spatial-kuzey-isiklari-thumb.jpg",
-    "stillURL": "",
-    "videoURL": "/media/spatial-kuzey-isiklari.mp4",
-    "partnerURL": "",
-    "coupleCoverURL": "",
-    "category": "Spatial",
-    "accentRed": 0.45,
-    "accentGreen": 0.65,
-    "accentBlue": 1,
-    "isPremium": false,
-    "order": 279
   }
 ]
