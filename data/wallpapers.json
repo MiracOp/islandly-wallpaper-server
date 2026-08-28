@@ -667,5 +667,22 @@
     "accentBlue": 0.96,
     "isPremium": true,
     "order": 400
+  },
+  {
+    "id": "spatial-gece-nobeti",
+    "title": "Gece Nobeti",
+    "subtitle": "",
+    "imageURL": "/media/spatial-gece-nobeti.jpg",
+    "thumbURL": "/media/spatial-gece-nobeti-thumb.jpg",
+    "stillURL": "",
+    "videoURL": "/media/spatial-gece-nobeti.mov",
+    "partnerURL": "",
+    "coupleCoverURL": "",
+    "category": "Spatial",
+    "accentRed": 0.45,
+    "accentGreen": 0.65,
+    "accentBlue": 1,
+    "isPremium": false,
+    "order": 410
   }
 ]
