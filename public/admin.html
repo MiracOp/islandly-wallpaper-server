@@ -1419,20 +1419,20 @@ const $ = (id) => document.getElementById(id);
    kendi renkli rafı yerine jenerik gri bir rafta çıkar.
    Yeni kategori eklerken önce uygulamada builtIn listesine ekle.        */
 const WP_APP_CATEGORIES = [
-  { id: "Cute",     emoji: "💗" },
-  { id: "Minimal",  emoji: "◽️" },
-  { id: "Funny",    emoji: "😄" },
-  { id: "Animals",  emoji: "🐾" },
-  { id: "Dark",     emoji: "🌙" },
-  { id: "Space",    emoji: "✨" },
-  { id: "Abstract", emoji: "🎨" },
-  { id: "Anime",    emoji: "⭐️" },
-  { id: "Toons",    emoji: "📺" },
-  { id: "Couples",  emoji: "❤️" },
-  { id: "Football", emoji: "⚽️" },
-  { id: "Nature",   emoji: "🌿" },
-  { id: "City",     emoji: "🌃" },
-  { id: "Spatial",  emoji: "🧊" }
+  { id: "Cute",     emoji: "💗", tr: "Sevimli" },
+  { id: "Minimal",  emoji: "◽️", tr: "Minimal" },
+  { id: "Funny",    emoji: "😄", tr: "Komik" },
+  { id: "Animals",  emoji: "🐾", tr: "Hayvanlar" },
+  { id: "Dark",     emoji: "🌙", tr: "Karanlık" },
+  { id: "Space",    emoji: "✨", tr: "Uzay" },
+  { id: "Abstract", emoji: "🎨", tr: "Soyut" },
+  { id: "Anime",    emoji: "⭐️", tr: "Anime" },
+  { id: "Toons",    emoji: "📺", tr: "Çizgi Film" },
+  { id: "Couples",  emoji: "❤️", tr: "Çiftler" },
+  { id: "Football", emoji: "⚽️", tr: "Futbol" },
+  { id: "Nature",   emoji: "🌿", tr: "Doğa" },
+  { id: "City",     emoji: "🌃", tr: "Şehir" },
+  { id: "Spatial",  emoji: "🧊", tr: "Uzamsal" }
 ];
 /* Uygulamada kodla özel işleniyor ama builtIn listesinde yok — jenerik görünür */
 const WP_SPECIAL_CATEGORIES = [{ id: "Watch", emoji: "⌚️" }];
@@ -1454,6 +1454,9 @@ const WP_NEW_LIMIT = 14;
 const WP_THIN_SHELF = 3;
 
 function catEmoji(id) { return WP_CAT_EMOJI[id] || "🏷️"; }
+const WP_CAT_TR = Object.fromEntries(WP_APP_CATEGORIES.filter(c => c.tr && c.tr !== c.id).map(c => [c.id, c.tr]));
+/* Kategori adının yanına Türkçe karşılığı — sadece farklıysa */
+function catTR(id) { return WP_CAT_TR[id] ? ` \u00b7 ${WP_CAT_TR[id]}` : ""; }
 
 /* Yeni kayıt için bir sonraki boş sıra — "New Drops" rafına düşsün diye sona ekler */
 function nextOrder() {
@@ -1484,7 +1487,7 @@ function buildCategorySelect() {
   const group = (label, list) => {
     if (!list.length) return "";
     const opts = list.map(c =>
-      `<option value="${c.id}">${c.emoji} ${c.id}</option>`).join("");
+      `<option value="${c.id}">${c.emoji} ${c.id}${c.tr && c.tr !== c.id ? " \u00b7 " + c.tr : ""}</option>`).join("");
     return `<optgroup label="${label}">${opts}</optgroup>`;
   };
   const unknown = [...new Set(items.map(w => w.category).filter(Boolean))]
@@ -1854,7 +1857,7 @@ function applyWpCategoriesUI() {
     rows.push(`
       <div class="cat-row${off ? " hidden-cat" : ""}">
         <span class="cat-emoji">${known ? catEmoji(id) : "❔"}</span>
-        <span class="cat-name">${esc(id)}</span>
+        <span class="cat-name">${esc(id)}${catTR(id)}</span>
         <span class="cat-tag${known ? "" : " unknown"}">${known ? "UYGULAMADA VAR" : "TANIMSIZ"}</span>
         <span class="cat-count">${n} kart</span>
         <span class="spacer"></span>

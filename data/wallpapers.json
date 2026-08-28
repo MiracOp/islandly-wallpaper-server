@@ -633,5 +633,39 @@
     "accentBlue": 0.75,
     "isPremium": true,
     "order": 380
+  },
+  {
+    "id": "anime-sunset-train-station-v1",
+    "title": "Sunset Train Station",
+    "subtitle": "Anime couple set",
+    "imageURL": "/media/anime-sunset-train-station-left-v1.png",
+    "thumbURL": "",
+    "stillURL": "/media/anime-sunset-train-station-left-v1.png",
+    "videoURL": "",
+    "partnerURL": "/media/anime-sunset-train-station-right-v1.png",
+    "coupleCoverURL": "",
+    "category": "Couples",
+    "accentRed": 1,
+    "accentGreen": 0.58,
+    "accentBlue": 0.25,
+    "isPremium": true,
+    "order": 390
+  },
+  {
+    "id": "anime-rooftop-moon-couple-v1",
+    "title": "Rooftop Moon Couple",
+    "subtitle": "Anime night pair",
+    "imageURL": "/media/anime-rooftop-moon-couple-left-v1.png",
+    "thumbURL": "",
+    "stillURL": "/media/anime-rooftop-moon-couple-left-v1.png",
+    "videoURL": "",
+    "partnerURL": "/media/anime-rooftop-moon-couple-right-v1.png",
+    "coupleCoverURL": "",
+    "category": "Couples",
+    "accentRed": 0.55,
+    "accentGreen": 0.36,
+    "accentBlue": 0.96,
+    "isPremium": true,
+    "order": 400
   }
 ]
