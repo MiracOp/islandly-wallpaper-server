@@ -480,5 +480,22 @@
     "accentBlue": 1,
     "isPremium": false,
     "order": 279
+  },
+  {
+    "id": "couples-linked-v2",
+    "title": "Linked Hearts",
+    "subtitle": "Two screens, one scene",
+    "imageURL": "/media/couples-linked-left-v2.png",
+    "thumbURL": "",
+    "stillURL": "/media/couples-linked-left-v2.png",
+    "videoURL": "",
+    "partnerURL": "/media/couples-linked-right-v2.png",
+    "coupleCoverURL": "/media/couples-linked-master-v2.png",
+    "category": "Couples",
+    "accentRed": 1,
+    "accentGreen": 0.32,
+    "accentBlue": 0.48,
+    "isPremium": true,
+    "order": 300
   }
 ]
