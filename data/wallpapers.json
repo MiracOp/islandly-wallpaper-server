@@ -466,7 +466,7 @@
   },
   {
     "id": "spatial-deneme-1",
-    "title": "Gece Hizi",
+    "title": "Super Power",
     "subtitle": "4K",
     "imageURL": "/media/spatial-deneme-1.jpg",
     "thumbURL": "/media/spatial-deneme-1-thumb.jpg",
@@ -653,7 +653,7 @@
   },
   {
     "id": "spatial-gece-nobeti",
-    "title": "Yildizli Nobet",
+    "title": "Gece Nobeti",
     "subtitle": "",
     "imageURL": "/media/spatial-gece-nobeti.jpg",
     "thumbURL": "/media/spatial-gece-nobeti-thumb.jpg",
@@ -670,7 +670,7 @@
   },
   {
     "id": "uzmansa-karlarworlds",
-    "title": "Buz Vadisi",
+    "title": "Karlarworlds",
     "subtitle": "Motion preview",
     "imageURL": "/media/uzmansa-karlarworlds.jpg",
     "thumbURL": "/media/uzmansa-karlarworlds-thumb.jpg",
@@ -687,7 +687,7 @@
   },
   {
     "id": "uzmansa-lilok",
-    "title": "Sicacik Hikaye",
+    "title": "Lilok",
     "subtitle": "Motion preview",
     "imageURL": "/media/uzmansa-lilok.jpg",
     "thumbURL": "/media/uzmansa-lilok-thumb.jpg",
@@ -704,7 +704,7 @@
   },
   {
     "id": "uzmansa-manzara",
-    "title": "Sakli Derinlik",
+    "title": "Manzara",
     "subtitle": "Motion preview",
     "imageURL": "/media/uzmansa-manzara.jpg",
     "thumbURL": "/media/uzmansa-manzara-thumb.jpg",
@@ -721,7 +721,7 @@
   },
   {
     "id": "uzmansa-nightblut",
-    "title": "Hilal ve Bulutlar",
+    "title": "Nightblut",
     "subtitle": "Motion preview",
     "imageURL": "/media/uzmansa-nightblut.jpg",
     "thumbURL": "/media/uzmansa-nightblut-thumb.jpg",
@@ -738,7 +738,7 @@
   },
   {
     "id": "uzmansa-sarilavuk",
-    "title": "Kis Aksami",
+    "title": "Sarilavuk",
     "subtitle": "Motion preview",
     "imageURL": "/media/uzmansa-sarilavuk.jpg",
     "thumbURL": "/media/uzmansa-sarilavuk-thumb.jpg",
@@ -755,7 +755,7 @@
   },
   {
     "id": "uzmansa-scoobidu",
-    "title": "Karli Esik",
+    "title": "Scoobidu",
     "subtitle": "Motion preview",
     "imageURL": "/media/uzmansa-scoobidu.jpg",
     "thumbURL": "/media/uzmansa-scoobidu-thumb.jpg",
@@ -772,7 +772,7 @@
   },
   {
     "id": "uzmansa-spaydirman",
-    "title": "Sehir Nobeti",
+    "title": "Spaydirman",
     "subtitle": "Motion preview",
     "imageURL": "/media/uzmansa-spaydirman.jpg",
     "thumbURL": "/media/uzmansa-spaydirman-thumb.jpg",
@@ -789,7 +789,7 @@
   },
   {
     "id": "uzmansa-spidirman",
-    "title": "Neon Ufuk",
+    "title": "Spidirman",
     "subtitle": "Motion preview",
     "imageURL": "/media/uzmansa-spidirman.jpg",
     "thumbURL": "/media/uzmansa-spidirman-thumb.jpg",
@@ -806,7 +806,7 @@
   },
   {
     "id": "uzmansa-uccaak",
-    "title": "Gun Batimi Inisi",
+    "title": "Uccaak",
     "subtitle": "Motion preview",
     "imageURL": "/media/uzmansa-uccaak.jpg",
     "thumbURL": "/media/uzmansa-uccaak-thumb.jpg",
