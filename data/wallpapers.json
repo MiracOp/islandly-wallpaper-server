@@ -1041,5 +1041,23 @@
     "accentBlue": 0.48,
     "isPremium": false,
     "order": 640
+  },
+  {
+    "id": "dark-red-john-files",
+    "title": "Red John Files",
+    "subtitle": "4K",
+    "imageURL": "/media/dark-red-john-files.png",
+    "thumbURL": "/media/dark-red-john-files-thumb.jpg",
+    "stillURL": "/media/dark-red-john-files.png",
+    "videoURL": "",
+    "pairSetID": "",
+    "pairPosition": "",
+    "pairName": "",
+    "category": "Dark",
+    "accentRed": 0.55,
+    "accentGreen": 0.14,
+    "accentBlue": 0.12,
+    "isPremium": true,
+    "order": 650
   }
 ]
