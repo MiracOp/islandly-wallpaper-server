@@ -178,5 +178,15 @@
     "claimed": true,
     "claimedAt": "2026-08-26T14:08:07.029Z",
     "petType": "penguin"
+  },
+  {
+    "id": "b872b27d-e429-4cd6-964d-df3d750dd3da",
+    "userID": "apple:000496.4d3ab43bd00d4530bd9467f2de0b8a11.1643",
+    "kind": "premium",
+    "note": "",
+    "createdAt": "2026-08-31T14:33:36.625Z",
+    "claimed": false,
+    "claimedAt": null,
+    "premiumDays": 30
   }
 ]
