@@ -48,7 +48,8 @@ const DEFAULT_CONFIG = {
   // Buradaki id'ler app'teki WallpaperCategory id'leriyle aynıdır; ayrıca
   // "Live" ve "Couples" özel raflarını da kapatmak için kullanılabilir.
   wallpapers: {
-    disabledCategories: []   // bu kategoriler duvar kağıdı sekmesinde hiç görünmez
+    disabledCategories: [],  // bu kategoriler duvar kağıdı sekmesinde hiç görünmez
+    homeOrder: []            // ana sayfadaki kategori / raf sırası (id listesi)
   },
   // Tema yönetimi — uygulama güncellemesi olmadan panelden kontrol
   themes: {
@@ -313,6 +314,41 @@ async function firebaseAccessToken(scope = SCOPE_FIRESTORE) {
 // eşzamanlılıkla döngü kuruyoruz.
 
 const FCM_CONCURRENCY = 20;
+const PUSH_LOCALES = ["en", "tr", "de", "es", "fr", "it", "nl", "ja", "pt-BR", "ru", "hi"];
+
+function normalizePushLocale(input) {
+  const raw = String(input || "").trim();
+  if (!raw) return "en";
+
+  const lower = raw.toLowerCase();
+  if (lower === "pt" || lower === "pt-br" || lower.startsWith("pt-")) return "pt-BR";
+
+  const exact = PUSH_LOCALES.find((code) => code.toLowerCase() === lower);
+  if (exact) return exact;
+
+  const base = lower.split(/[-_]/)[0];
+  const baseMatch = PUSH_LOCALES.find((code) => code.toLowerCase() === base);
+  return baseMatch || "en";
+}
+
+function sanitizeTranslationMap(input, maxLen) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return {};
+  const out = {};
+  for (const [key, value] of Object.entries(input)) {
+    const locale = normalizePushLocale(key);
+    const clean = String(value || "").trim().slice(0, maxLen);
+    if (clean) out[locale] = clean;
+  }
+  return out;
+}
+
+function pickLocalizedPushText(map, locale, fallback) {
+  const safeFallback = String(fallback || "").trim();
+  if (!map || typeof map !== "object") return safeFallback;
+
+  const normalized = normalizePushLocale(locale);
+  return map[normalized] || map.en || safeFallback;
+}
 
 /** Tek cihaza bildirim gönderir. Dönen kod token silinmeli mi belirtir. */
 async function sendPushToToken(accessToken, projectID, token, { title, body, deepLink }) {
@@ -378,13 +414,15 @@ async function deleteFcmToken(accessToken, projectID, userID) {
  * Segmentteki tüm kullanıcılara push gönderir.
  * target: all | premium | nonpremium
  */
-async function sendPushCampaign({ title, body, target = "all", deepLink = "" }) {
+async function sendPushCampaign({ title, body, target = "all", deepLink = "", titleTranslations = {}, bodyTranslations = {} }) {
   const sa = firebaseServiceAccount();
   if (!sa) throw new Error("FIREBASE_SERVICE_ACCOUNT tanımlı değil");
 
   const cleanTitle = String(title || "").trim().slice(0, 120);
   const cleanBody = String(body || "").trim().slice(0, 400);
   if (!cleanTitle || !cleanBody) throw new Error("Başlık ve mesaj zorunlu");
+  const cleanTitleTranslations = sanitizeTranslationMap(titleTranslations, 120);
+  const cleanBodyTranslations = sanitizeTranslationMap(bodyTranslations, 400);
 
   const users = await fetchFirebaseUsers();
   const now = new Date();
@@ -419,8 +457,11 @@ async function sendPushCampaign({ title, body, target = "all", deepLink = "" }) 
     while (cursor < targets.length) {
       const user = targets[cursor++];
       try {
+        const locale = normalizePushLocale(user.fcmLocale || user.languageCode || user.locale || "en");
+        const localizedTitle = pickLocalizedPushText(cleanTitleTranslations, locale, cleanTitle);
+        const localizedBody = pickLocalizedPushText(cleanBodyTranslations, locale, cleanBody);
         const r = await sendPushToToken(messagingToken, sa.project_id, user.fcmToken, {
-          title: cleanTitle, body: cleanBody, deepLink
+          title: localizedTitle, body: localizedBody, deepLink
         });
         if (r.ok) { sent += 1; continue; }
         failed += 1;
@@ -444,6 +485,8 @@ async function sendPushCampaign({ title, body, target = "all", deepLink = "" }) 
     id: randomUUID(),
     title: cleanTitle,
     body: cleanBody,
+    titleTranslations: cleanTitleTranslations,
+    bodyTranslations: cleanBodyTranslations,
     target,
     deepLink,
     total: targets.length,
@@ -1090,6 +1133,15 @@ function send(res, status, body, headers = {}) {
   res.end(payload);
 }
 
+function sendJSONFresh(res, status, body, headers = {}) {
+  send(res, status, body, {
+    "cache-control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+    "pragma": "no-cache",
+    "expires": "0",
+    ...headers
+  });
+}
+
 async function parseBody(req) {
   const chunks = [];
   let total = 0;
@@ -1380,7 +1432,7 @@ const server = createServer(async (req, res) => {
 
     // Uygulama görünüm ayarları — iOS app okur (public), panel yazar (admin)
     if (req.method === "GET" && url.pathname === "/api/config") {
-      send(res, 200, await readConfig());
+      sendJSONFresh(res, 200, await readConfig());
       return;
     }
 
@@ -1686,7 +1738,7 @@ const server = createServer(async (req, res) => {
 
     if (req.method === "GET" && url.pathname === "/api/wallpapers") {
       const items = await readWallpapers();
-      send(res, 200, items.sort((a, b) => Number(a.order || 999) - Number(b.order || 999)));
+      sendJSONFresh(res, 200, items.sort((a, b) => Number(a.order || 999) - Number(b.order || 999)));
       return;
     }
 
