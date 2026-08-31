@@ -1195,19 +1195,56 @@ function safeEqual(a, b) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-function requireAdmin(req, res) {
-  // 1) Kullanıcı oturumu (imzalı token) 2) Eski usül admin token — ikisi de geçerli
+function isAdminRequest(req) {
   const session = req.headers["x-admin-session"];
   if (session && verifySession(session)) return true;
-  if (req.headers["x-admin-token"] && safeEqual(req.headers["x-admin-token"], ADMIN_TOKEN)) return true;
+  return !!(req.headers["x-admin-token"] && safeEqual(req.headers["x-admin-token"], ADMIN_TOKEN));
+}
+
+function requireAdmin(req, res) {
+  // 1) Kullanıcı oturumu (imzalı token) 2) Eski usül admin token — ikisi de geçerli
+  if (isAdminRequest(req)) return true;
   send(res, 401, { error: "Unauthorized" });
   return false;
+}
+
+function normalizeIsoOrEmpty(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString();
+}
+
+function timestampOrNull(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return null;
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? null : date.getTime();
+}
+
+function wallpaperLifecycle(wallpaper, now = Date.now()) {
+  const status = String(wallpaper.status || "published");
+  const publishAtMs = timestampOrNull(wallpaper.publishAt);
+  const unpublishAtMs = timestampOrNull(wallpaper.unpublishAt);
+
+  if (status === "draft") {
+    return { state: publishAtMs && publishAtMs > now ? "scheduled" : "draft", visible: false };
+  }
+  if (status === "hidden") return { state: "hidden", visible: false };
+  if (status === "archived") return { state: "archived", visible: false };
+  if (publishAtMs && publishAtMs > now) return { state: "scheduled", visible: false };
+  if (unpublishAtMs && unpublishAtMs <= now) return { state: "expired", visible: false };
+  return { state: "published", visible: true };
 }
 
 function normalizeWallpaper(input, existing = {}) {
   const id = String(input.id || existing.id || "").trim();
   const title = String(input.title || existing.title || "").trim();
   const imageURL = String(input.imageURL || existing.imageURL || "").trim();
+  const rawStatus = String(input.status ?? existing.status ?? "published").trim().toLowerCase();
+  const status = new Set(["draft", "published", "hidden", "archived"]).has(rawStatus) ? rawStatus : "published";
+  const nowISO = new Date().toISOString();
+  const createdAt = normalizeIsoOrEmpty(existing.createdAt || input.createdAt || nowISO) || nowISO;
 
   if (!id || !title || !imageURL) {
     throw new Error("id, title and imageURL are required");
@@ -1238,7 +1275,13 @@ function normalizeWallpaper(input, existing = {}) {
     accentGreen: Number(input.accentGreen ?? existing.accentGreen ?? 0.65),
     accentBlue: Number(input.accentBlue ?? existing.accentBlue ?? 1),
     isPremium: Boolean(input.isPremium ?? existing.isPremium ?? false),
-    order: Number(input.order ?? existing.order ?? 999)
+    order: Number(input.order ?? existing.order ?? 999),
+    featured: Boolean(input.featured ?? existing.featured ?? false),
+    status,
+    publishAt: normalizeIsoOrEmpty(input.publishAt ?? existing.publishAt ?? ""),
+    unpublishAt: normalizeIsoOrEmpty(input.unpublishAt ?? existing.unpublishAt ?? ""),
+    createdAt,
+    updatedAt: nowISO
   };
 }
 
@@ -1737,8 +1780,16 @@ const server = createServer(async (req, res) => {
     }
 
     if (req.method === "GET" && url.pathname === "/api/wallpapers") {
-      const items = await readWallpapers();
-      sendJSONFresh(res, 200, items.sort((a, b) => Number(a.order || 999) - Number(b.order || 999)));
+      const allItems = await readWallpapers();
+      const decorated = allItems
+        .map((item) => {
+          const life = wallpaperLifecycle(item);
+          return { ...item, effectiveState: life.state, isVisibleNow: life.visible };
+        })
+        .sort((a, b) => Number(a.order || 999) - Number(b.order || 999));
+      const wantsAdmin = url.searchParams.get("admin") === "1" && isAdminRequest(req);
+      const items = wantsAdmin ? decorated : decorated.filter((item) => item.isVisibleNow);
+      sendJSONFresh(res, 200, items);
       return;
     }
 
@@ -1753,6 +1804,122 @@ const server = createServer(async (req, res) => {
       items.push(item);
       await writeWallpapers(items);
       send(res, 201, item);
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/wallpapers/bulk") {
+      if (!requireAdmin(req, res)) return;
+      const body = await parseBody(req);
+      const action = String(body.action || "").trim();
+      const ids = Array.isArray(body.ids) ? body.ids.map((id) => String(id || "").trim()).filter(Boolean) : [];
+      if (!ids.length) {
+        send(res, 400, { error: "ids are required" });
+        return;
+      }
+
+      const items = await readWallpapers();
+      const target = new Set(ids);
+      const selected = items.filter((item) => target.has(item.id));
+      if (!selected.length) {
+        send(res, 404, { error: "No wallpapers matched ids" });
+        return;
+      }
+
+      if (action === "delete") {
+        const next = items.filter((item) => !target.has(item.id));
+        await writeWallpapers(next);
+        send(res, 200, { action, affected: items.length - next.length });
+        return;
+      }
+
+      if (action === "moveCategory") {
+        const category = String(body.category || "").trim();
+        if (!category) {
+          send(res, 400, { error: "category is required" });
+          return;
+        }
+        const nowISO = new Date().toISOString();
+        for (const item of items) {
+          if (target.has(item.id)) {
+            item.category = category;
+            item.updatedAt = nowISO;
+          }
+        }
+        await writeWallpapers(items);
+        send(res, 200, { action, affected: selected.length, category });
+        return;
+      }
+
+      if (action === "setPremium") {
+        const isPremium = Boolean(body.isPremium);
+        const nowISO = new Date().toISOString();
+        for (const item of items) {
+          if (target.has(item.id)) {
+            item.isPremium = isPremium;
+            item.updatedAt = nowISO;
+          }
+        }
+        await writeWallpapers(items);
+        send(res, 200, { action, affected: selected.length, isPremium });
+        return;
+      }
+
+      if (action === "setFeatured") {
+        const featured = Boolean(body.featured);
+        const nowISO = new Date().toISOString();
+        for (const item of items) {
+          if (target.has(item.id)) {
+            item.featured = featured;
+            item.updatedAt = nowISO;
+          }
+        }
+        await writeWallpapers(items);
+        send(res, 200, { action, affected: selected.length, featured });
+        return;
+      }
+
+      if (action === "setStatus") {
+        const status = String(body.status || "").trim().toLowerCase();
+        if (!new Set(["draft", "published", "hidden", "archived"]).has(status)) {
+          send(res, 400, { error: "invalid status" });
+          return;
+        }
+        const publishAt = Object.prototype.hasOwnProperty.call(body, "publishAt")
+          ? normalizeIsoOrEmpty(body.publishAt)
+          : undefined;
+        const unpublishAt = Object.prototype.hasOwnProperty.call(body, "unpublishAt")
+          ? normalizeIsoOrEmpty(body.unpublishAt)
+          : undefined;
+        const nowISO = new Date().toISOString();
+        for (const item of items) {
+          if (!target.has(item.id)) continue;
+          item.status = status;
+          if (publishAt !== undefined) item.publishAt = publishAt;
+          if (unpublishAt !== undefined) item.unpublishAt = unpublishAt;
+          item.updatedAt = nowISO;
+        }
+        await writeWallpapers(items);
+        send(res, 200, { action, affected: selected.length, status, publishAt, unpublishAt });
+        return;
+      }
+
+      if (action === "applyOrder") {
+        const orderedIDs = Array.isArray(body.orderedIDs)
+          ? body.orderedIDs.map((id) => String(id || "").trim()).filter(Boolean)
+          : ids;
+        const index = Object.fromEntries(orderedIDs.map((id, i) => [id, i]));
+        const nowISO = new Date().toISOString();
+        for (const item of items) {
+          if (!target.has(item.id) || index[item.id] == null) continue;
+          item.order = (index[item.id] + 1) * 10;
+          item.updatedAt = nowISO;
+        }
+        await writeWallpapers(items);
+        send(res, 200, { action, affected: selected.length });
+        return;
+      }
+
+      send(res, 400, { error: "Unknown bulk action" });
       return;
     }
 

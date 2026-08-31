@@ -188,6 +188,71 @@
   }
   .cat-row .btn { padding: 7px 12px; font-size: 12px; }
   .cat-row .vis-label { font-size: 11px; color: var(--text-dim); }
+  .tool-row {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .tool-row .mini-label {
+    font-size: 11px; color: var(--text-dim); min-width: 78px;
+  }
+  .inline-select, .inline-input {
+    min-width: 150px; padding: 9px 11px;
+    background: rgba(0,0,0,0.3); color: var(--text);
+    border: 1px solid var(--stroke); border-radius: 11px;
+    font-size: 12.5px; font-family: inherit;
+  }
+  .inline-input { min-width: 185px; }
+  .bulk-bar {
+    display: grid; gap: 12px; margin: 14px 0 18px;
+    padding: 14px; border-radius: 16px;
+    background: rgba(255,255,255,0.035);
+    border: 1px solid var(--stroke-soft);
+  }
+  .bulk-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; flex-wrap: wrap;
+  }
+  .bulk-count { font-size: 12.5px; color: var(--text-mid); }
+  .toolbar {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .toolbar .search-wrap { flex: 1 1 240px; min-width: 240px; }
+  .toolbar .inline-select { min-width: 190px; }
+  .status-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 9px; border-radius: 999px;
+    font-size: 10px; font-weight: 800; letter-spacing: .4px;
+    border: 1px solid var(--stroke-soft);
+    background: rgba(255,255,255,0.06); color: var(--text-mid);
+  }
+  .status-chip.published { color: #9ef0b8; background: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.24); }
+  .status-chip.scheduled { color: #8fe3ff; background: rgba(77,214,255,0.12); border-color: rgba(77,214,255,0.24); }
+  .status-chip.draft { color: #ffd79a; background: rgba(255,196,84,0.12); border-color: rgba(255,196,84,0.24); }
+  .status-chip.hidden, .status-chip.archived, .status-chip.expired { color: #ffabbc; background: rgba(255,92,122,0.12); border-color: rgba(255,92,122,0.24); }
+  .pair-preview {
+    display: none; gap: 10px; justify-content: center; margin-top: 12px;
+  }
+  .pair-preview.show { display: flex; }
+  .pair-phone {
+    width: 92px; height: 186px; border-radius: 20px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.12); background: #0a0a12 center/cover no-repeat;
+    position: relative;
+  }
+  .pair-phone::before {
+    content: ""; position: absolute; top: 7px; left: 50%; transform: translateX(-50%);
+    width: 34px; height: 11px; border-radius: 999px; background: #000;
+  }
+  .pair-caption { text-align: center; font-size: 10px; color: var(--text-dim); margin-top: 6px; }
+  .selection-box {
+    position: absolute; top: 8px; left: 8px; z-index: 3;
+    width: 18px; height: 18px;
+  }
+  .meta-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; flex-wrap: wrap; margin-top: 10px;
+    font-size: 11px; color: var(--text-dim);
+  }
   .mode-badge {
     font-size: 11px; font-weight: 700; letter-spacing: 0.6px;
     padding: 4px 10px; border-radius: 999px;
@@ -243,7 +308,7 @@
     display: block; font-size: 11.5px; font-weight: 600;
     color: var(--text-mid); margin-bottom: 6px; letter-spacing: 0.3px;
   }
-  .field input[type="text"], .field input[type="url"], .field input[type="number"], .field select {
+  .field input[type="text"], .field input[type="url"], .field input[type="number"], .field input[type="datetime-local"], .field select {
     width: 100%; padding: 10px 13px;
     background: rgba(0,0,0,0.3); border: 1px solid var(--stroke);
     border-radius: 12px; color: var(--text); font-size: 13.5px;
@@ -1445,6 +1510,17 @@
         <div class="ph-empty" id="phEmpty">Görsel URL'i girince<br>canlı önizleme burada</div>
       </div>
     </div>
+    <div id="statusPreview" class="tool-row" style="justify-content:center;margin-top:-6px;margin-bottom:14px"></div>
+    <div class="pair-preview" id="pairPreview">
+      <div>
+        <div class="pair-phone" id="pairLeft"></div>
+        <div class="pair-caption">Sol</div>
+      </div>
+      <div>
+        <div class="pair-phone" id="pairRight"></div>
+        <div class="pair-caption">Sağ</div>
+      </div>
+    </div>
 
     <div class="field">
       <label>ID <span style="color:var(--text-dim);font-weight:400">— benzersiz, örn. space-aurora-001</span></label>
@@ -1493,6 +1569,37 @@
       </div>
     </div>
     <div class="cat-note" id="catNote"></div>
+    <div class="row">
+      <div class="field">
+        <label>Durum</label>
+        <select id="fStatus">
+          <option value="published">Yayında</option>
+          <option value="draft">Taslak</option>
+          <option value="hidden">Gizli</option>
+          <option value="archived">Arşiv</option>
+        </select>
+      </div>
+      <div class="toggle-row" style="margin:0">
+        <div>
+          <div class="t-label">Editör seçimi</div>
+          <div class="t-hint">Panelde öne çıkar, hızlı filtrelenir</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="fFeatured">
+          <span class="track"></span>
+        </label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Yayın başlangıcı <span style="color:var(--text-dim);font-weight:400">— opsiyonel</span></label>
+        <input type="datetime-local" id="fPublishAt">
+      </div>
+      <div class="field">
+        <label>Yayından kalkış <span style="color:var(--text-dim);font-weight:400">— opsiyonel</span></label>
+        <input type="datetime-local" id="fUnpublishAt">
+      </div>
+    </div>
     <div class="field">
       <label>Vurgu rengi <span style="color:var(--text-dim);font-weight:400">— Island parlaması</span></label>
       <div class="row3">
@@ -1526,11 +1633,66 @@
   <!-- ── Gallery ── -->
   <section>
     <div class="gallery-head">
-      <div class="search-wrap">
+      <div class="toolbar">
+        <div class="search-wrap">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
         <input type="text" id="search" placeholder="Başlık veya ID ara…">
+        </div>
+        <select id="sortMode" class="inline-select">
+          <option value="manual">Liste: Sıra alanı</option>
+          <option value="newest">Liste: En yeni / güncel</option>
+          <option value="title">Liste: Başlık A-Z</option>
+          <option value="category">Liste: Kategori</option>
+          <option value="status">Liste: Durum</option>
+        </select>
+        <button class="btn" id="selectVisibleBtn">Görüneni Seç</button>
+        <button class="btn btn-ghost" id="clearSelectionBtn">Seçimi Temizle</button>
       </div>
       <div class="chips" id="chips"></div>
+    </div>
+    <div class="bulk-bar" id="bulkBar">
+      <div class="bulk-head">
+        <div>
+          <div style="font-weight:700">Toplu İşlemler</div>
+          <div class="bulk-count" id="bulkCount">0 kayıt seçili</div>
+        </div>
+        <button class="btn" id="applyCurrentSortBtn">Bu sırayı order olarak yaz</button>
+      </div>
+      <div class="tool-row">
+        <span class="mini-label">Kategori</span>
+        <select id="bulkCategory" class="inline-select"></select>
+        <button class="btn" id="bulkMoveBtn">Taşı</button>
+      </div>
+      <div class="tool-row">
+        <span class="mini-label">Premium</span>
+        <select id="bulkPremium" class="inline-select">
+          <option value="true">Premium yap</option>
+          <option value="false">Free yap</option>
+        </select>
+        <button class="btn" id="bulkPremiumBtn">Uygula</button>
+        <span class="mini-label">Editör</span>
+        <select id="bulkFeatured" class="inline-select">
+          <option value="true">Öne çıkar</option>
+          <option value="false">Öne çıkarmayı kaldır</option>
+        </select>
+        <button class="btn" id="bulkFeaturedBtn">Uygula</button>
+      </div>
+      <div class="tool-row">
+        <span class="mini-label">Durum</span>
+        <select id="bulkStatus" class="inline-select">
+          <option value="published">Yayında</option>
+          <option value="draft">Taslak</option>
+          <option value="hidden">Gizli</option>
+          <option value="archived">Arşiv</option>
+        </select>
+        <input type="datetime-local" id="bulkPublishAt" class="inline-input" placeholder="Yayın başlangıcı">
+        <input type="datetime-local" id="bulkUnpublishAt" class="inline-input" placeholder="Yayından kalkış">
+        <button class="btn" id="bulkStatusBtn">Uygula</button>
+      </div>
+      <div class="tool-row">
+        <span class="mini-label">Kalıcı işlem</span>
+        <button class="btn btn-danger" id="bulkDeleteBtn">Seçileni Sil</button>
+      </div>
     </div>
     <div class="grid" id="grid">
       <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
@@ -1545,6 +1707,8 @@ const API = "/api/wallpapers";
 let items = [];
 let editingId = null;
 let activeCat = "all";
+let sortMode = "manual";
+let selectedIDs = new Set();
 
 const $ = (id) => document.getElementById(id);
 
@@ -1593,6 +1757,55 @@ function catEmoji(id) { return WP_CAT_EMOJI[id] || "🏷️"; }
 const WP_CAT_TR = Object.fromEntries(WP_APP_CATEGORIES.filter(c => c.tr && c.tr !== c.id).map(c => [c.id, c.tr]));
 /* Kategori adının yanına Türkçe karşılığı — sadece farklıysa */
 function catTR(id) { return WP_CAT_TR[id] ? ` \u00b7 ${WP_CAT_TR[id]}` : ""; }
+
+function toLocalInputValue(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const mins = pad(date.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${mins}`;
+}
+
+function fromLocalInputValue(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString();
+}
+
+function effectiveState(item) {
+  if (item && item.effectiveState) return item.effectiveState;
+  const status = String(item.status || "published");
+  const now = Date.now();
+  const publishAt = item.publishAt ? new Date(item.publishAt).getTime() : NaN;
+  const unpublishAt = item.unpublishAt ? new Date(item.unpublishAt).getTime() : NaN;
+  if (status === "draft") return Number.isFinite(publishAt) && publishAt > now ? "scheduled" : "draft";
+  if (status === "hidden") return "hidden";
+  if (status === "archived") return "archived";
+  if (Number.isFinite(publishAt) && publishAt > now) return "scheduled";
+  if (Number.isFinite(unpublishAt) && unpublishAt <= now) return "expired";
+  return "published";
+}
+
+function stateLabel(state) {
+  return {
+    published: "YAYINDA",
+    scheduled: "ZAMANLI",
+    draft: "TASLAK",
+    hidden: "GİZLİ",
+    archived: "ARŞİV",
+    expired: "SÜRESİ BİTTİ"
+  }[state] || "BİLİNMİYOR";
+}
+
+function statePriority(state) {
+  return { published: 0, scheduled: 1, draft: 2, hidden: 3, archived: 4, expired: 5 }[state] ?? 99;
+}
 
 /* Yeni kayıt için bir sonraki boş sıra — "New Drops" rafına düşsün diye sona ekler */
 function nextOrder() {
@@ -1770,6 +1983,12 @@ function updatePreview() {
   const img = $("fImage").value.trim();
   const phone = $("phone");
   const hex = $("fColor").value;
+  const partner = $("fPartner").value.trim();
+  const state = effectiveState({
+    status: $("fStatus").value,
+    publishAt: fromLocalInputValue($("fPublishAt").value),
+    unpublishAt: fromLocalInputValue($("fUnpublishAt").value)
+  });
   phone.style.setProperty("--glow", hex + "99");
   phone.style.setProperty("--wash", hex + "38");
   phone.style.backgroundImage = img ? `url("${img}")` : "none";
@@ -1777,16 +1996,26 @@ function updatePreview() {
   $("phTitle").textContent = $("fTitle").value;
   $("phSub").textContent = $("fSubtitle").value;
   $("phPremium").classList.toggle("show", $("fPremium").checked);
+  $("statusPreview").innerHTML = `
+    <span class="status-chip ${state}">${stateLabel(state)}</span>
+    ${$("fFeatured").checked ? '<span class="status-chip">⭐ EDİTÖR</span>' : ""}
+  `;
+  $("pairPreview").classList.toggle("show", !!img && !!partner);
+  $("pairLeft").style.backgroundImage = img ? `url("${img}")` : "none";
+  $("pairRight").style.backgroundImage = partner ? `url("${partner}")` : "none";
 }
-["fImage", "fTitle", "fSubtitle"].forEach(id => $(id).addEventListener("input", updatePreview));
-$("fPremium").addEventListener("change", updatePreview);
+["fImage", "fTitle", "fSubtitle", "fPartner", "fPublishAt", "fUnpublishAt"].forEach(id => $(id).addEventListener("input", updatePreview));
+["fPremium", "fFeatured", "fStatus"].forEach(id => $(id).addEventListener("change", updatePreview));
 $("fCategory").addEventListener("change", updateCatNote);
 
 /* ── Load & render ── */
 async function load() {
   try {
-    const res = await fetch(API);
+    const res = await fetch(SESSION ? `${API}?admin=1` : API, {
+      headers: SESSION ? { "x-admin-session": SESSION } : {}
+    });
     items = await res.json();
+    selectedIDs = new Set([...selectedIDs].filter(id => items.some(w => w.id === id)));
     render();
     applyPageManagementUI();
   } catch {
@@ -1798,13 +2027,13 @@ async function load() {
 function shelfModel() {
   // Gizlenen kategoriler uygulamada hiç görünmez — önizleme de aynısını yapar
   const hidden = pendingHidden || hiddenCats();
-  const visible = (w) => !hidden.has(w.category || "");
+  const visible = (w) => !hidden.has(w.category || "") && effectiveState(w) === "published";
 
   const byOrder = (a, b) => (Number(a.order ?? 999)) - (Number(b.order ?? 999));
   const live    = hidden.has("Live") ? [] : items.filter(w => w.videoURL && visible(w)).sort(byOrder);
-  const rest    = items.filter(w => !w.videoURL).sort(byOrder);
+  const rest    = items.filter(w => !w.videoURL && visible(w)).sort(byOrder);
   const couples = hidden.has("Couples") ? [] : rest.filter(w => w.partnerURL);
-  const flat    = rest.filter(w => !w.partnerURL && visible(w));
+  const flat    = rest.filter(w => !w.partnerURL);
 
   const shelves = [];
   if (flat.length) shelves.push({ name: "Popular", kind: "auto", items: flat.slice(0, WP_POPULAR_LIMIT) });
@@ -1893,7 +2122,7 @@ function renderShelves() {
       `${WP_THIN_SHELF}'ten az kart olan raf ekranda yarım görünür. Ya içerik ekle ya da geçici olarak başka kategoriye al.` });
   }
 
-  const noThumb = items.filter(w => !w.thumbURL).length;
+  const noThumb = items.filter(w => effectiveState(w) === "published" && !w.thumbURL).length;
   if (noThumb) {
     issues.push({ level: "warn", html:
       `<b>${noThumb} kayıtta küçük görsel (thumb) yok</b> — raflardaki 140px kartlar tam boy dosyayı indiriyor. ` +
@@ -1901,6 +2130,7 @@ function renderShelves() {
   }
 
   const spatialBroken = items.filter(w =>
+    effectiveState(w) === "published" &&
     (w.category || "").toLowerCase() === "spatial" && (!w.videoURL || !w.imageURL));
   if (spatialBroken.length) {
     issues.push({ level: "bad", html:
@@ -1917,7 +2147,7 @@ function renderShelves() {
       `kapak olarak tam boy görsel kullanılır; videonun ilk karesi değilse kaydedilen Live Photo titrek görünür.` });
   }
 
-  const noOrder = items.filter(w => w.order == null || Number(w.order) === 999).length;
+  const noOrder = items.filter(w => effectiveState(w) === "published" && (w.order == null || Number(w.order) === 999)).length;
   if (noOrder) {
     issues.push({ level: "warn", html:
       `<b>${noOrder} kayıtta sıra ayarlanmamış (999)</b> — “Popular” ilk ${WP_POPULAR_LIMIT}, ` +
@@ -1925,12 +2155,59 @@ function renderShelves() {
   }
 
   const dupOrders = Object.entries(
-    items.reduce((acc, w) => { const k = String(w.order ?? 999); acc[k] = (acc[k] || 0) + 1; return acc; }, {})
+    items.filter(w => effectiveState(w) === "published")
+      .reduce((acc, w) => { const k = String(w.order ?? 999); acc[k] = (acc[k] || 0) + 1; return acc; }, {})
   ).filter(([k, n]) => n > 1 && k !== "999");
   if (dupOrders.length) {
     issues.push({ level: "warn", html:
       `<b>Aynı sıra numarası birden fazla kayıtta:</b> ${dupOrders.map(([k, n]) => `#${k} ×${n}`).join(", ")} — ` +
       `sıralama tahmin edilemez olur.` });
+  }
+
+  const lifecycleCounts = items.reduce((acc, w) => {
+    const state = effectiveState(w);
+    acc[state] = (acc[state] || 0) + 1;
+    return acc;
+  }, {});
+  const lifecycleSummary = Object.entries(lifecycleCounts)
+    .filter(([, count]) => count > 0)
+    .map(([state, count]) => `${stateLabel(state)}: ${count}`)
+    .join(" · ");
+  if (lifecycleSummary) {
+    issues.push({ level: "ok", html: `<b>İçerik durumu:</b> ${esc(lifecycleSummary)}` });
+  }
+
+  const badDates = items.filter(w => {
+    if (!w.publishAt || !w.unpublishAt) return false;
+    return new Date(w.publishAt).getTime() >= new Date(w.unpublishAt).getTime();
+  });
+  if (badDates.length) {
+    issues.push({ level: "bad", html:
+      `<b>${badDates.length} kayıtta tarih çakışması var</b> — yayın başlangıcı, yayından kalkış tarihinden sonra olamaz.` });
+  }
+
+  const brokenPairs = items.filter(w => w.partnerURL && !w.coupleCoverURL && !w.thumbURL);
+  if (brokenPairs.length) {
+    issues.push({ level: "warn", html:
+      `<b>${brokenPairs.length} couples kaydında kapak/thumb eksik</b> — çift kartların liste açılışı daha zayıf görünür.` });
+  }
+
+  const pairAspectIssues = items.filter(w => w.partnerURL && !w.imageURL);
+  if (pairAspectIssues.length) {
+    issues.push({ level: "bad", html:
+      `<b>${pairAspectIssues.length} couples kaydı bozuk</b> — left/right set için ana görsel eksik.` });
+  }
+
+  const sameSidePairs = items.filter(w => w.partnerURL && w.imageURL && w.partnerURL === w.imageURL);
+  if (sameSidePairs.length) {
+    issues.push({ level: "bad", html:
+      `<b>${sameSidePairs.length} couples kaydında left/right aynı dosya</b> — iki yarı farklı olmalı.` });
+  }
+
+  const hiddenPublishedPairs = items.filter(w => w.partnerURL && ["hidden", "archived", "draft"].includes(String(w.status || "")));
+  if (hiddenPublishedPairs.length) {
+    issues.push({ level: "warn", html:
+      `<b>${hiddenPublishedPairs.length} couples set yayında değil</b> — çift içeriği var ama durum nedeniyle uygulamada görünmez.` });
   }
 
   if (!issues.length) {
@@ -2219,6 +2496,9 @@ function buildChips() {
       `<button class="chip${activeCat === id ? " active" : ""}" data-cat="${esc(id)}">` +
       `${WP_APP_CATEGORY_IDS.has(id) ? catEmoji(id) : "❔"} ${esc(id)}</button>`),
     `<button class="chip${activeCat === "premium" ? " active" : ""}" data-cat="premium">⭐ Premium</button>`,
+    `<button class="chip${activeCat === "featured" ? " active" : ""}" data-cat="featured">⭐ Editör</button>`,
+    `<button class="chip${activeCat === "scheduled" ? " active" : ""}" data-cat="scheduled">🕒 Zamanlı</button>`,
+    `<button class="chip${activeCat === "draft" ? " active" : ""}" data-cat="draft">📝 Taslak</button>`,
     `<button class="chip${activeCat === "live" ? " active" : ""}" data-cat="live">▶ Canlı</button>`,
     `<button class="chip${activeCat === "couples" ? " active" : ""}" data-cat="couples">❤️ Couples set</button>`,
     `<button class="chip${activeCat === "nothumb" ? " active" : ""}" data-cat="nothumb">🐢 Thumb'sız</button>`
@@ -2226,13 +2506,72 @@ function buildChips() {
   host.innerHTML = chips.join("");
 }
 
-function render() {
+function refreshBulkCategoryOptions() {
+  const sel = $("bulkCategory");
+  if (!sel) return;
+  const current = sel.value;
+  const options = allCategoryIDs().map(id =>
+    `<option value="${esc(id)}">${catEmoji(id)} ${esc(id)}${catTR(id)}</option>`
+  ).join("");
+  sel.innerHTML = options;
+  if (current && sel.querySelector(`option[value="${CSS.escape(current)}"]`)) sel.value = current;
+}
+
+function filteredList() {
   const q = $("search").value.trim().toLowerCase();
+  let list = [...items];
+
+  if (activeCat === "premium") list = list.filter(w => w.isPremium);
+  else if (activeCat === "featured") list = list.filter(w => w.featured);
+  else if (activeCat === "scheduled") list = list.filter(w => effectiveState(w) === "scheduled");
+  else if (activeCat === "draft") list = list.filter(w => effectiveState(w) === "draft");
+  else if (activeCat === "live") list = list.filter(w => w.videoURL);
+  else if (activeCat === "couples") list = list.filter(w => w.partnerURL);
+  else if (activeCat === "nothumb") list = list.filter(w => !w.thumbURL);
+  else if (activeCat !== "all") list = list.filter(w => w.category === activeCat);
+
+  if (q) {
+    list = list.filter(w =>
+      (w.title || "").toLowerCase().includes(q) ||
+      (w.id || "").toLowerCase().includes(q) ||
+      (w.subtitle || "").toLowerCase().includes(q));
+  }
+
+  if (sortMode === "newest") {
+    list.sort((a, b) =>
+      (new Date(b.updatedAt || b.createdAt || 0).getTime() || 0) -
+      (new Date(a.updatedAt || a.createdAt || 0).getTime() || 0));
+  } else if (sortMode === "title") {
+    list.sort((a, b) => String(a.title || "").localeCompare(String(b.title || ""), "tr"));
+  } else if (sortMode === "category") {
+    list.sort((a, b) =>
+      String(a.category || "").localeCompare(String(b.category || ""), "tr") ||
+      Number(a.order ?? 999) - Number(b.order ?? 999));
+  } else if (sortMode === "status") {
+    list.sort((a, b) =>
+      statePriority(effectiveState(a)) - statePriority(effectiveState(b)) ||
+      Number(a.order ?? 999) - Number(b.order ?? 999));
+  } else {
+    list.sort((a, b) => Number(a.order ?? 999) - Number(b.order ?? 999));
+  }
+
+  return list;
+}
+
+function updateBulkBar(list = filteredList()) {
+  $("bulkCount").textContent = `${selectedIDs.size} kayıt seçili · görünürde ${list.length} kayıt var`;
+  const disabled = selectedIDs.size === 0;
+  ["bulkMoveBtn", "bulkPremiumBtn", "bulkFeaturedBtn", "bulkStatusBtn", "bulkDeleteBtn", "applyCurrentSortBtn"]
+    .forEach(id => { if ($(id)) $(id).disabled = disabled; });
+}
+
+function render() {
   const grid = $("grid");
   $("statTotal").textContent = items.length;
   $("statPremium").textContent = items.filter(w => w.isPremium).length;
 
   buildCategorySelect();
+  refreshBulkCategoryOptions();
   buildChips();
   applyWpCategoriesUI();
   renderShelves();
@@ -2241,14 +2580,8 @@ function render() {
   const popularIDs = new Set(flat.slice(0, WP_POPULAR_LIMIT).map(w => w.id));
   const newIDs = new Set(flat.slice(-WP_NEW_LIMIT).map(w => w.id));
 
-  let list = [...items].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
-  if (activeCat === "premium") list = list.filter(w => w.isPremium);
-  else if (activeCat === "live") list = list.filter(w => w.videoURL);
-  else if (activeCat === "couples") list = list.filter(w => w.partnerURL);
-  else if (activeCat === "nothumb") list = list.filter(w => !w.thumbURL);
-  else if (activeCat !== "all") list = list.filter(w => w.category === activeCat);
-  if (q) list = list.filter(w =>
-    (w.title || "").toLowerCase().includes(q) || (w.id || "").toLowerCase().includes(q));
+  const list = filteredList();
+  updateBulkBar(list);
 
   if (!list.length) {
     grid.innerHTML = `<div class="empty-state"><div class="big">🏝️</div>Burada hiç wallpaper yok.<br>Soldaki formdan ilkini ekle!</div>`;
@@ -2257,14 +2590,18 @@ function render() {
 
   grid.innerHTML = list.map(w => {
     const hex = rgb01ToHex(w.accentRed ?? 0.49, w.accentGreen ?? 0.36, w.accentBlue ?? 1);
+    const state = effectiveState(w);
     return `
     <article class="card" style="--glow:${hex}99">
       <div class="thumb" style="background-image:url('${(w.thumbURL || w.imageURL || "").replace(/'/g, "%27")}')">
+        <input class="selection-box" type="checkbox" data-select-id="${esc(w.id)}" ${selectedIDs.has(w.id) ? "checked" : ""}>
         <div class="mini-island"></div>
         <span class="order-tag">#${w.order ?? "–"}</span>
         <div class="badges">
           <span class="badge"${WP_APP_CATEGORY_IDS.has(w.category) ? "" : ' style="background:rgba(255,196,84,0.35)" title="Uygulama bu kategoriyi tanımıyor"'}>${WP_APP_CATEGORY_IDS.has(w.category) ? "" : "❔ "}${w.category || "–"}</span>
           ${w.isPremium ? '<span class="badge premium">PREMIUM</span>' : '<span class="badge">FREE</span>'}
+          ${w.featured ? '<span class="badge" style="background:rgba(255,214,106,0.35)">⭐ EDİTÖR</span>' : ''}
+          <span class="badge" style="background:rgba(255,255,255,0.12)">${stateLabel(state)}</span>
           ${w.videoURL ? '<span class="badge" style="background:rgba(77,214,255,0.35)">▶ CANLI</span>' : ''}
           ${w.partnerURL ? '<span class="badge" style="background:rgba(255,92,122,0.35)">❤️ SET</span>' : ''}
           ${popularIDs.has(w.id) ? '<span class="badge" style="background:rgba(255,140,60,0.38)">🔥 POPULAR</span>' : ''}
@@ -2275,6 +2612,10 @@ function render() {
       <div class="meta">
         <h3>${esc(w.title)}</h3>
         <p>${esc(w.subtitle || w.id)}</p>
+        <div class="meta-row">
+          <span class="status-chip ${state}">${stateLabel(state)}</span>
+          <span>${w.publishAt ? "Başlangıç: " + esc(new Date(w.publishAt).toLocaleString("tr-TR")) : "Hemen yayında"}</span>
+        </div>
         <div class="actions">
           <button class="btn" onclick="startEdit('${esc(w.id)}')">Düzenle</button>
           <button class="btn btn-danger" onclick="removeItem('${esc(w.id)}')">Sil</button>
@@ -2287,6 +2628,7 @@ function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;
 
 /* ── Filters ── */
 $("search").addEventListener("input", render);
+$("sortMode").addEventListener("change", (e) => { sortMode = e.target.value; render(); });
 $("chips").addEventListener("click", (e) => {
   const chip = e.target.closest(".chip");
   if (!chip) return;
@@ -2295,6 +2637,21 @@ $("chips").addEventListener("click", (e) => {
   activeCat = chip.dataset.cat;
   render();
 });
+$("grid").addEventListener("change", (e) => {
+  const box = e.target.closest("input[data-select-id]");
+  if (!box) return;
+  if (box.checked) selectedIDs.add(box.dataset.selectId);
+  else selectedIDs.delete(box.dataset.selectId);
+  updateBulkBar();
+});
+$("selectVisibleBtn").onclick = () => {
+  filteredList().forEach(w => selectedIDs.add(w.id));
+  render();
+};
+$("clearSelectionBtn").onclick = () => {
+  selectedIDs.clear();
+  render();
+};
 
 /* ── Form ── */
 function collect() {
@@ -2312,18 +2669,24 @@ function collect() {
     category: $("fCategory").value,
     accentRed: r, accentGreen: g, accentBlue: b,
     isPremium: $("fPremium").checked,
-    order: Number($("fOrder").value || 999)
+    order: Number($("fOrder").value || 999),
+    featured: $("fFeatured").checked,
+    status: $("fStatus").value,
+    publishAt: fromLocalInputValue($("fPublishAt").value),
+    unpublishAt: fromLocalInputValue($("fUnpublishAt").value)
   };
 }
 
 function resetForm() {
   editingId = null;
-  ["fId", "fTitle", "fSubtitle", "fImage", "fThumb", "fStill", "fVideo", "fCoupleCover", "fPartner"]
+  ["fId", "fTitle", "fSubtitle", "fImage", "fThumb", "fStill", "fVideo", "fCoupleCover", "fPartner", "fPublishAt", "fUnpublishAt"]
     .forEach(id => $(id).value = "");
   $("fCategory").value = "Cute";
   updateCatNote();
   $("fOrder").value = nextOrder();
   $("fPremium").checked = false;
+  $("fFeatured").checked = false;
+  $("fStatus").value = "published";
   $("fId").disabled = false;
   syncColor("#7c5cff");
   $("formTitle").textContent = "Yeni Wallpaper";
@@ -2350,6 +2713,10 @@ window.startEdit = (id) => {
   updateCatNote();
   $("fOrder").value = w.order ?? 100;
   $("fPremium").checked = !!w.isPremium;
+  $("fFeatured").checked = !!w.featured;
+  $("fStatus").value = w.status || "published";
+  $("fPublishAt").value = toLocalInputValue(w.publishAt);
+  $("fUnpublishAt").value = toLocalInputValue(w.unpublishAt);
   syncColor(rgb01ToHex(w.accentRed ?? 0.49, w.accentGreen ?? 0.36, w.accentBlue ?? 1));
   $("formTitle").textContent = w.title || w.id;
   $("editBadge").classList.add("show");
@@ -2366,6 +2733,9 @@ $("saveBtn").onclick = async () => {
   const body = collect();
   if (!body.id || !body.title || !body.imageURL) {
     return toast("ID, başlık ve görsel URL zorunlu", "err");
+  }
+  if (body.publishAt && body.unpublishAt && new Date(body.publishAt) >= new Date(body.unpublishAt)) {
+    return toast("Yayın başlangıcı, bitişten önce olmalı", "err");
   }
   if (!SESSION) return toast("Önce giriş yap 🔑", "err");
 
@@ -2402,6 +2772,52 @@ window.removeItem = async (id) => {
 };
 
 $("refreshBtn").onclick = load;
+
+async function runBulk(action, extra = {}, successText = "Toplu işlem tamam") {
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
+  const ids = [...selectedIDs];
+  if (!ids.length) return toast("Önce kayıt seç", "err");
+  try {
+    const res = await fetch(`${API}/bulk`, {
+      method: "POST",
+      headers: headers(),
+      body: JSON.stringify({ action, ids, ...extra })
+    });
+    const json = await res.json().catch(() => ({}));
+    if (res.status === 401) return toast("Oturum düştü", "err");
+    if (!res.ok) return toast(json.error || "Toplu işlem başarısız", "err");
+    toast(successText);
+    if (action === "delete") selectedIDs.clear();
+    await load();
+  } catch {
+    toast("Bağlantı hatası", "err");
+  }
+}
+
+$("bulkMoveBtn").onclick = () =>
+  runBulk("moveCategory", { category: $("bulkCategory").value }, "Kategori toplu taşındı");
+
+$("bulkPremiumBtn").onclick = () =>
+  runBulk("setPremium", { isPremium: $("bulkPremium").value === "true" }, "Premium durumu güncellendi");
+
+$("bulkFeaturedBtn").onclick = () =>
+  runBulk("setFeatured", { featured: $("bulkFeatured").value === "true" }, "Editör seçimi güncellendi");
+
+$("bulkStatusBtn").onclick = () => {
+  const status = $("bulkStatus").value;
+  const publishAt = fromLocalInputValue($("bulkPublishAt").value);
+  const unpublishAt = fromLocalInputValue($("bulkUnpublishAt").value);
+  runBulk("setStatus", { status, publishAt, unpublishAt }, "Durum ve zamanlama güncellendi");
+};
+
+$("bulkDeleteBtn").onclick = () => {
+  if (!confirm(`${selectedIDs.size} kayıt kalıcı silinsin mi?`)) return;
+  if (!confirm("Bu işlem geri alınamaz. Devam?")) return;
+  runBulk("delete", {}, "Seçilen kayıtlar silindi");
+};
+
+$("applyCurrentSortBtn").onclick = () =>
+  runBulk("applyOrder", { orderedIDs: filteredList().map(w => w.id) }, "Görünen sıraya göre order yazıldı");
 
 /* ── Sekmeler ── */
 document.querySelectorAll(".page-tab").forEach(tab => {
