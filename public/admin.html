@@ -655,6 +655,7 @@
   <button class="page-tab" data-page="gifts">🎁 Hediyeler</button>
   <button class="page-tab" data-page="users">👤 Kullanıcılar</button>
   <button class="page-tab" data-page="announcement">📣 Duyuru</button>
+  <button class="page-tab" data-page="pages">📚 Sayfa Yönetimi</button>
   <button class="page-tab" data-page="themes">🎨 Temalar</button>
   <button class="page-tab" data-page="paywall">💰 Paywall</button>
   <button class="page-tab" data-page="revenue">💵 Gelir</button>
@@ -1023,6 +1024,35 @@
   </div>
 </div>
 
+<!-- ═══ Sayfa Yönetimi ═══ -->
+<div class="page" id="page-pages">
+  <div class="gifts-layout">
+    <section class="panel" style="position:static">
+      <div class="panel-head">
+        <h2>Wallpaper Ana Sayfa Sırası</h2>
+      </div>
+
+      <p style="font-size:12px;color:var(--text-dim);line-height:1.6;margin-bottom:14px">
+        Buradaki sıra, uygulamadaki duvar kağıdı ana ekranında kategorilerin ve özel rafların hangi sırayla üstte görüneceğini belirler.
+        Yukarı taşıdığın kategori daha üstte çıkar.
+      </p>
+
+      <div id="pageManager" style="display:grid;gap:10px"></div>
+
+      <div class="form-actions" style="margin-top:24px">
+        <button class="btn btn-primary" id="savePageOrderBtn">📚 Sayfa Sırasını Yayınla</button>
+      </div>
+    </section>
+
+    <section class="panel" style="position:static">
+      <div class="panel-head">
+        <h2>Önizleme</h2>
+      </div>
+      <div id="pageOrderPreview" style="display:grid;gap:10px"></div>
+    </section>
+  </div>
+</div>
+
 <!-- ═══ Temalar ═══ -->
 <div class="page" id="page-themes">
   <div class="gifts-layout">
@@ -1173,6 +1203,112 @@
         <label for="pushBody">Mesaj</label>
         <input type="text" id="pushBody" maxlength="400" placeholder="12 yeni Dynamic Island teması seni bekliyor." autocomplete="off">
       </div>
+
+      <details style="margin:14px 0 0">
+        <summary style="cursor:pointer;color:var(--text);font-weight:700">🌍 Çok dilli bildirim metinleri (opsiyonel)</summary>
+        <p style="font-size:11px;color:var(--text-dim);margin:10px 0 14px;line-height:1.5">
+          Burayı doldurursan kullanıcıya cihaz diline göre bildirim gider. Boş bırakırsan yukarıdaki varsayılan başlık ve mesaj kullanılır.
+        </p>
+
+        <div class="field">
+          <label for="pushTitle_en">🇬🇧 English başlık</label>
+          <input type="text" id="pushTitle_en" maxlength="120" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="pushBody_en">🇬🇧 English mesaj</label>
+          <input type="text" id="pushBody_en" maxlength="400" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="pushTitle_tr">🇹🇷 Türkçe başlık</label>
+          <input type="text" id="pushTitle_tr" maxlength="120" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="pushBody_tr">🇹🇷 Türkçe mesaj</label>
+          <input type="text" id="pushBody_tr" maxlength="400" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="pushTitle_de">🇩🇪 Deutsch başlık</label>
+          <input type="text" id="pushTitle_de" maxlength="120" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="pushBody_de">🇩🇪 Deutsch mesaj</label>
+          <input type="text" id="pushBody_de" maxlength="400" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="pushTitle_es">🇪🇸 Español başlık</label>
+          <input type="text" id="pushTitle_es" maxlength="120" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="pushBody_es">🇪🇸 Español mesaj</label>
+          <input type="text" id="pushBody_es" maxlength="400" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="pushTitle_fr">🇫🇷 Français başlık</label>
+          <input type="text" id="pushTitle_fr" maxlength="120" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="pushBody_fr">🇫🇷 Français mesaj</label>
+          <input type="text" id="pushBody_fr" maxlength="400" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="pushTitle_it">🇮🇹 Italiano başlık</label>
+          <input type="text" id="pushTitle_it" maxlength="120" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="pushBody_it">🇮🇹 Italiano mesaj</label>
+          <input type="text" id="pushBody_it" maxlength="400" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="pushTitle_nl">🇳🇱 Nederlands başlık</label>
+          <input type="text" id="pushTitle_nl" maxlength="120" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="pushBody_nl">🇳🇱 Nederlands mesaj</label>
+          <input type="text" id="pushBody_nl" maxlength="400" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="pushTitle_ja">🇯🇵 日本語 başlık</label>
+          <input type="text" id="pushTitle_ja" maxlength="120" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="pushBody_ja">🇯🇵 日本語 mesaj</label>
+          <input type="text" id="pushBody_ja" maxlength="400" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="pushTitle_pt_br">🇧🇷 Português başlık</label>
+          <input type="text" id="pushTitle_pt_br" maxlength="120" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="pushBody_pt_br">🇧🇷 Português mesaj</label>
+          <input type="text" id="pushBody_pt_br" maxlength="400" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="pushTitle_ru">🇷🇺 Русский başlık</label>
+          <input type="text" id="pushTitle_ru" maxlength="120" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="pushBody_ru">🇷🇺 Русский mesaj</label>
+          <input type="text" id="pushBody_ru" maxlength="400" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="pushTitle_hi">🇮🇳 हिन्दी başlık</label>
+          <input type="text" id="pushTitle_hi" maxlength="120" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="pushBody_hi">🇮🇳 हिन्दी mesaj</label>
+          <input type="text" id="pushBody_hi" maxlength="400" autocomplete="off">
+        </div>
+      </details>
 
       <div class="field">
         <label for="pushTarget">Kime gidecek</label>
@@ -1652,6 +1788,7 @@ async function load() {
     const res = await fetch(API);
     items = await res.json();
     render();
+    applyPageManagementUI();
   } catch {
     toast("Liste yüklenemedi — sunucu ayakta mı?", "err");
   }
@@ -1681,6 +1818,17 @@ function shelfModel() {
     if (!list.length) continue;
     shelves.push({ name: id, kind: "kategori", items: list, categoryID: id });
   }
+
+  const order = pendingHomeOrder || savedHomeOrder();
+  const orderIndex = Object.fromEntries(order.map((id, i) => [id, i]));
+  const shelfID = (s) => {
+    if (s.name === "Live Wallpapers") return "Live";
+    if (s.name === "Couples") return "Couples";
+    if (s.name === "Motion Wallpapers") return "Spatial";
+    return s.categoryID || "";
+  };
+  shelves.sort((a, b) => (orderIndex[shelfID(a)] ?? 9999) - (orderIndex[shelfID(b)] ?? 9999));
+
   return { shelves, live, couples, flat, hidden };
 }
 
@@ -1804,8 +1952,71 @@ function hiddenCats() {
   return new Set((cfg.wallpapers && cfg.wallpapers.disabledCategories) || []);
 }
 
+function savedHomeOrder() {
+  return Array.isArray(cfg.wallpapers && cfg.wallpapers.homeOrder) ? cfg.wallpapers.homeOrder : [];
+}
+
 /* Ekranda düzenlenmekte olan görünürlük durumu — kaydedilene kadar burada durur */
 let pendingHidden = null;
+let pendingHomeOrder = null;
+
+function buildHomeOrderBase() {
+  const ids = [];
+  const push = (id) => {
+    if (!id || ids.includes(id)) return;
+    ids.push(id);
+  };
+  if (items.some(w => w.partnerURL)) push("Couples");
+  if (items.some(w => w.videoURL && !["spatial", "uzamsal", "uzmansa"].includes(String(w.category || "").toLowerCase()))) push("Live");
+  if (items.some(w => ["spatial", "uzamsal", "uzmansa"].includes(String(w.category || "").toLowerCase()) && w.videoURL)) push("Spatial");
+  allCategoryIDs().forEach(id => {
+    if (id !== "Couples" && id !== "Live" && id !== "Spatial") push(id);
+  });
+  return ids;
+}
+
+function pageOrderLabel(id) {
+  if (id === "Live") return "Live Wallpapers";
+  if (id === "Couples") return "Couples";
+  if (id === "Spatial") return "Motion Wallpapers";
+  return id;
+}
+
+function applyPageManagementUI() {
+  const host = $("pageManager");
+  const preview = $("pageOrderPreview");
+  if (!host || !preview) return;
+
+  const base = buildHomeOrderBase();
+  const saved = savedHomeOrder().filter(id => base.includes(id));
+  if (!pendingHomeOrder) {
+    pendingHomeOrder = [...saved, ...base.filter(id => !saved.includes(id))];
+  } else {
+    pendingHomeOrder = [
+      ...pendingHomeOrder.filter(id => base.includes(id)),
+      ...base.filter(id => !pendingHomeOrder.includes(id))
+    ];
+  }
+
+  host.innerHTML = pendingHomeOrder.map((id, index) => `
+    <div class="cat-row">
+      <span class="cat-emoji">${catEmoji(id)}</span>
+      <span class="cat-name">${esc(pageOrderLabel(id))}${catTR(id)}</span>
+      <span class="cat-count">#${index + 1}</span>
+      <span class="spacer"></span>
+      <button class="btn" data-page-up="${esc(id)}" ${index === 0 ? "disabled" : ""}>↑</button>
+      <button class="btn" data-page-down="${esc(id)}" ${index === pendingHomeOrder.length - 1 ? "disabled" : ""}>↓</button>
+    </div>
+  `).join("");
+
+  preview.innerHTML = pendingHomeOrder.map((id, index) => `
+    <div class="shelf-row">
+      <span class="idx">${index + 1}</span>
+      <span class="name">${catEmoji(id)} ${esc(pageOrderLabel(id))}</span>
+      <span class="kind">SIRA</span>
+    </div>
+  `).join("");
+}
 
 function applyWpCategoriesUI() {
   const host = $("catManager");
@@ -1949,6 +2160,52 @@ $("saveWpCatsBtn").onclick = async () => {
     }
   } catch { toast("Bağlantı hatası", "err"); }
   btn.disabled = false; btn.textContent = "👁️ Görünürlüğü Yayınla";
+};
+
+$("pageManager").addEventListener("click", (e) => {
+  const upBtn = e.target.closest("button[data-page-up]");
+  const downBtn = e.target.closest("button[data-page-down]");
+  if (!upBtn && !downBtn) return;
+
+  if (!pendingHomeOrder) applyPageManagementUI();
+  const id = (upBtn || downBtn).dataset.pageUp || (downBtn || upBtn).dataset.pageDown;
+  const index = pendingHomeOrder.indexOf(id);
+  if (index < 0) return;
+
+  if (upBtn && index > 0) {
+    [pendingHomeOrder[index - 1], pendingHomeOrder[index]] = [pendingHomeOrder[index], pendingHomeOrder[index - 1]];
+  }
+  if (downBtn && index < pendingHomeOrder.length - 1) {
+    [pendingHomeOrder[index + 1], pendingHomeOrder[index]] = [pendingHomeOrder[index], pendingHomeOrder[index + 1]];
+  }
+
+  applyPageManagementUI();
+  renderShelves();
+});
+
+$("savePageOrderBtn").onclick = async () => {
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
+  const btn = $("savePageOrderBtn");
+  btn.disabled = true; btn.textContent = "Yayınlanıyor…";
+  try {
+    const res = await fetch("/api/config", {
+      method: "PUT",
+      headers: headers(),
+      body: JSON.stringify({ wallpapers: { homeOrder: pendingHomeOrder || buildHomeOrderBase() } })
+    });
+    if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
+    else if (!res.ok) toast("Kaydedilemedi", "err");
+    else {
+      cfg = await res.json();
+      pendingHomeOrder = savedHomeOrder();
+      applyPageManagementUI();
+      renderShelves();
+      toast("📚 Sayfa sırası yayında!");
+    }
+  } catch {
+    toast("Bağlantı hatası", "err");
+  }
+  btn.disabled = false; btn.textContent = "📚 Sayfa Sırasını Yayınla";
 };
 
 /* ── Filtre çipleri — veriye göre kurulur ── */
@@ -2173,6 +2430,30 @@ $("pushTitle").addEventListener("input", updatePushPreview);
 $("pushBody").addEventListener("input", updatePushPreview);
 
 let pushReachData = null;
+const PUSH_TARGET_LABEL = { all: "Herkes", nonpremium: "Premium olmayanlar", premium: "Premium olanlar" };
+const PUSH_LOCALES = ["en", "tr", "de", "es", "fr", "it", "nl", "ja", "pt-BR", "ru", "hi"];
+
+function pushInputSuffix(locale) {
+  return locale === "pt-BR" ? "pt_br" : locale;
+}
+
+function collectPushTranslations(kind) {
+  const out = {};
+  for (const locale of PUSH_LOCALES) {
+    const suffix = pushInputSuffix(locale);
+    const value = $(`push${kind}_${suffix}`).value.trim();
+    if (value) out[locale] = value;
+  }
+  return out;
+}
+
+function clearPushTranslations() {
+  for (const locale of PUSH_LOCALES) {
+    const suffix = pushInputSuffix(locale);
+    $(`pushTitle_${suffix}`).value = "";
+    $(`pushBody_${suffix}`).value = "";
+  }
+}
 
 async function loadPushReach() {
   if (!SESSION) { $("pushReach").textContent = "Önce giriş yap 🔑"; return; }
@@ -2203,6 +2484,8 @@ $("sendPushBtn").onclick = async () => {
   const title = $("pushTitle").value.trim();
   const body = $("pushBody").value.trim();
   if (!title || !body) { toast("Başlık ve mesaj zorunlu", "err"); return; }
+  const titleTranslations = collectPushTranslations("Title");
+  const bodyTranslations = collectPushTranslations("Body");
 
   const t = $("pushTarget").value;
   const n = pushReachData?.[t] ?? "?";
@@ -2214,7 +2497,14 @@ $("sendPushBtn").onclick = async () => {
   try {
     const res = await fetch("/api/push", {
       method: "POST", headers: headers(),
-      body: JSON.stringify({ title, body, target: t, deepLink: $("pushDeepLink").value })
+      body: JSON.stringify({
+        title,
+        body,
+        titleTranslations,
+        bodyTranslations,
+        target: t,
+        deepLink: $("pushDeepLink").value
+      })
     });
     const json = await res.json().catch(() => ({}));
     if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
@@ -2223,14 +2513,13 @@ $("sendPushBtn").onclick = async () => {
     else {
       toast(`🔔 ${json.sent} cihaza ulaştı${json.failed ? ` · ${json.failed} başarısız` : ""}`);
       $("pushTitle").value = ""; $("pushBody").value = "";
+      clearPushTranslations();
       updatePushPreview();
       loadPushHistory(); loadPushReach();
     }
   } catch { toast("Bağlantı hatası", "err"); }
   btn.disabled = false; btn.textContent = "🔔 Bildirimi Gönder";
 };
-
-const PUSH_TARGET_LABEL = { all: "Herkes", nonpremium: "Premium olmayanlar", premium: "Premium olanlar" };
 
 async function loadPushHistory() {
   if (!SESSION) { $("pushHistory").innerHTML = '<div class="gift-empty">Önce giriş yap 🔑</div>'; return; }
@@ -2942,6 +3231,7 @@ async function loadConfig() {
   // Config geldikten sonra kategori görünürlüğü tazelensin
   pendingHidden = hiddenCats();
   applyWpCategoriesUI();
+  applyPageManagementUI();
   renderShelves();
 }
 
