@@ -131,5 +131,9 @@
     "purchases": {
       "com.dynamicisland.premium.monthly": 2
     }
+  },
+  "2026-09-01": {
+    "paywallShown": 2,
+    "purchases": {}
   }
 }
