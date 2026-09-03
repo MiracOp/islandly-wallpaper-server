@@ -113,6 +113,17 @@
   .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
   .panel-head h2 { font-size: 16px; font-weight: 700; letter-spacing: -0.2px; }
 
+  .admin-advanced { grid-column: 1 / -1; border: 1px solid var(--stroke-soft); border-radius: var(--radius); background: var(--card); overflow: hidden; }
+  .admin-advanced > summary { cursor: pointer; list-style: none; padding: 17px 20px; color: var(--text); font-size: 14px; font-weight: 700; }
+  .admin-advanced > summary::-webkit-details-marker { display: none; }
+  .admin-advanced > summary::after { content: '⌄'; float: right; color: var(--text-dim); font-size: 18px; line-height: 12px; }
+  .admin-advanced[open] > summary { border-bottom: 1px solid var(--stroke-soft); }
+  .admin-advanced[open] > summary::after { transform: rotate(180deg); }
+  .admin-advanced .panel { position: static; margin: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+  .admin-advanced .panel + .panel { border-top: 1px solid var(--stroke-soft); }
+  .form-advanced { border-top: 1px solid var(--stroke-soft); margin: 18px 0 0; }
+  .form-advanced > summary { cursor: pointer; color: var(--text-mid); padding: 14px 0; font-size: 13px; font-weight: 700; }
+
   /* ── Raf önizlemesi + kategori sağlığı ─────────── */
   .shelf-intro {
     font-size: 12.5px; line-height: 1.6; color: var(--text-mid);
@@ -1432,6 +1443,8 @@
 <!-- ═══ Wallpaperlar ═══ -->
 <main class="layout page active" id="page-wallpapers">
 
+  <details class="admin-advanced">
+    <summary>⚙️ Uygulama ve kategori ayarları</summary>
   <!-- ── Sekmeyi aç/kapa ── -->
   <section class="panel" style="position:static;grid-column:1/-1">
     <div class="panel-head">
@@ -1492,6 +1505,7 @@
       kategorilere eklenir — burada sadece sunucudan gelen kayıtlar sayılır.
     </p>
   </section>
+  </details>
 
   <!-- ── Form ── -->
   <section class="panel">
@@ -1531,12 +1545,14 @@
       <input type="text" id="fTitle" placeholder="Aurora Lake">
     </div>
     <div class="field">
-      <label>Alt başlık</label>
-      <input type="text" id="fSubtitle" placeholder="Northern lights for Dynamic Island">
-    </div>
-    <div class="field">
       <label>Görsel URL <span style="color:var(--text-dim);font-weight:400">— tam çözünürlük, kaydedilen dosya</span></label>
       <input type="url" id="fImage" placeholder="https://…/image.jpg">
+    </div>
+    <details class="form-advanced">
+      <summary>Gelişmiş medya ayarları (opsiyonel)</summary>
+    <div class="field">
+      <label>Alt başlık</label>
+      <input type="text" id="fSubtitle" placeholder="Northern lights for Dynamic Island">
     </div>
     <div class="field">
       <label>Küçük görsel (thumb) URL <span style="color:var(--text-dim);font-weight:400">— opsiyonel, ~420px. Raflarda ve ızgarada bu kullanılır; boşsa tam boy iner</span></label>
@@ -1558,6 +1574,7 @@
       <label>Partner wallpaper URL <span style="color:var(--text-dim);font-weight:400">— Couples için ikinci görsel</span></label>
       <input type="url" id="fPartner" placeholder="https://…/partner-wallpaper.jpg">
     </div>
+    </details>
     <div class="row">
       <div class="field">
         <label>Kategori</label>
@@ -1590,6 +1607,8 @@
         </label>
       </div>
     </div>
+    <details class="form-advanced">
+      <summary>Zamanlama ve görünüm ayarları (opsiyonel)</summary>
     <div class="row">
       <div class="field">
         <label>Yayın başlangıcı <span style="color:var(--text-dim);font-weight:400">— opsiyonel</span></label>
@@ -1614,6 +1633,7 @@
         </div>
       </div>
     </div>
+    </details>
     <div class="toggle-row">
       <div>
         <div class="t-label">Premium içerik</div>
