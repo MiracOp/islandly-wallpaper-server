@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { randomUUID, createHmac, timingSafeEqual } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -942,12 +942,33 @@ const mimeTypes = {
   ".mp4": "video/mp4",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
   ".png": "image/png",
   ".webp": "image/webp"
 };
 
 /// Medya dosyaları isimleriyle sabit — uzun süre önbelleklensin.
-const MEDIA_EXTENSIONS = new Set([".mov", ".mp4", ".jpg", ".jpeg", ".png", ".webp"]);
+const MEDIA_EXTENSIONS = new Set([".mov", ".mp4", ".jpg", ".jpeg", ".gif", ".png", ".webp"]);
+
+/// Widget vitrini için medya dosyaları. İçerikler public/media/widgets
+/// klasörüne eklenir; uygulamaya yeni sürüm göndermeden bu uç noktadan görünür.
+async function readWidgets() {
+  const directory = join(PUBLIC_DIR, "media", "widgets");
+  try {
+    const files = (await readdir(directory))
+      .filter((file) => [".jpg", ".jpeg", ".png", ".webp", ".gif"].includes(extname(file).toLowerCase()))
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }));
+
+    return files.map((file, index) => ({
+      id: `widget-${String(index + 1).padStart(3, "0")}`,
+      imageURL: `/media/widgets/${encodeURIComponent(file)}`,
+      type: extname(file).toLowerCase() === ".gif" ? "animated" : "image",
+      order: index + 1
+    }));
+  } catch {
+    return [];
+  }
+}
 
 async function readWallpapers() {
   const raw = await readFile(DATA_FILE, "utf8");
@@ -1287,7 +1308,14 @@ function normalizeWallpaper(input, existing = {}) {
 
 async function serveStatic(pathname, res) {
   const requested = pathname === "/" ? "/admin.html" : pathname;
-  const safePath = normalize(requested).replace(/^(\.\.[/\\])+/, "");
+  let decodedPath;
+  try {
+    decodedPath = decodeURIComponent(requested);
+  } catch {
+    send(res, 400, "Invalid path");
+    return;
+  }
+  const safePath = normalize(decodedPath).replace(/^(\.\.[/\\])+/, "");
   const filePath = join(PUBLIC_DIR, safePath);
 
   if (!filePath.startsWith(PUBLIC_DIR) || !existsSync(filePath)) {
@@ -1790,6 +1818,11 @@ const server = createServer(async (req, res) => {
       const wantsAdmin = url.searchParams.get("admin") === "1" && isAdminRequest(req);
       const items = wantsAdmin ? decorated : decorated.filter((item) => item.isVisibleNow);
       sendJSONFresh(res, 200, items);
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/widgets") {
+      sendJSONFresh(res, 200, await readWidgets());
       return;
     }
 
