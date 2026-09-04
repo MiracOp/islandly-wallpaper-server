@@ -957,7 +957,8 @@ async function readWidgets() {
   try {
     const files = (await readdir(directory))
       .filter((file) => [".jpg", ".jpeg", ".png", ".webp", ".gif"].includes(extname(file).toLowerCase()))
-      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }));
+      // Klasöre son eklenen içerik uygulamada da ilk görünsün.
+      .sort((a, b) => b.localeCompare(a, undefined, { numeric: true, sensitivity: "base" }));
 
     return files.map((file, index) => ({
       id: `widget-${String(index + 1).padStart(3, "0")}`,
