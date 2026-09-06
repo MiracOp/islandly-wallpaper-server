@@ -1,8 +1,9 @@
+import { prepareImageVariants, withImageVariants } from "./image-variants.js";
 import { createServer } from "node:http";
 import { randomUUID, createHmac, timingSafeEqual } from "node:crypto";
 import { readFile, writeFile, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { extname, join, normalize } from "node:path";
+import { basename, extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -10,6 +11,7 @@ const PORT = Number(process.env.PORT || 3000);
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "change-me";
 const DATA_FILE = process.env.DATA_FILE || join(__dirname, "data", "wallpapers.json");
 const PUBLIC_DIR = join(__dirname, "public");
+let imageVariants = new Map();
 
 // ── GitHub sync ──────────────────────────────────────────────
 // GITHUB_TOKEN tanımlıysa: her wallpaper değişikliği GitHub'a commit edilir,
@@ -950,6 +952,33 @@ const mimeTypes = {
 /// Medya dosyaları isimleriyle sabit — uzun süre önbelleklensin.
 const MEDIA_EXTENSIONS = new Set([".mov", ".mp4", ".jpg", ".jpeg", ".gif", ".png", ".webp"]);
 
+const WIDGET_CATEGORY_PREFIXES = {
+  mono: "widget.gallery.mono",
+  red: "widget.gallery.red",
+  blue: "widget.gallery.blue",
+  green: "widget.gallery.green",
+  animated: "Animated",
+  photo: "Photos",
+  photos: "Photos"
+};
+
+function parseWidgetMetadata(file) {
+  const parts = basename(file, extname(file))
+    .split("-")
+    .filter(Boolean);
+  if (parts[0] !== "zz" || parts.length < 3) {
+    return {};
+  }
+  const category = WIDGET_CATEGORY_PREFIXES[parts[1].toLowerCase()];
+  if (!category) {
+    return {};
+  }
+  const title = parts.slice(2)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+  return { title, category };
+}
+
 /// Widget vitrini için medya dosyaları. İçerikler public/media/widgets
 /// klasörüne eklenir; uygulamaya yeni sürüm göndermeden bu uç noktadan görünür.
 async function readWidgets() {
@@ -960,12 +989,16 @@ async function readWidgets() {
       // Klasöre son eklenen içerik uygulamada da ilk görünsün.
       .sort((a, b) => b.localeCompare(a, undefined, { numeric: true, sensitivity: "base" }));
 
-    return files.map((file, index) => ({
-      id: `widget-${String(index + 1).padStart(3, "0")}`,
-      imageURL: `/media/widgets/${encodeURIComponent(file)}`,
-      type: extname(file).toLowerCase() === ".gif" ? "animated" : "image",
-      order: index + 1
-    }));
+    return files.map((file, index) => {
+      const metadata = parseWidgetMetadata(file);
+      return {
+        id: `widget-${String(index + 1).padStart(3, "0")}`,
+        imageURL: `/media/widgets/${encodeURIComponent(file)}`,
+        type: extname(file).toLowerCase() === ".gif" ? "animated" : "image",
+        ...metadata,
+        order: index + 1
+      };
+    });
   } catch {
     return [];
   }
@@ -1818,12 +1851,17 @@ const server = createServer(async (req, res) => {
         .sort((a, b) => Number(a.order || 999) - Number(b.order || 999));
       const wantsAdmin = url.searchParams.get("admin") === "1" && isAdminRequest(req);
       const items = wantsAdmin ? decorated : decorated.filter((item) => item.isVisibleNow);
-      sendJSONFresh(res, 200, items);
+      sendJSONFresh(res, 200, wantsAdmin ? items : items.map((item) => withImageVariants(item, imageVariants)));
       return;
     }
 
     if (req.method === "GET" && url.pathname === "/api/widgets") {
-      sendJSONFresh(res, 200, await readWidgets());
+      sendJSONFresh(res, 200, (await readWidgets()).map((item) => ({
+        ...item,
+        thumbURL: imageVariants.get(item.imageURL)?.[640] || item.imageURL,
+        width: imageVariants.get(item.imageURL)?.width,
+        height: imageVariants.get(item.imageURL)?.height
+      })));
       return;
     }
 
@@ -2048,6 +2086,13 @@ if (ADMIN_TOKEN === "change-me") {
 }
 if (!process.env.SESSION_SECRET) {
   console.warn("ℹ️  SESSION_SECRET tanımlı değil — oturum imzası ADMIN_TOKEN ile atılıyor (çalışır ama ayrı bir değer daha güvenli).");
+}
+
+try {
+  imageVariants = await prepareImageVariants([...(await readWallpapers()), ...(await readWidgets())], PUBLIC_DIR);
+  console.log(`Prepared lightweight previews for ${imageVariants.size} source images`);
+} catch (error) {
+  console.warn("Preview preparation failed; using original media:", error.message);
 }
 
 server.listen(PORT, () => {

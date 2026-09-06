@@ -6,3 +6,6 @@ islandly-7fd09-*.json
 
 node_modules/
 .DS_Store
+
+# Generated from originals on server startup
+public/media/previews/
