@@ -28,6 +28,7 @@ const EVENTS_FILE = process.env.EVENTS_FILE || join(__dirname, "data", "events.j
 const GITHUB_EVENTS_PATH = "data/events.json";
 const PUSH_FILE = process.env.PUSH_FILE || join(__dirname, "data", "push.json");
 const GITHUB_PUSH_PATH = "data/push.json";
+const WIDGET_MANIFEST_FILE = join(PUBLIC_DIR, "media", "widgets", "import-manifest.json");
 
 // Uygulama görünüm ayarları (kar modu vb.) — panelden yönetilir
 const DEFAULT_CONFIG = {
@@ -984,16 +985,21 @@ function parseWidgetMetadata(file) {
 async function readWidgets() {
   const directory = join(PUBLIC_DIR, "media", "widgets");
   try {
+    const manifest = await readWidgetManifest();
     const files = (await readdir(directory))
       .filter((file) => [".jpg", ".jpeg", ".png", ".webp", ".gif"].includes(extname(file).toLowerCase()))
       // Klasöre son eklenen içerik uygulamada da ilk görünsün.
       .sort((a, b) => b.localeCompare(a, undefined, { numeric: true, sensitivity: "base" }));
 
     return files.map((file, index) => {
-      const metadata = parseWidgetMetadata(file);
+      const imageURL = `/media/widgets/${encodeURIComponent(file)}`;
+      const metadata = {
+        ...parseWidgetMetadata(file),
+        ...(manifest.get(imageURL) || {})
+      };
       return {
         id: `widget-${String(index + 1).padStart(3, "0")}`,
-        imageURL: `/media/widgets/${encodeURIComponent(file)}`,
+        imageURL,
         type: extname(file).toLowerCase() === ".gif" ? "animated" : "image",
         ...metadata,
         order: index + 1
@@ -1001,6 +1007,21 @@ async function readWidgets() {
     });
   } catch {
     return [];
+  }
+}
+
+async function readWidgetManifest() {
+  try {
+    const entries = JSON.parse(await readFile(WIDGET_MANIFEST_FILE, "utf8"));
+    if (!Array.isArray(entries)) return new Map();
+    return new Map(entries
+      .filter((entry) => entry?.output)
+      .map((entry) => [entry.output, {
+        title: entry.title,
+        category: WIDGET_CATEGORY_PREFIXES[String(entry.category || "").toLowerCase()] || entry.category
+      }]));
+  } catch {
+    return new Map();
   }
 }
 
