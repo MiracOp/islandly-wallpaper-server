@@ -9,3 +9,12 @@ node_modules/
 
 # Generated from originals on server startup
 public/media/previews/
+
+# Yarım kalan script çalışmalarından kalan geçici dosyalar
+# (image-variants.js ve enhance/upscale betikleri önce .tmp yazıp sonra rename eder)
+*.tmp
+
+# Yerel yedekler — upscale/enhance betikleri orijinalleri buraya kopyalıyor.
+# Sunucunun bunlara ihtiyacı yok, repoya girmemeli.
+public/media/widgets/_pre-ai-upscale-backup/
+public/media/widgets/_backup*/

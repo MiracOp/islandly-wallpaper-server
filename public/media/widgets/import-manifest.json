@@ -3837,5 +3837,49 @@
     "sourceHeight": 736,
     "width": 736,
     "height": 736
+  },
+  {
+    "source": "/Users/yenilio/Desktop/wallpaper/animasyonwidgetler/27175D7C-1ED4-4F61-8F4E-532FB1AFBB85.GIF",
+    "output": "/media/widgets/zz-animated-neon-grid-flight-350-a3ce149e.gif",
+    "title": "Neon Grid Flight",
+    "category": "animated",
+    "accentHex": "#47464a",
+    "sourceWidth": 768,
+    "sourceHeight": 432,
+    "width": 768,
+    "height": 432
+  },
+  {
+    "source": "/Users/yenilio/Desktop/wallpaper/animasyonwidgetler/50DE71CD-4117-4188-A106-380D994DA1E0.GIF",
+    "output": "/media/widgets/zz-animated-amber-light-streaks-351-0e59838f.gif",
+    "title": "Amber Light Streaks",
+    "category": "animated",
+    "accentHex": "#7c4d24",
+    "sourceWidth": 500,
+    "sourceHeight": 206,
+    "width": 500,
+    "height": 206
+  },
+  {
+    "source": "/Users/yenilio/Desktop/wallpaper/animasyonwidgetler/70348285-ED23-455A-B930-234B0762A088.GIF",
+    "output": "/media/widgets/zz-animated-synthwave-night-drive-352-1b8edc4d.gif",
+    "title": "Synthwave Night Drive",
+    "category": "animated",
+    "accentHex": "#11101f",
+    "sourceWidth": 960,
+    "sourceHeight": 540,
+    "width": 600,
+    "height": 338
+  },
+  {
+    "source": "/Users/yenilio/Desktop/wallpaper/animasyonwidgetler/AE3DE687-BC75-4765-AE24-E192A39ABBF2.GIF",
+    "output": "/media/widgets/zz-animated-sakura-street-pixels-353-5e69bfec.gif",
+    "title": "Sakura Street Pixels",
+    "category": "animated",
+    "accentHex": "#936c92",
+    "sourceWidth": 688,
+    "sourceHeight": 340,
+    "width": 600,
+    "height": 297
   }
 ]
