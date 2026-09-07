@@ -958,6 +958,9 @@ const WIDGET_CATEGORY_PREFIXES = {
   red: "widget.gallery.red",
   blue: "widget.gallery.blue",
   green: "widget.gallery.green",
+  pink: "Pink",
+  purple: "Purple",
+  white: "White",
   animated: "Animated",
   photo: "Photos",
   photos: "Photos"
