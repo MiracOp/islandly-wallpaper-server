@@ -198,5 +198,15 @@
     "claimed": true,
     "claimedAt": "2026-09-08T13:52:52.009Z",
     "premiumDays": 999
+  },
+  {
+    "id": "4a3edf66-fa13-46f0-be7e-ac8dd9d87894",
+    "userID": "apple:001161.548f601497184bf7a4d3508998754fd9.1842",
+    "kind": "premium",
+    "note": "",
+    "createdAt": "2026-09-08T18:44:46.542Z",
+    "claimed": false,
+    "claimedAt": null,
+    "premiumDays": 999
   }
 ]
