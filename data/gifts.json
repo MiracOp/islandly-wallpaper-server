@@ -90,16 +90,6 @@
     "premiumDays": 30
   },
   {
-    "id": "ca8f78e7-7bdb-4db5-b854-f719979f615d",
-    "userID": "google:117414480036618079841",
-    "kind": "premium",
-    "note": "",
-    "createdAt": "2026-08-04T18:00:27.446Z",
-    "claimed": false,
-    "claimedAt": null,
-    "premiumDays": 30
-  },
-  {
     "id": "e4f82df5-654e-4c16-b843-e7a21685edff",
     "userID": "apple:001133.8aae5e17e2a64f0aa3ddcaf459f24bf6.0208",
     "kind": "pet",
