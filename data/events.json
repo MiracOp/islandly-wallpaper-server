@@ -61,5 +61,9 @@
       "com.dynamicisland.premium.yearly": 2,
       "com.dynamicisland.premium.monthly": 1
     }
+  },
+  "2026-09-12": {
+    "paywallShown": 3,
+    "purchases": {}
   }
 }
