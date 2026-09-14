@@ -44,17 +44,6 @@
     "height": 1365
   },
   {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0031.JPG",
-    "output": "/media/widgets/zz-red-black-bird-red-005-afbe6576.jpg",
-    "title": "Black Bird Red",
-    "category": "widget.gallery.red",
-    "accentHex": "#710506",
-    "sourceWidth": 736,
-    "sourceHeight": 736,
-    "width": 736,
-    "height": 736
-  },
-  {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0032.JPG",
     "output": "/media/widgets/zz-red-red-money-stack-006-edf136f9.jpg",
     "title": "Red Money Stack",
@@ -66,33 +55,11 @@
     "height": 474
   },
   {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0033.JPG",
-    "output": "/media/widgets/zz-red-formula-one-mark-007-44bb9d5d.jpg",
-    "title": "Formula One Mark",
-    "category": "widget.gallery.red",
-    "accentHex": "#5f0d10",
-    "sourceWidth": 720,
-    "sourceHeight": 720,
-    "width": 720,
-    "height": 720
-  },
-  {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0034.JPG",
     "output": "/media/widgets/zz-mono-red-sports-car-detail-008-983797a9.jpg",
     "title": "Red Sports Car Detail",
     "category": "widget.gallery.red",
     "accentHex": "#250d0d",
-    "sourceWidth": 736,
-    "sourceHeight": 736,
-    "width": 736,
-    "height": 736
-  },
-  {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0035.JPG",
-    "output": "/media/widgets/zz-mono-scarlet-supercar-front-009-e56e00a8.jpg",
-    "title": "Scarlet Supercar Front",
-    "category": "widget.gallery.red",
-    "accentHex": "#1d0b0b",
     "sourceWidth": 736,
     "sourceHeight": 736,
     "width": 736,
@@ -165,17 +132,6 @@
     "height": 675
   },
   {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0042.JPG",
-    "output": "/media/widgets/zz-red-red-light-tunnel-016-aac1ab94.jpg",
-    "title": "Red Light Tunnel",
-    "category": "widget.gallery.red",
-    "accentHex": "#771515",
-    "sourceWidth": 500,
-    "sourceHeight": 215,
-    "width": 500,
-    "height": 215
-  },
-  {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0043.JPG",
     "output": "/media/widgets/zz-mono-porsche-tail-detail-017-5a83e05d.jpg",
     "title": "Porsche Tail Detail",
@@ -214,28 +170,6 @@
     "title": "Red City Skyline",
     "category": "widget.gallery.red",
     "accentHex": "#330e0b",
-    "sourceWidth": 1200,
-    "sourceHeight": 675,
-    "width": 1200,
-    "height": 675
-  },
-  {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0047.JPG",
-    "output": "/media/widgets/zz-mono-red-gothic-text-021-669db7c5.jpg",
-    "title": "Red Gothic Text",
-    "category": "widget.gallery.red",
-    "accentHex": "#0f0001",
-    "sourceWidth": 1198,
-    "sourceHeight": 440,
-    "width": 1198,
-    "height": 440
-  },
-  {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0048.JPG",
-    "output": "/media/widgets/zz-red-red-coupe-studio-022-9839fb84.jpg",
-    "title": "Red Coupe Studio",
-    "category": "widget.gallery.red",
-    "accentHex": "#7f0e22",
     "sourceWidth": 1200,
     "sourceHeight": 675,
     "width": 1200,
@@ -396,17 +330,6 @@
     "height": 1200
   },
   {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0063.JPG",
-    "output": "/media/widgets/zz-red-marvel-red-title-037-b815d46e.jpg",
-    "title": "Marvel Red Title",
-    "category": "widget.gallery.red",
-    "accentHex": "#692f28",
-    "sourceWidth": 736,
-    "sourceHeight": 736,
-    "width": 736,
-    "height": 736
-  },
-  {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0064.JPG",
     "output": "/media/widgets/zz-mono-mono-portrait-sunglasses-038-fa2f9d9b.jpg",
     "title": "Mono Portrait Sunglasses",
@@ -427,17 +350,6 @@
     "sourceHeight": 570,
     "width": 570,
     "height": 570
-  },
-  {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0066.JPG",
-    "output": "/media/widgets/zz-red-red-suit-portrait-040-2db5e042.jpg",
-    "title": "Red Suit Portrait",
-    "category": "widget.gallery.red",
-    "accentHex": "#5b1c1b",
-    "sourceWidth": 1200,
-    "sourceHeight": 675,
-    "width": 1200,
-    "height": 675
   },
   {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0084.JPG",
@@ -471,17 +383,6 @@
     "sourceHeight": 736,
     "width": 736,
     "height": 736
-  },
-  {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0087.JPG",
-    "output": "/media/widgets/zz-mono-red-supercar-top-044-5261c921.jpg",
-    "title": "Red Supercar Top",
-    "category": "widget.gallery.red",
-    "accentHex": "#31191a",
-    "sourceWidth": 750,
-    "sourceHeight": 750,
-    "width": 750,
-    "height": 750
   },
   {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0088.JPG",
@@ -537,17 +438,6 @@
     "sourceHeight": 1200,
     "width": 1200,
     "height": 1200
-  },
-  {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0093.JPG",
-    "output": "/media/widgets/zz-red-red-cherries-050-d439a554.jpg",
-    "title": "Red Cherries",
-    "category": "widget.gallery.red",
-    "accentHex": "#320b0e",
-    "sourceWidth": 735,
-    "sourceHeight": 663,
-    "width": 735,
-    "height": 663
   },
   {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0094.JPG",
@@ -940,17 +830,6 @@
     "title": "Red Signature Portrait",
     "category": "widget.gallery.red",
     "accentHex": "#c73132",
-    "sourceWidth": 1200,
-    "sourceHeight": 675,
-    "width": 1200,
-    "height": 675
-  },
-  {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0130.JPG",
-    "output": "/media/widgets/zz-mono-widget-087-087-d04ed224.jpg",
-    "title": "City Spider Back",
-    "category": "widget.gallery.blue",
-    "accentHex": "#100a0e",
     "sourceWidth": 1200,
     "sourceHeight": 675,
     "width": 1200,
@@ -1419,17 +1298,6 @@
     "height": 753
   },
   {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0173.JPG",
-    "output": "/media/widgets/zz-mono-widget-130-130-586a953b.jpg",
-    "title": "Black Porsche Silhouette",
-    "category": "widget.gallery.blue",
-    "accentHex": "#5d5d5d",
-    "sourceWidth": 736,
-    "sourceHeight": 414,
-    "width": 736,
-    "height": 414
-  },
-  {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0174.JPG",
     "output": "/media/widgets/zz-mono-widget-131-131-419b8b29.jpg",
     "title": "Blue Topographic Lines",
@@ -1540,17 +1408,6 @@
     "height": 1200
   },
   {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0184.JPG",
-    "output": "/media/widgets/zz-blue-widget-141-141-64347867.jpg",
-    "title": "Money Blue",
-    "category": "widget.gallery.blue",
-    "accentHex": "#040b35",
-    "sourceWidth": 1200,
-    "sourceHeight": 1200,
-    "width": 1200,
-    "height": 1200
-  },
-  {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0185.JPG",
     "output": "/media/widgets/zz-blue-widget-142-142-7f34e656.jpg",
     "title": "Blue Arabic Quote",
@@ -1584,17 +1441,6 @@
     "height": 414
   },
   {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0188.JPG",
-    "output": "/media/widgets/zz-mono-widget-145-145-fe7116cd.jpg",
-    "title": "Blue City Skyline",
-    "category": "widget.gallery.blue",
-    "accentHex": "#111e30",
-    "sourceWidth": 1200,
-    "sourceHeight": 625,
-    "width": 1200,
-    "height": 625
-  },
-  {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0189.JPG",
     "output": "/media/widgets/zz-blue-widget-146-146-13cf41eb.jpg",
     "title": "Nobody Does It Like You",
@@ -1604,17 +1450,6 @@
     "sourceHeight": 675,
     "width": 1200,
     "height": 675
-  },
-  {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0190.JPG",
-    "output": "/media/widgets/zz-blue-widget-147-147-373e8660.jpg",
-    "title": "Initial A Blue",
-    "category": "widget.gallery.blue",
-    "accentHex": "#04184c",
-    "sourceWidth": 1200,
-    "sourceHeight": 1207,
-    "width": 1200,
-    "height": 1207
   },
   {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0191.JPG",
@@ -2057,17 +1892,6 @@
     "height": 500
   },
   {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0231.JPG",
-    "output": "/media/widgets/zz-mono-widget-188-188-5b7db8ad.jpg",
-    "title": "Rich Risk Text",
-    "category": "widget.gallery.mono",
-    "accentHex": "#040404",
-    "sourceWidth": 1199,
-    "sourceHeight": 652,
-    "width": 1199,
-    "height": 652
-  },
-  {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0232.JPG",
     "output": "/media/widgets/zz-mono-widget-189-189-c99f9a84.jpg",
     "title": "Porsche Black Mark",
@@ -2077,17 +1901,6 @@
     "sourceHeight": 240,
     "width": 500,
     "height": 240
-  },
-  {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0233.JPG",
-    "output": "/media/widgets/zz-mono-widget-190-190-58b15837.jpg",
-    "title": "Black Porsche Studio",
-    "category": "widget.gallery.mono",
-    "accentHex": "#0b0b0b",
-    "sourceWidth": 736,
-    "sourceHeight": 491,
-    "width": 736,
-    "height": 491
   },
   {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0234.JPG",
@@ -2167,17 +1980,6 @@
     "height": 1200
   },
   {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0241.JPG",
-    "output": "/media/widgets/zz-mono-widget-198-198-92d4cae7.jpg",
-    "title": "Marble Bust Mono",
-    "category": "widget.gallery.mono",
-    "accentHex": "#0e0e0e",
-    "sourceWidth": 750,
-    "sourceHeight": 750,
-    "width": 750,
-    "height": 750
-  },
-  {
     "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0242.JPG",
     "output": "/media/widgets/zz-mono-widget-199-199-51f64717.jpg",
     "title": "Black Premium Card",
@@ -2227,17 +2029,6 @@
     "title": "Chrome Dice Cube",
     "category": "widget.gallery.mono",
     "accentHex": "#393839",
-    "sourceWidth": 736,
-    "sourceHeight": 736,
-    "width": 736,
-    "height": 736
-  },
-  {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0247.JPG",
-    "output": "/media/widgets/zz-mono-widget-204-204-049a4435.jpg",
-    "title": "Black Eight Ball",
-    "category": "widget.gallery.mono",
-    "accentHex": "#030303",
     "sourceWidth": 736,
     "sourceHeight": 736,
     "width": 736,
@@ -2359,17 +2150,6 @@
     "title": "Grid Garage Supercar",
     "category": "widget.gallery.mono",
     "accentHex": "#5e5e5e",
-    "sourceWidth": 1200,
-    "sourceHeight": 675,
-    "width": 1200,
-    "height": 675
-  },
-  {
-    "source": "/Users/yenilio/Desktop/wallpaper/eklenecekwidgetler/IMG_0259.JPG",
-    "output": "/media/widgets/zz-mono-widget-216-216-90ba867d.jpg",
-    "title": "Black Jet Nose",
-    "category": "widget.gallery.mono",
-    "accentHex": "#090909",
     "sourceWidth": 1200,
     "sourceHeight": 675,
     "width": 1200,
