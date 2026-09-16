@@ -22,7 +22,10 @@
       "Seasonal",
       "Sports"
     ],
-    "homeOrder": []
+    "homeOrder": [],
+    "categoryAliases": {
+      "Football": "Dark"
+    }
   },
   "themes": {
     "freeThemeNames": [],

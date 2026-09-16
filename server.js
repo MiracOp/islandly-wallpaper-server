@@ -52,7 +52,11 @@ const DEFAULT_CONFIG = {
   // "Live" ve "Couples" özel raflarını da kapatmak için kullanılabilir.
   wallpapers: {
     disabledCategories: [],  // bu kategoriler duvar kağıdı sekmesinde hiç görünmez
-    homeOrder: []            // ana sayfadaki kategori / raf sırası (id listesi)
+    homeOrder: [],           // ana sayfadaki kategori / raf sırası (id listesi)
+    // Eski app sürümleri yeni kategori id'lerini raf olarak göstermeyebilir.
+    // Admin verisindeki kategori korunur; public API app'e uyumlu kategori döner.
+    // Örn: { "Football": "Dark" } veride Football tutar, uygulamada Dark rafında gösterir.
+    categoryAliases: {}
   },
   // Tema yönetimi — uygulama güncellemesi olmadan panelden kontrol
   themes: {
@@ -1068,6 +1072,21 @@ async function writeConfig(config) {
     "chore: update app config via admin panel [skip railway]"); // arka planda
 }
 
+function categoryAliasesFromConfig(config) {
+  const aliases = config?.wallpapers?.categoryAliases;
+  if (!aliases || typeof aliases !== "object" || Array.isArray(aliases)) return {};
+  return Object.fromEntries(Object.entries(aliases)
+    .map(([source, target]) => [String(source || "").trim(), String(target || "").trim()])
+    .filter(([source, target]) => source && target && source !== target));
+}
+
+function withPublicWallpaperConfig(item, config) {
+  const aliases = categoryAliasesFromConfig(config);
+  const mappedCategory = aliases[item.category];
+  const output = mappedCategory ? { ...item, category: mappedCategory, originalCategory: item.category } : item;
+  return withImageVariants(output, imageVariants);
+}
+
 // ── Hediyeler (kullanıcı ID'sine premium / coin / pet gönderme) ──
 // Panel hediye oluşturur → iOS app açılışta kendi ID'siyle bekleyenleri
 // çeker, uygular ve claim eder.
@@ -1875,7 +1894,8 @@ const server = createServer(async (req, res) => {
         .sort((a, b) => Number(a.order || 999) - Number(b.order || 999));
       const wantsAdmin = url.searchParams.get("admin") === "1" && isAdminRequest(req);
       const items = wantsAdmin ? decorated : decorated.filter((item) => item.isVisibleNow);
-      sendJSONFresh(res, 200, wantsAdmin ? items : items.map((item) => withImageVariants(item, imageVariants)));
+      const config = wantsAdmin ? null : await readConfig();
+      sendJSONFresh(res, 200, wantsAdmin ? items : items.map((item) => withPublicWallpaperConfig(item, config)));
       return;
     }
 

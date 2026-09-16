@@ -1481,6 +1481,17 @@
       <b>geri alınamaz</b>.
     </p>
     <div id="catManager" class="cat-manager"></div>
+    <div style="margin-top:18px;border-top:1px solid var(--stroke-soft);padding-top:18px">
+      <h3 style="margin:0 0 6px;font-size:15px">Kategori Uyumluluğu</h3>
+      <p class="shelf-intro" style="margin-top:0">
+        Yeni kategori app sürümünde raf olarak yoksa, verideki kategori korunur ama
+        uygulamaya seçtiğin mevcut kategori olarak servis edilir. Örn. Football → Dark.
+      </p>
+      <div id="catAliasManager" class="cat-manager"></div>
+      <div class="form-actions" style="margin-top:14px">
+        <button class="btn btn-primary" id="saveCatAliasesBtn">🔀 Uyumluluğu Yayınla</button>
+      </div>
+    </div>
     <div class="form-actions" style="margin-top:18px">
       <button class="btn btn-primary" id="saveWpCatsBtn">👁️ Görünürlüğü Yayınla</button>
     </div>
@@ -2041,6 +2052,7 @@ async function load() {
     selectedIDs = new Set([...selectedIDs].filter(id => items.some(w => w.id === id)));
     render();
     applyPageManagementUI();
+    applyCategoryAliasesUI();
   } catch {
     toast("Liste yüklenemedi — sunucu ayakta mı?", "err");
   }
@@ -2050,11 +2062,16 @@ async function load() {
 function shelfModel() {
   // Gizlenen kategoriler uygulamada hiç görünmez — önizleme de aynısını yapar
   const hidden = pendingHidden || hiddenCats();
+  const aliases = pendingCategoryAliases || savedCategoryAliases();
+  const appItems = items.map(w => {
+    const target = aliases[w.category];
+    return target ? { ...w, category: target, originalCategory: w.category } : w;
+  });
   const visible = (w) => !hidden.has(w.category || "") && effectiveState(w) === "published";
 
   const byOrder = (a, b) => (Number(a.order ?? 999)) - (Number(b.order ?? 999));
-  const live    = hidden.has("Live") ? [] : items.filter(w => w.videoURL && visible(w)).sort(byOrder);
-  const rest    = items.filter(w => !w.videoURL && visible(w)).sort(byOrder);
+  const live    = hidden.has("Live") ? [] : appItems.filter(w => w.videoURL && visible(w)).sort(byOrder);
+  const rest    = appItems.filter(w => !w.videoURL && visible(w)).sort(byOrder);
   const couples = hidden.has("Couples") ? [] : rest.filter(w => w.partnerURL);
   const flat    = rest.filter(w => !w.partnerURL);
 
@@ -2129,7 +2146,7 @@ function renderShelves() {
       `<b>Gizli:</b> ${[...hidden].map(esc).join(", ")} — uygulamada hiç görünmüyor, kayıtlar duruyor.` });
   }
 
-  const unknownCats = [...new Set(items.map(w => w.category).filter(Boolean))]
+  const unknownCats = [...new Set(appItems.map(w => w.category).filter(Boolean))]
     .filter(id => !WP_APP_CATEGORY_IDS.has(id) && !hidden.has(id));
   if (unknownCats.length) {
     issues.push({ level: "warn", html:
@@ -2152,7 +2169,7 @@ function renderShelves() {
       `~420px bir kopya yükleyip “Küçük görsel URL” alanına koymak ilk açılışı belirgin hızlandırır.` });
   }
 
-  const spatialBroken = items.filter(w =>
+  const spatialBroken = appItems.filter(w =>
     effectiveState(w) === "published" &&
     (w.category || "").toLowerCase() === "spatial" && (!w.videoURL || !w.imageURL));
   if (spatialBroken.length) {
@@ -2256,9 +2273,15 @@ function savedHomeOrder() {
   return Array.isArray(cfg.wallpapers && cfg.wallpapers.homeOrder) ? cfg.wallpapers.homeOrder : [];
 }
 
+function savedCategoryAliases() {
+  const raw = cfg.wallpapers && cfg.wallpapers.categoryAliases;
+  return raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+}
+
 /* Ekranda düzenlenmekte olan görünürlük durumu — kaydedilene kadar burada durur */
 let pendingHidden = null;
 let pendingHomeOrder = null;
+let pendingCategoryAliases = null;
 
 function buildHomeOrderBase() {
   const ids = [];
@@ -2388,6 +2411,39 @@ function applyWpCategoriesUI() {
   $("catHiddenCount").textContent = `${pendingHidden.size} gizli`;
 }
 
+function applyCategoryAliasesUI() {
+  const host = $("catAliasManager");
+  if (!host) return;
+  if (!pendingCategoryAliases) pendingCategoryAliases = { ...savedCategoryAliases() };
+
+  const counts = {};
+  for (const w of items) {
+    const c = w.category || "—";
+    counts[c] = (counts[c] || 0) + 1;
+  }
+
+  const ids = allCategoryIDs().filter(id => counts[id] || pendingCategoryAliases[id]);
+  const targetOptions = (source, selected) =>
+    [`<option value="">Alias yok</option>`]
+      .concat(WP_APP_CATEGORIES
+        .filter(c => c.id !== source)
+        .map(c => `<option value="${esc(c.id)}" ${selected === c.id ? "selected" : ""}>${c.emoji} ${esc(c.id)}${c.tr ? " · " + esc(c.tr) : ""}</option>`))
+      .join("");
+
+  host.innerHTML = ids.map(id => {
+    const selected = pendingCategoryAliases[id] || "";
+    return `
+      <div class="cat-row">
+        <span class="cat-emoji">${WP_APP_CATEGORY_IDS.has(id) ? catEmoji(id) : "❔"}</span>
+        <span class="cat-name">${esc(id)}${catTR(id)}</span>
+        <span class="cat-count">${counts[id] || 0} kart</span>
+        <span class="spacer"></span>
+        <span class="vis-label">app'e şöyle gönder</span>
+        <select data-alias-source="${esc(id)}">${targetOptions(id, selected)}</select>
+      </div>`;
+  }).join("") || `<div class="gift-empty">Henüz kategori yok.</div>`;
+}
+
 /* Anahtarlar — sadece ekrandaki durumu değiştirir, yayınlamak ayrı buton */
 $("catManager").addEventListener("change", (e) => {
   const box = e.target.closest("input[data-vis]");
@@ -2396,6 +2452,17 @@ $("catManager").addEventListener("change", (e) => {
   if (box.checked) pendingHidden.delete(box.dataset.vis);
   else pendingHidden.add(box.dataset.vis);
   applyWpCategoriesUI();
+});
+
+$("catAliasManager").addEventListener("change", (e) => {
+  const sel = e.target.closest("select[data-alias-source]");
+  if (!sel) return;
+  if (!pendingCategoryAliases) pendingCategoryAliases = { ...savedCategoryAliases() };
+  const source = sel.dataset.aliasSource;
+  const target = sel.value;
+  if (target) pendingCategoryAliases[source] = target;
+  else delete pendingCategoryAliases[source];
+  applyCategoryAliasesUI();
 });
 
 /* Taşı / Sil */
@@ -2460,6 +2527,30 @@ $("saveWpCatsBtn").onclick = async () => {
     }
   } catch { toast("Bağlantı hatası", "err"); }
   btn.disabled = false; btn.textContent = "👁️ Görünürlüğü Yayınla";
+};
+
+$("saveCatAliasesBtn").onclick = async () => {
+  if (!SESSION) return toast("Önce giriş yap 🔑", "err");
+  const btn = $("saveCatAliasesBtn");
+  const aliases = Object.fromEntries(Object.entries(pendingCategoryAliases || {})
+    .filter(([source, target]) => source && target && source !== target));
+  btn.disabled = true; btn.textContent = "Yayınlanıyor…";
+  try {
+    const res = await fetch("/api/config", {
+      method: "PUT", headers: headers(),
+      body: JSON.stringify({ wallpapers: { ...(cfg.wallpapers || {}), categoryAliases: aliases } })
+    });
+    if (res.status === 401) toast("Oturum düşmüş — tekrar giriş yap", "err");
+    else if (!res.ok) toast("Kaydedilemedi", "err");
+    else {
+      cfg = await res.json();
+      pendingCategoryAliases = { ...savedCategoryAliases() };
+      applyCategoryAliasesUI();
+      renderShelves();
+      toast("🔀 Kategori uyumluluğu yayında!");
+    }
+  } catch { toast("Bağlantı hatası", "err"); }
+  btn.disabled = false; btn.textContent = "🔀 Uyumluluğu Yayınla";
 };
 
 $("pageManager").addEventListener("click", (e) => {
@@ -3669,7 +3760,9 @@ async function loadConfig() {
   applyWpTabUI();
   // Config geldikten sonra kategori görünürlüğü tazelensin
   pendingHidden = hiddenCats();
+  pendingCategoryAliases = { ...savedCategoryAliases() };
   applyWpCategoriesUI();
+  applyCategoryAliasesUI();
   applyPageManagementUI();
   renderShelves();
 }
