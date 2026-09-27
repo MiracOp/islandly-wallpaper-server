@@ -27,10 +27,14 @@
     }
   },
   "2026-09-26": {
-    "paywallShown": 177,
+    "paywallShown": 178,
     "purchases": {
       "com.dynamicisland.premium.yearly": 6,
       "com.dynamicisland.premium.monthly": 1
     }
+  },
+  "2026-09-27": {
+    "paywallShown": 1,
+    "purchases": {}
   }
 }
