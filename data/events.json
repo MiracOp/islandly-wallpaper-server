@@ -10,5 +10,9 @@
     "purchases": {
       "com.dynamicisland.premium.yearly": 3
     }
+  },
+  "2026-10-01": {
+    "paywallShown": 1,
+    "purchases": {}
   }
 }
